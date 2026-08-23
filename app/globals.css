@@ -1220,6 +1220,8 @@ img, svg { display: block; max-width: 100%; }
     overflow: hidden;
 }
 
+/* Static crops. The captures are viewport-sized, so `cover` from the top
+   shows exactly what a visitor sees on landing, at each width. */
 .nv-case__shot-desktop img,
 .nv-case__shot-mobile img {
     width: 100%;
@@ -1252,36 +1254,6 @@ img, svg { display: block; max-width: 100%; }
         width: 26%;
         transform: rotate(2.5deg);
     }
-}
-
-/* Slow showcase pan. The image is taller than its frame, so translating it
-   upward reveals the rest of the page. Transform only, and only while the
-   frame is on screen: see components/ShowcaseScroll.js. */
-.nv-pan-shot img {
-    /* Overrides the 100% height the static crop used, so there is something
-       to pan through. */
-    height: auto;
-    min-height: 100%;
-    will-change: transform;
-}
-
-.nv-pan-shot.is-running img {
-    animation: nv-shot-pan var(--nv-shot-duration, 26s) ease-in-out infinite alternate;
-}
-
-/* Pausing rather than stopping, so a reader studying one part is not fighting
-   it, and it resumes from where it was. */
-@media (hover: hover) and (pointer: fine) {
-    .nv-pan-shot:hover img { animation-play-state: paused; }
-}
-
-.nv-pan-shot:focus-within img { animation-play-state: paused; }
-
-@keyframes nv-shot-pan {
-    from { transform: translate3d(0, 0, 0); }
-    /* Never a full -100%: the frame would end on blank space past the footer
-       of the screenshot. This stops with content still filling it. */
-    to { transform: translate3d(0, calc(-100% + 100px), 0); }
 }
 
 /* ══════════════════════════════════════════════════════════════════════
