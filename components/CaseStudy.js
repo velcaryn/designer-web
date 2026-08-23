@@ -2,9 +2,18 @@
  * Work, currently one project shown properly rather than six shown as
  * thumbnails.
  *
- * Both images are real screenshots of the live site, captured at 1440px and
- * 414px, which is also the argument the section is making: one build, two
- * viewports, no separate mobile site.
+ * Both images are real FULL-PAGE screenshots of the live site, captured at
+ * 1440px and 414px, which is also the argument the section is making: one
+ * build, two viewports, no separate mobile site.
+ *
+ * WHY NOT AN IFRAME OF THE LIVE SITE
+ * The obvious idea is to embed lihashop.in in a small frame and let it scroll
+ * for real. It cannot be done, and the reason is our own work: that site sends
+ * `x-frame-options: DENY` and a CSP without a permissive `frame-ancestors`,
+ * both straight out of docs/PLAYBOOK.md section 7. Every browser refuses to
+ * render it in a frame, so the panel would be blank. Weakening the client's
+ * security headers to decorate our marketing page would be an indefensible
+ * trade. A full-page capture panning inside a frame shows the same thing.
  *
  * THE NUMBERS ARE BUILD FACTS, NOT RESULTS. Every figure here is something
  * checkable by opening lihashop.in. There are no traffic lifts or conversion
@@ -53,19 +62,19 @@ export default function CaseStudy() {
                 <Reveal delay={0.1} className="nv-case__shots">
                     <ShowcaseScroll className="nv-case__shot-desktop" duration={30}>
                         <Image
-                            src="/lihashop-desktop.png"
-                            alt="Liha's Karuppati on a laptop, showing the bilingual product hero."
-                            width={2880}
-                            height={1800}
+                            src="/lihashop-desktop-full.webp"
+                            alt="The full Liha's Karuppati home page on a laptop, from the bilingual hero down through products and heritage."
+                            width={1000}
+                            height={5757}
                             sizes="(max-width: 1023px) 100vw, 55vw"
                         />
                     </ShowcaseScroll>
                     <ShowcaseScroll className="nv-case__shot-mobile" duration={22}>
                         <Image
-                            src="/lihashop-mobile.png"
-                            alt="The same page on a phone, with the WhatsApp ordering button in reach of the thumb."
-                            width={828}
-                            height={1720}
+                            src="/lihashop-mobile-full.webp"
+                            alt="The same page on a phone, stacked to one column with the WhatsApp ordering button in reach of the thumb."
+                            width={560}
+                            height={7000}
                             sizes="(max-width: 767px) 42vw, 20vw"
                         />
                     </ShowcaseScroll>

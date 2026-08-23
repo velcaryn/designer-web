@@ -35,7 +35,7 @@
  * whole point: this is a lead-qualification instrument, not a toy.
  */
 import { useMemo, useState } from 'react';
-import { Check, ArrowUpRight, Clock, Warning } from '@phosphor-icons/react/ssr';
+import { Check, ArrowUpRight, Clock } from '@phosphor-icons/react/ssr';
 
 /*
  * Each deliverable carries a [min, max] range in working weeks, and the scope
@@ -109,8 +109,6 @@ const FLOOR = 1;
 const CEILING = 3;
 
 function estimate(selected) {
-    if (selected.length === 0) return null;
-
     const chosen = DELIVERABLES.filter((d) => selected.includes(d.id));
     const sorted = [...chosen].sort((a, b) => b.weeks[1] - a.weeks[1]);
 
@@ -137,7 +135,16 @@ export default function Estimator() {
     const scale = SCALES.find((s) => s.id === scaleId);
     const result = useMemo(() => estimate(selected), [selected]);
 
+    /* Deselecting the last option is refused. With at least one always on,
+       the result panel can never be empty, which is why there is no empty
+       state below: a state that cannot be reached does not need designing,
+       and an instruction telling someone to pick something they have already
+       picked is noise. The button reports the refusal through aria-disabled
+       rather than going dead silently. */
+    const isLast = (id) => selected.length === 1 && selected[0] === id;
+
     const toggle = (id) => {
+        if (isLast(id)) return;
         setSelected((prev) => (prev.includes(id)
             ? prev.filter((x) => x !== id)
             : [...prev, id]));
@@ -145,8 +152,7 @@ export default function Estimator() {
 
     /* The selection is carried into the enquiry as prefilled text, so the
        visitor never retypes what they just specified. */
-    const brief = result
-        ? [
+    const brief = [
             'Scope from the estimator:',
             ...result.items.map((d) => `- ${d.label}`),
             `Sector: ${sector.label}`,
@@ -154,8 +160,7 @@ export default function Estimator() {
             `Indicative timeline: ${result.min === result.max
                 ? `${result.min} week${result.min === 1 ? '' : 's'}`
                 : `${result.min} to ${result.max} weeks`}`,
-        ].join('\n')
-        : '';
+    ].join('\n');
 
     return (
         <section className="nv-section nv-ground--paper" id="estimator">
@@ -179,12 +184,15 @@ export default function Estimator() {
                             <div className="nv-est__options">
                                 {DELIVERABLES.map(({ id, label }) => {
                                     const on = selected.includes(id);
+                                    const locked = isLast(id);
                                     return (
                                         <button
                                             key={id}
                                             type="button"
                                             className={`nv-chip${on ? ' is-active' : ''}`}
                                             aria-pressed={on}
+                                            aria-disabled={locked}
+                                            title={locked ? 'Keep at least one' : undefined}
                                             onClick={() => toggle(id)}
                                         >
                                             <span className="nv-chip__box" aria-hidden="true">
@@ -237,65 +245,52 @@ export default function Estimator() {
                     {/* aria-live so the result is announced when it changes, rather
                         than silently updating for a screen reader user. */}
                     <div className="nv-est__result" aria-live="polite">
-                        {result ? (
-                            <>
-                                <p className="nv-est__resultLabel">
-                                    <Clock size={16} weight="bold" aria-hidden="true" />
-                                    Indicative timeline
-                                </p>
-                                <p className="nv-est__weeks">
-                                    {result.min === result.max
-                                        ? result.min
-                                        : `${result.min} to ${result.max}`}
-                                    <span className="nv-est__unit">
-                                        {result.max === 1 ? 'week' : 'weeks'}
-                                    </span>
-                                </p>
+                        <p className="nv-est__resultLabel">
+                            <Clock size={16} weight="bold" aria-hidden="true" />
+                            Indicative timeline
+                        </p>
+                        <p className="nv-est__weeks">
+                            {result.min === result.max
+                                ? result.min
+                                : `${result.min} to ${result.max}`}
+                            <span className="nv-est__unit">
+                                {result.max === 1 ? 'week' : 'weeks'}
+                            </span>
+                        </p>
 
-                                <ul className="nv-est__scope">
-                                    {result.items.map(({ id, scope }) => (
-                                        <li className="nv-est__scopeItem" key={id}>
-                                            <Check size={16} weight="bold" aria-hidden="true" />
-                                            <span>{scope}</span>
-                                        </li>
-                                    ))}
-                                </ul>
+                        <ul className="nv-est__scope">
+                            {result.items.map(({ id, scope }) => (
+                                <li className="nv-est__scopeItem" key={id}>
+                                    <Check size={16} weight="bold" aria-hidden="true" />
+                                    <span>{scope}</span>
+                                </li>
+                            ))}
+                        </ul>
 
-                                {sector.note && (
-                                    <p className="nv-est__note">{sector.note}</p>
-                                )}
+                        {sector.note && <p className="nv-est__note">{sector.note}</p>}
 
-                                <a
-                                    className="nv-btn nv-btn--primary nv-est__cta"
-                                    href={`#contact?brief=${encodeURIComponent(brief)}`}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        /* Hand the built scope to the form rather than
-                                           making them describe it again. */
-                                        window.dispatchEvent(
-                                            new CustomEvent('nv:prefill-brief', { detail: brief }),
-                                        );
-                                        document.getElementById('contact')
-                                            ?.scrollIntoView({ block: 'start' });
-                                    }}
-                                >
-                                    Send this scope
-                                    <ArrowUpRight size={18} weight="bold" aria-hidden="true" />
-                                </a>
+                        <a
+                            className="nv-btn nv-btn--primary nv-est__cta"
+                            href="#contact"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                /* Hand the built scope to the form rather than
+                                   making them describe it again. */
+                                window.dispatchEvent(
+                                    new CustomEvent('nv:prefill-brief', { detail: brief }),
+                                );
+                                document.getElementById('contact')
+                                    ?.scrollIntoView({ block: 'start' });
+                            }}
+                        >
+                            Send this scope
+                            <ArrowUpRight size={18} weight="bold" aria-hidden="true" />
+                        </a>
 
-                                <p className="nv-est__caveat">
-                                    Working weeks from kickoff, assuming content and approvals
-                                    arrive on time. Firmed up after one call.
-                                </p>
-                            </>
-                        ) : (
-                            /* Empty state. The panel keeps its shape so selecting the
-                               first option does not shift the layout underneath. */
-                            <div className="nv-est__empty">
-                                <Warning size={22} weight="bold" aria-hidden="true" />
-                                <p>Pick at least one thing you need and the estimate appears here.</p>
-                            </div>
-                        )}
+                        <p className="nv-est__caveat">
+                            Working weeks from kickoff, assuming content and approvals
+                            arrive on time. Firmed up after one call.
+                        </p>
                     </div>
                 </div>
             </div>

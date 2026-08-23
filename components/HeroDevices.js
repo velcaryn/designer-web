@@ -24,11 +24,15 @@
  * the same depth.
  *
  * WHAT IS INSIDE THE FRAMES
- * Abstract layout blocks, deliberately. These are wireframes of a reflowing
- * grid, not an imitation of a real interface: three columns on the desktop,
- * two on the tablet, one stacked on the phone, which is the actual point
- * being made. Building a fake product UI out of divs and passing it off as a
- * screenshot would be dishonest and, worse, unconvincing.
+ * Three DIFFERENT page compositions, not one grid at three sizes: a hero
+ * beside a text column on the desktop, a media grid on the tablet, a stacked
+ * feed on the phone. Each reflows on its own timer. Showing the same six
+ * boxes in all three would say "one layout scaled down", which is the
+ * opposite of the argument.
+ *
+ * The parts are abstract on purpose. Building a fake product UI out of divs
+ * and passing it off as a screenshot would be dishonest and, worse,
+ * unconvincing.
  *
  * The whole thing is decorative and marked aria-hidden. The claim it
  * illustrates is made in words in the hero copy beside it, so nothing is
@@ -37,29 +41,120 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'motion/react';
 
-/* Wireframe fills for one device. `cols` drives the reflow: the same six
-   blocks arranged three-up, two-up, then stacked. */
-function Wireframe({ cols }) {
+/*
+ * Wireframe contents.
+ *
+ * Each device shows a DIFFERENT page composition, not the same six boxes
+ * three times. That is the point: identical grids at three sizes says "one
+ * layout scaled", which is the opposite of the claim. A hero image over a
+ * text column, a media grid, and a stacked feed are three real page shapes,
+ * and seeing them reflow independently is what makes the scene read as three
+ * live viewports.
+ *
+ * The parts are deliberately generic (image blocks, text lines, a button)
+ * rather than an imitation of any real interface. This is a diagram of
+ * layout, not a fake screenshot.
+ */
+function Line({ w = '100%', strong = false, dim = false }) {
     return (
-        <div className={`nv-wf nv-wf--${cols}`}>
-            <span className="nv-wf__bar nv-wf__bar--title" />
-            <span className="nv-wf__bar nv-wf__bar--sub" />
-            <div className="nv-wf__grid">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                    <span className="nv-wf__cell" key={i} />
-                ))}
-            </div>
-            <span className="nv-wf__bar nv-wf__bar--foot" />
+        <span
+            className={`nv-wf__line${strong ? ' is-strong' : ''}${dim ? ' is-dim' : ''}`}
+            style={{ width: w }}
+        />
+    );
+}
+
+function TextBlock({ lines = 3, lead = false }) {
+    return (
+        <span className="nv-wf__text">
+            {lead && <Line w="70%" strong />}
+            {Array.from({ length: lines }).map((_, i) => (
+                <Line key={i} w={i === lines - 1 ? '55%' : '100%'} dim />
+            ))}
+        </span>
+    );
+}
+
+/* Desktop wide: hero media beside a text column, then a three-up row. */
+function DesktopWide() {
+    return (
+        <div className="nv-wf nv-wf--deskWide">
+            <span className="nv-wf__split">
+                <span className="nv-wf__media" />
+                <TextBlock lines={3} lead />
+            </span>
+            <span className="nv-wf__row nv-wf__row--3">
+                <span className="nv-wf__tile" />
+                <span className="nv-wf__tile" />
+                <span className="nv-wf__tile" />
+            </span>
         </div>
     );
 }
 
-/*
- * Each device breathes between two widths on its own clock. The periods are
- * deliberately coprime-ish so the three never resize in lockstep: a synchronised
- * pulse reads as one animation applied three times, where staggered resizing
- * reads as three independent viewports, which is the actual claim.
- */
+/* Desktop narrow: the same page with the split collapsed and the row at two. */
+function DesktopNarrow() {
+    return (
+        <div className="nv-wf nv-wf--deskNarrow">
+            <span className="nv-wf__media nv-wf__media--wide" />
+            <TextBlock lines={2} lead />
+            <span className="nv-wf__row nv-wf__row--2">
+                <span className="nv-wf__tile" />
+                <span className="nv-wf__tile" />
+            </span>
+        </div>
+    );
+}
+
+/* Tablet: a media grid with a caption under each, plus a button. */
+function TabletGrid({ narrow }) {
+    return (
+        <div className="nv-wf nv-wf--tablet">
+            <Line w="58%" strong />
+            <span className={`nv-wf__row ${narrow ? 'nv-wf__row--1' : 'nv-wf__row--2'}`}>
+                {Array.from({ length: narrow ? 2 : 4 }).map((_, i) => (
+                    <span className="nv-wf__card" key={i}>
+                        <span className="nv-wf__cardMedia" />
+                        <Line w="80%" dim />
+                    </span>
+                ))}
+            </span>
+            <span className="nv-wf__btn" />
+        </div>
+    );
+}
+
+/* Phone portrait: a stacked feed. Landscape: two columns and a wider hero. */
+function PhoneStack({ landscape }) {
+    if (landscape) {
+        return (
+            <div className="nv-wf nv-wf--phoneLand">
+                <span className="nv-wf__media nv-wf__media--wide" />
+                <span className="nv-wf__row nv-wf__row--2">
+                    <TextBlock lines={2} />
+                    <TextBlock lines={2} />
+                </span>
+                <span className="nv-wf__btn" />
+            </div>
+        );
+    }
+    return (
+        <div className="nv-wf nv-wf--phone">
+            <Line w="64%" strong />
+            <span className="nv-wf__media" />
+            <TextBlock lines={2} />
+            <span className="nv-wf__card nv-wf__card--row">
+                <span className="nv-wf__thumb" />
+                <span className="nv-wf__cardText">
+                    <Line w="90%" dim />
+                    <Line w="60%" dim />
+                </span>
+            </span>
+            <span className="nv-wf__btn" />
+        </div>
+    );
+}
+
 const CYCLES = {
     desktop: 5200,
     tablet: 6300,
@@ -134,7 +229,7 @@ export default function HeroDevices() {
                     {...float(0)}
                 >
                     <div className="nv-dev__screen">
-                        <Wireframe cols={deskNarrow ? 2 : 3} />
+                        {deskNarrow ? <DesktopNarrow /> : <DesktopWide />}
                     </div>
                 </motion.div>
 
@@ -143,7 +238,7 @@ export default function HeroDevices() {
                     {...float(0.9)}
                 >
                     <div className="nv-dev__screen">
-                        <Wireframe cols={tabletNarrow ? 1 : 2} />
+                        <TabletGrid narrow={tabletNarrow} />
                     </div>
                 </motion.div>
 
@@ -152,7 +247,7 @@ export default function HeroDevices() {
                     {...float(1.8)}
                 >
                     <div className="nv-dev__screen">
-                        <Wireframe cols={1} />
+                        <PhoneStack landscape={landscape} />
                     </div>
                 </motion.div>
             </motion.div>

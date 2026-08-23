@@ -1,40 +1,41 @@
-'use client';
-
 /**
- * Capabilities, as a horizontal rail.
+ * Capabilities, as a continuously rolling ribbon.
  *
- * WHY THIS IS A RAIL AND NOT A GRID
- * The five panels are one sequence: design, build, rank, reach, grow. A grid
- * says "pick one", a sideways track says "this is the order it happens in",
- * which is the argument the section is making.
+ * WHY IT IS NOT A SCROLL CONTAINER ANY MORE
+ * The previous version was an `overflow-x: auto` rail. On a trackpad or a
+ * mouse wheel that traps the page: once the pointer is over a horizontally
+ * scrollable element the browser routes the wheel to it, and the page stops
+ * moving until the rail reaches its end. Reported as "vertical scroll getting
+ * stuck if the pointer is inside the elements there", which is exactly what
+ * it is. The version before that was a GSAP ScrollTrigger pin, which hijacked
+ * scroll in a louder way and released with a visible jump.
  *
- * THE PIN IS GONE, AND THAT WAS A BUG FIX.
- * This was a GSAP ScrollTrigger pin that converted vertical scroll into
- * horizontal pan on desktop. It felt wrong in exactly the way scroll hijacking
- * always does: the page stopped moving when the user expected it to move, and
- * clicking a panel or scrolling away produced a jump as the pin released and
- * the pin-spacer collapsed. Reported as "gives a weird move when clicked or
- * moved away from this system", which is the correct diagnosis.
+ * Both were the same mistake: the panels are a sequence to be seen, not a
+ * list to be operated. The ribbon now rolls on its own and the page keeps
+ * every scroll gesture. Nothing here consumes wheel, touch or key input, and
+ * there is no scroll container to get caught in.
  *
- * It is now a native CSS scroll-snap rail at every width, which the playbook
- * already prescribes: native gets hardware acceleration, real momentum and
- * correct touch feel for free, and it never takes the scroll gesture away from
- * the person using it. Arrow buttons drive it on desktop, where there is no
- * thumb to swipe with.
+ * HOW THE LOOP WORKS
+ * The five panels are rendered twice and the track translates by exactly
+ * -50%. Those two numbers are a pair: change the duplication and the loop
+ * seams. It is a CSS animation on a transform, so it runs on the compositor
+ * and costs no main-thread work. The second copy is `aria-hidden`, so a
+ * screen reader hears five panels rather than ten.
  *
- * That also removes GSAP from the bundle entirely. Per the playbook's
- * performance section, GSAP is roughly 70KB gzipped and is only worth carrying
- * when an interaction genuinely needs it. This one did not.
+ * It pauses on hover and on focus-within, so anyone reading a panel can
+ * finish. Under reduced motion it does not move at all and the track becomes
+ * a wrapping grid, which keeps every panel reachable without animation.
+ *
+ * No GSAP. Per the playbook's performance section that is roughly 70KB
+ * gzipped, only worth carrying when an interaction genuinely needs it. This
+ * one never did.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
 import {
     PenNib,
     RocketLaunch,
     MagnifyingGlass,
     InstagramLogo,
     TrendUp,
-    CaretLeft,
-    CaretRight,
 } from '@phosphor-icons/react/ssr';
 
 const PANELS = [
@@ -75,89 +76,46 @@ const PANELS = [
     },
 ];
 
+function Panel({ index, Icon, title, body, tags }) {
+    return (
+        <>
+            <span className="nv-panel__index">{index}</span>
+            <span className="nv-panel__icon">
+                <Icon size={28} weight="bold" aria-hidden="true" />
+            </span>
+            <h3 className="nv-panel__title">{title}</h3>
+            <p className="nv-panel__body">{body}</p>
+            <div className="nv-panel__list">
+                {tags.map((tag) => (
+                    <span className="nv-panel__tag" key={tag}>{tag}</span>
+                ))}
+            </div>
+        </>
+    );
+}
+
 export default function Capabilities() {
-    const track = useRef(null);
-    const [atStart, setAtStart] = useState(true);
-    const [atEnd, setAtEnd] = useState(false);
-
-    /* The arrows are disabled at the ends rather than wrapping, so a control
-       that cannot do anything says so instead of silently no-opping. */
-    const sync = useCallback(() => {
-        const el = track.current;
-        if (!el) return;
-        const max = el.scrollWidth - el.clientWidth;
-        setAtStart(el.scrollLeft <= 2);
-        setAtEnd(el.scrollLeft >= max - 2);
-    }, []);
-
-    useEffect(() => {
-        const el = track.current;
-        if (!el) return undefined;
-        sync();
-        el.addEventListener('scroll', sync, { passive: true });
-        window.addEventListener('resize', sync);
-        return () => {
-            el.removeEventListener('scroll', sync);
-            window.removeEventListener('resize', sync);
-        };
-    }, [sync]);
-
-    /* Scroll by one panel, measured from the real rendered width rather than
-       a hardcoded number, so it stays correct across every breakpoint. */
-    const nudge = (dir) => {
-        const el = track.current;
-        if (!el) return;
-        const panel = el.querySelector('.nv-panel');
-        const step = panel ? panel.getBoundingClientRect().width + 26 : el.clientWidth * 0.8;
-        el.scrollBy({ left: dir * step, behavior: 'smooth' });
-    };
-
     return (
         <section className="nv-pan" id="capabilities">
             <div className="nv-shell nv-pan__head">
                 <p className="nv-eyebrow">What we do</p>
-                <div className="nv-pan__headRow">
-                    <h2 className="nv-pan__title">Five things, in the order they happen.</h2>
-                    <div className="nv-pan__nav">
-                        <button
-                            type="button"
-                            className="nv-pan__arrow"
-                            onClick={() => nudge(-1)}
-                            disabled={atStart}
-                            aria-label="Previous capability"
-                        >
-                            <CaretLeft size={20} weight="bold" aria-hidden="true" />
-                        </button>
-                        <button
-                            type="button"
-                            className="nv-pan__arrow"
-                            onClick={() => nudge(1)}
-                            disabled={atEnd}
-                            aria-label="Next capability"
-                        >
-                            <CaretRight size={20} weight="bold" aria-hidden="true" />
-                        </button>
-                    </div>
-                </div>
+                <h2 className="nv-pan__title">Five things, in the order they happen.</h2>
             </div>
 
-            <ul className="nv-pan__track" ref={track}>
-                {PANELS.map(({ index, Icon, title, body, tags }) => (
-                    <li className="nv-panel" key={index}>
-                        <span className="nv-panel__index">{index}</span>
-                        <span className="nv-panel__icon">
-                            <Icon size={28} weight="bold" aria-hidden="true" />
-                        </span>
-                        <h3 className="nv-panel__title">{title}</h3>
-                        <p className="nv-panel__body">{body}</p>
-                        <div className="nv-panel__list">
-                            {tags.map((tag) => (
-                                <span className="nv-panel__tag" key={tag}>{tag}</span>
-                            ))}
-                        </div>
-                    </li>
-                ))}
-            </ul>
+            <div className="nv-ribbon">
+                <ul className="nv-ribbon__track">
+                    {PANELS.map((panel) => (
+                        <li className="nv-panel" key={panel.index}>
+                            <Panel {...panel} />
+                        </li>
+                    ))}
+                    {PANELS.map((panel) => (
+                        <li className="nv-panel" key={`dup-${panel.index}`} aria-hidden="true">
+                            <Panel {...panel} />
+                        </li>
+                    ))}
+                </ul>
+            </div>
         </section>
     );
 }

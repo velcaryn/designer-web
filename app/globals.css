@@ -828,59 +828,150 @@ img, svg { display: block; max-width: 100%; }
 }
 
 /* ── Wireframe contents ────────────────────────────────────────────────
-   Abstract layout blocks, not an imitation of a real interface. The column
-   count is the whole point: three, then two, then stacked. */
+   Three different page shapes, one per device, each built from the same small
+   vocabulary: media blocks, text lines, tiles, a button. Everything is sized
+   in percentages so a composition holds when its frame resizes.
+
+   Two colours only, both already in the palette, so the scene never competes
+   with the real content beside it. */
 
 .nv-wf {
     display: flex;
     flex-direction: column;
-    gap: 6%;
+    gap: 5%;
     height: 100%;
     padding: 7%;
 }
 
-.nv-wf__bar {
+/* Text lines. `is-strong` is a heading, `is-dim` is body copy. */
+.nv-wf__line {
     display: block;
     flex: none;
+    height: 3.2%;
+    min-height: 3px;
     border-radius: 999px;
     background: var(--nv-ink);
 }
 
-.nv-wf__bar--title { width: 62%; height: 7%; min-height: 4px; }
-.nv-wf__bar--sub { width: 40%; height: 4%; min-height: 3px; background: var(--nv-storm); opacity: 0.55; }
-.nv-wf__bar--foot { width: 30%; height: 5%; min-height: 3px; background: var(--nv-lav-deep); }
+.nv-wf__line.is-strong { height: 5.5%; min-height: 5px; }
 
-.nv-wf__grid {
+.nv-wf__line.is-dim {
+    background: var(--nv-storm);
+    opacity: 0.4;
+    height: 2.4%;
+    min-height: 2px;
+}
+
+.nv-wf__text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8%;
     flex: 1;
-    display: grid;
-    gap: 6%;
     min-height: 0;
 }
 
-/* The reflow, stated three times. */
-.nv-wf--3 .nv-wf__grid { grid-template-columns: repeat(3, 1fr); }
-.nv-wf--2 .nv-wf__grid { grid-template-columns: repeat(2, 1fr); }
-.nv-wf--1 .nv-wf__grid { grid-template-columns: 1fr; }
-
-/* At one column six blocks would overflow a phone screen, so the stacked
-   view shows the first three and lets the rest fall outside the clip, which
-   is exactly what a real page does. */
-.nv-wf--1 .nv-wf__cell:nth-child(n + 4) { display: none; }
-
-.nv-wf__cell {
-    border-radius: 6px;
-    background: var(--nv-storm-soft);
+/* A picture. The lavender fill is what makes the scene read as a page with
+   images in it rather than a wireframe of grey rectangles. */
+.nv-wf__media {
+    display: block;
+    flex: 1.4;
+    min-height: 0;
+    border-radius: 5px;
     border: 1.5px solid var(--nv-ink);
+    background: var(--nv-lav);
+}
+
+.nv-wf__media--wide { flex: 1; }
+
+.nv-wf__split {
+    display: flex;
+    gap: 5%;
+    flex: 1.6;
     min-height: 0;
 }
 
-.nv-wf__cell:nth-child(3n + 1) { background: var(--nv-lav-soft); }
+.nv-wf__split .nv-wf__media { flex: 1.1; }
 
-/* The landscape phone gets its columns back, which is the reflow happening
-   live rather than being described. */
-.nv-dev--phone.is-landscape .nv-wf__grid { grid-template-columns: repeat(2, 1fr); }
-.nv-dev--phone.is-landscape .nv-wf__cell:nth-child(n + 4) { display: block; }
-.nv-dev--phone.is-landscape .nv-wf__cell:nth-child(n + 5) { display: none; }
+.nv-wf__row {
+    display: grid;
+    gap: 4%;
+    flex: 1;
+    min-height: 0;
+}
+
+.nv-wf__row--1 { grid-template-columns: 1fr; }
+.nv-wf__row--2 { grid-template-columns: repeat(2, 1fr); }
+.nv-wf__row--3 { grid-template-columns: repeat(3, 1fr); }
+
+.nv-wf__tile {
+    border-radius: 5px;
+    border: 1.5px solid var(--nv-ink);
+    background: var(--nv-storm-soft);
+    min-height: 0;
+}
+
+.nv-wf__tile:nth-child(2) { background: var(--nv-lav-soft); }
+
+/* A card: image on top, caption under. */
+.nv-wf__card {
+    display: flex;
+    flex-direction: column;
+    gap: 8%;
+    min-height: 0;
+    min-width: 0;
+}
+
+.nv-wf__cardMedia {
+    flex: 1;
+    min-height: 0;
+    border-radius: 4px;
+    border: 1.5px solid var(--nv-ink);
+    background: var(--nv-lav-soft);
+}
+
+.nv-wf__card:nth-child(even) .nv-wf__cardMedia { background: var(--nv-storm-soft); }
+
+/* A list row: thumbnail beside two lines of text. */
+.nv-wf__card--row {
+    flex-direction: row;
+    align-items: center;
+    gap: 5%;
+    flex: none;
+    height: 14%;
+}
+
+.nv-wf__thumb {
+    flex: none;
+    width: 18%;
+    height: 100%;
+    border-radius: 4px;
+    border: 1.5px solid var(--nv-ink);
+    background: var(--nv-lav);
+}
+
+.nv-wf__cardText {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 22%;
+    flex: 1;
+    min-width: 0;
+}
+
+/* The one filled element: a call to action, so each composition has an
+   obvious focal point the way a real page does. */
+.nv-wf__btn {
+    display: block;
+    flex: none;
+    width: 42%;
+    height: 7%;
+    min-height: 7px;
+    border-radius: 999px;
+    background: var(--nv-ink);
+}
+
+.nv-wf--phoneLand .nv-wf__btn { width: 30%; }
 
 /* ══════════════════════════════════════════════════════════════════════
    Marquee - one per page, and this is it
@@ -950,26 +1041,44 @@ img, svg { display: block; max-width: 100%; }
 
 .nv-pan__title { font-size: var(--nv-d2); max-width: 16ch; }
 
-/* Mobile and tablet: no pin, no hijack. A scroll-snap rail the thumb already
-   knows how to drive. Pinning a section on a phone means intercepting the one
-   gesture the user has, and it is where premium desktop sites turn unusable
-   on the device most of the traffic arrives on. */
-.nv-pan__track {
-    display: flex;
-    gap: 16px;
-    /* Room for the hard shadows, which sit outside the border box. */
-    padding: 8px var(--nv-gutter) calc(var(--nv-section-y) + 10px);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+/* The ribbon. NOT a scroll container: `overflow: hidden`, never `auto`. A
+   horizontally scrollable element captures the mouse wheel whenever the
+   pointer is over it, which stops the page dead. See Capabilities.js. */
+.nv-ribbon {
+    position: relative;
+    overflow: hidden;
+    padding-block: 8px calc(var(--nv-section-y) + 10px);
+    /* Nothing in here should ever intercept a scroll or swipe. */
+    touch-action: pan-y;
 }
 
-.nv-pan__track::-webkit-scrollbar { display: none; }
+.nv-ribbon__track {
+    display: flex;
+    align-items: stretch;
+    gap: 20px;
+    width: max-content;
+    padding-inline: var(--nv-gutter);
+    /* The list is rendered twice and this moves it exactly half its width,
+       so the second copy lands where the first began. The two numbers are a
+       pair. */
+    animation: nv-ribbon-roll 52s linear infinite;
+    will-change: transform;
+}
+
+@keyframes nv-ribbon-roll {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(calc(-50% - 10px), 0, 0); }
+}
+
+/* Pause for anyone actually reading, by pointer or by keyboard. */
+@media (hover: hover) and (pointer: fine) {
+    .nv-ribbon:hover .nv-ribbon__track { animation-play-state: paused; }
+}
+
+.nv-ribbon__track:focus-within { animation-play-state: paused; }
 
 .nv-panel {
     flex: 0 0 min(82vw, 370px);
-    scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     min-height: 430px;
@@ -980,23 +1089,26 @@ img, svg { display: block; max-width: 100%; }
     min-width: 0;
 }
 
-/* Each panel gets its own colour, cycling through the palette. This is what
-   keeps a five-item sequence from reading as five identical cards. */
-.nv-panel:nth-child(1) { background: var(--nv-lav); }
-.nv-panel:nth-child(2) { background: var(--nv-storm-soft); }
-.nv-panel:nth-child(3) { background: var(--nv-paper-warm); }
-.nv-panel:nth-child(4) { background: var(--nv-lav-soft); }
-/* Lavender one step down rather than Abyss: an ink-filled panel would need
-   its whole text stack inverted, and that is a theme flip inside a rail. */
-.nv-panel:nth-child(5) { background: var(--nv-lav-deep); }
-
-/* Slight rotations, alternating, so the rail reads as laid-out objects
-   rather than a row of boxes. Kept under 1 degree: any more and the type
-   starts to look accidental. */
 @media (min-width: 1024px) {
-    .nv-panel:nth-child(odd) { transform: rotate(-0.7deg); }
-    .nv-panel:nth-child(even) { transform: rotate(0.6deg); }
+    .nv-ribbon__track { gap: 26px; }
+    .nv-panel {
+        flex: 0 0 clamp(350px, 29vw, 440px);
+        min-height: 510px;
+        padding: 40px 36px;
+    }
+    @keyframes nv-ribbon-roll {
+        from { transform: translate3d(0, 0, 0); }
+        to { transform: translate3d(calc(-50% - 13px), 0, 0); }
+    }
 }
+
+/* Colour cycle. nth-of-type over a 10-item track so the duplicate copy keeps
+   the same colours as the original and the loop cannot be spotted. */
+.nv-panel:nth-child(5n + 1) { background: var(--nv-lav); }
+.nv-panel:nth-child(5n + 2) { background: var(--nv-storm-soft); }
+.nv-panel:nth-child(5n + 3) { background: var(--nv-paper-warm); }
+.nv-panel:nth-child(5n + 4) { background: var(--nv-lav-soft); }
+.nv-panel:nth-child(5n + 5) { background: var(--nv-lav-deep); }
 
 .nv-panel__index {
     display: inline-flex;
@@ -1015,7 +1127,6 @@ img, svg { display: block; max-width: 100%; }
 .nv-panel__icon {
     margin-top: 26px;
     color: var(--nv-ink);
-    /* Optical size lock: every icon at this level is 28px. */
     height: 28px;
 }
 
@@ -1041,68 +1152,6 @@ img, svg { display: block; max-width: 100%; }
     font-size: var(--nv-micro);
     font-weight: 700;
     color: var(--nv-ink);
-}
-
-/* Desktop keeps the same native rail, just larger. There is no pin and no
-   scroll hijack: see components/Capabilities.js for why the ScrollTrigger
-   version was removed. */
-@media (min-width: 1024px) {
-    .nv-pan__track {
-        gap: 26px;
-        padding: 14px var(--nv-gutter) calc(var(--nv-section-y) + 10px);
-        scroll-padding-left: var(--nv-gutter);
-    }
-
-    .nv-panel {
-        flex: 0 0 clamp(350px, 29vw, 440px);
-        min-height: 510px;
-        padding: 40px 36px;
-    }
-}
-
-/* Header row: the arrows sit beside the heading, not floating over the rail,
-   so they never cover a panel and never need a z-index. */
-.nv-pan__headRow {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px;
-}
-
-.nv-pan__nav { display: none; gap: 10px; flex: none; }
-
-@media (min-width: 1024px) {
-    /* Touch devices swipe the rail directly, so the arrows are desktop only,
-       where there is no thumb to swipe with. */
-    .nv-pan__nav { display: flex; }
-}
-
-.nv-pan__arrow {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: var(--nv-paper);
-    border: 2px solid var(--nv-ink);
-    border-radius: var(--nv-radius-pill);
-    color: var(--nv-ink);
-    cursor: pointer;
-    touch-action: manipulation;
-    transition: background-color var(--nv-dur) var(--nv-ease),
-                opacity var(--nv-dur) var(--nv-ease);
-}
-
-@media (hover: hover) and (pointer: fine) {
-    .nv-pan__arrow:hover:not([disabled]) { background: var(--nv-lav); }
-}
-
-.nv-pan__arrow:active:not([disabled]) { transform: translate(2px, 2px); }
-
-/* A disabled control says so rather than silently doing nothing. */
-.nv-pan__arrow[disabled] {
-    opacity: 0.35;
-    cursor: not-allowed;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -1752,6 +1801,12 @@ img, svg { display: block; max-width: 100%; }
 
 .nv-chip:active { transform: translate(2px, 2px); box-shadow: none; }
 
+/* The last remaining selection cannot be turned off. It stays fully legible,
+   because it is still a valid, meaningful choice: only the cursor says the
+   press will do nothing. */
+.nv-chip[aria-disabled="true"] { cursor: default; }
+.nv-chip[aria-disabled="true"]:active { transform: none; box-shadow: var(--nv-pop-sm); }
+
 /* The tick box appears only on the multi-select group, so selection is not
    signalled by colour alone. */
 .nv-chip__box {
@@ -1796,9 +1851,12 @@ img, svg { display: block; max-width: 100%; }
     align-items: baseline;
     gap: 12px;
     margin-top: 12px;
-    /* Fixed leading so a one-digit and a "1 to 3" result occupy identical
-       height and the panel does not jump between selections. */
-    min-height: 1em;
+    /* Real leading, not min-height. This was `min-height: 1em` against a
+       3.6rem font size, so the box was shorter than the glyphs it contained
+       and every element below it rode up, which is what put the caveat on
+       top of the button. line-height reserves the space properly. */
+    line-height: 1.1;
+    padding-bottom: 0.08em;
     font-family: var(--nv-font-display);
     font-size: clamp(2.4rem, 5vw, 3.6rem);
     font-weight: 800;
@@ -1851,32 +1909,22 @@ img, svg { display: block; max-width: 100%; }
 }
 
 .nv-est__cta {
+    /* display:block so the width:100% actually applies to the anchor, and so
+       the following paragraph starts on its own line rather than being laid
+       out beside an inline-flex box. */
+    display: flex;
     margin-top: 26px;
-    margin-bottom: 14px;
+    margin-bottom: 0;
     width: 100%;
 }
 
 .nv-est__caveat {
-    margin-top: 0;
+    margin-top: 14px;
     font-size: var(--nv-micro);
     color: var(--nv-ink-faint);
     line-height: 1.5;
 }
 
-/* Empty state, sized close to the populated panel so choosing the first
-   option does not jump the page. */
-.nv-est__empty {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    align-items: flex-start;
-    justify-content: center;
-    min-height: 260px;
-    color: var(--nv-ink-soft);
-    font-size: var(--nv-body);
-}
-
-.nv-est__empty svg { color: var(--nv-ink); }
 
 /* ══════════════════════════════════════════════════════════════════════
    Contact
@@ -2103,6 +2151,17 @@ img, svg { display: block; max-width: 100%; }
 
     /* Static tilts are composition, not motion, so the panels and frames keep
        their rotation. Only the hover lift is removed. */
-    .nv-panel:hover { transform: none; }
     .nv-plan:hover { transform: none; }
+
+    /* The ribbon stops, so the track becomes a wrapping grid instead of a
+       row that runs off the side. The duplicate copy is hidden: with no
+       motion it is simply the same five panels printed twice. */
+    .nv-ribbon__track {
+        animation: none;
+        width: auto;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .nv-ribbon__track .nv-panel[aria-hidden="true"] { display: none; }
 }
