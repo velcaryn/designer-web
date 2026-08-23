@@ -86,13 +86,31 @@
          --t-paper    the page ground
          --t-accent   highlights, active states, the swipe behind a word
          --t-support  secondary text and figures
-         --t-soft     section grounds and panel fills                      */
+         --t-soft     section grounds and panel fills
+         --t-on-fill  the label on a filled button, see below              */
 
     --t-ink: #17313e;
     --t-paper: #faf8f6;
     --t-accent: #c5b0cd;
     --t-support: #415e72;
     --t-soft: #ece4f0;
+
+    /* WHY A SIXTH TOKEN EXISTS.
+       The primary button is filled with --t-ink and labelled with --t-paper,
+       which works for every light theme. It breaks the moment a dark theme
+       arrives: there the ink IS the light colour, so the button would be a
+       pale block with pale text.
+
+       Worse, several of the dark palettes use a deliberately high-luminance
+       accent (acid lime, cyber teal, amber). Measured, those fail WCAG AA
+       against BOTH white and black at 1.2:1 and 2.1:1. The only readable
+       label on them is the dark canvas colour, which is exactly what Linear
+       and Ramp do with the same colours.
+
+       So the fill colour and its label are stated per theme rather than
+       derived. Every value in config/themes.js was measured before shipping;
+       the weakest button in the set is 4.8:1. */
+    --t-on-fill: #faf8f6;
 
     /* ── DERIVED ───────────────────────────────────────────────────────
        Named for their job, not their colour, so no component rule ever needs
@@ -116,6 +134,11 @@
     --nv-paper-warm: color-mix(in srgb, var(--t-soft) 45%, var(--t-paper) 55%);
     --nv-storm-soft: color-mix(in srgb, var(--t-support) 14%, var(--t-paper) 86%);
     --nv-lav-deep: color-mix(in srgb, var(--t-accent) 78%, var(--t-ink) 22%);
+
+    /* The filled-button pair. --t-fill defaults to the ink so existing light
+       themes are unchanged; dark themes point it at their accent. */
+    --nv-fill: var(--t-fill, var(--t-ink));
+    --nv-on-fill: var(--t-on-fill);
 
     --nv-ink-soft: var(--t-support);
     --nv-ink-faint: color-mix(in srgb, var(--t-support) 72%, var(--t-paper) 28%);
@@ -400,16 +423,19 @@ img, svg { display: block; max-width: 100%; }
 }
 
 /* Abyss is the primary fill, everywhere, without exception. */
-/* Abyss fill, paper label: 12.7:1. The one place on the page where text is
-   not ink, and the reason the primary button cannot be mistaken for anything
-   else. Hover goes to Storm, which is the same hue one step lighter. */
+/* The one place on the page where text is not ink, and the reason the primary
+   button cannot be mistaken for anything else.
+
+   Both the fill and the label come from the theme, because a dark theme
+   inverts the relationship and a high-luminance accent needs a dark label.
+   See the --t-on-fill note in the token block. */
 .nv-btn--primary {
-    background: var(--nv-ink);
-    color: var(--nv-paper);
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .nv-btn--primary:hover { background: var(--nv-storm); }
+    .nv-btn--primary:hover { background: color-mix(in srgb, var(--nv-fill) 84%, var(--nv-paper) 16%); }
 }
 
 .nv-btn--ghost { background: var(--nv-paper); }
@@ -1135,8 +1161,8 @@ img, svg { display: block; max-width: 100%; }
     justify-content: center;
     width: 44px;
     height: 44px;
-    background: var(--nv-ink);
-    color: var(--nv-paper);
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
     border-radius: 50%;
     font-family: var(--nv-font-display);
     font-size: var(--nv-body);
@@ -2328,6 +2354,8 @@ img, svg { display: block; max-width: 100%; }
     color: var(--nv-ink-faint);
     margin-bottom: 16px;
 }
+
+.nv-lab__legend--spaced { margin-top: 26px; }
 
 .nv-lab__options {
     display: grid;

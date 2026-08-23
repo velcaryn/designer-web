@@ -41,7 +41,13 @@ function apply(themeId, fontId) {
 
     const theme = THEMES.find((t) => t.id === themeId) || THEMES[0];
     Object.entries(theme.tokens).forEach(([key, value]) => {
-        root.style.setProperty(`--t-${key}`, value);
+        /* camelCase to kebab-case. `onFill` must become `--t-on-fill`, not
+           `--t-onFill`: custom property names are case-sensitive, so the
+           mismatch fails silently and the declaration is simply never found.
+           That is exactly what happened, and it left every bright dark theme
+           with an unreadable primary button at 1.1:1. */
+        const prop = key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+        root.style.setProperty(`--t-${prop}`, value);
     });
 
     const font = FONTS.find((f) => f.id === fontId) || FONTS[0];
@@ -135,9 +141,12 @@ export default function ThemeLab() {
 
                 <div className="nv-lab__grid">
                     <div>
-                        <h3 className="nv-lab__legend">Colour</h3>
+                        {/* Split into light and dark. Eighteen swatches in one
+                            undifferentiated grid is a wall; the two groups are
+                            the first decision anyone makes anyway. */}
+                        <h3 className="nv-lab__legend">Colour, light</h3>
                         <div className="nv-lab__options">
-                            {THEMES.map((t) => {
+                            {THEMES.filter((x) => !x.dark).map((t) => {
                                 const on = t.id === themeId;
                                 return (
                                     <button
@@ -149,6 +158,39 @@ export default function ThemeLab() {
                                     >
                                         {/* The swatch is the argument: three of the five
                                             tokens, in the proportion the page uses them. */}
+                                        <span
+                                            className="nv-swatch__chip"
+                                            aria-hidden="true"
+                                            style={{
+                                                background: t.tokens.paper,
+                                                borderColor: t.tokens.ink,
+                                            }}
+                                        >
+                                            <span style={{ background: t.tokens.ink }} />
+                                            <span style={{ background: t.tokens.accent }} />
+                                            <span style={{ background: t.tokens.support }} />
+                                        </span>
+                                        <span className="nv-swatch__name">
+                                            {t.name}
+                                            {on && <Check size={15} weight="bold" aria-hidden="true" />}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <h3 className="nv-lab__legend nv-lab__legend--spaced">Colour, dark</h3>
+                        <div className="nv-lab__options">
+                            {THEMES.filter((x) => x.dark).map((t) => {
+                                const on = t.id === themeId;
+                                return (
+                                    <button
+                                        key={t.id}
+                                        type="button"
+                                        className={`nv-swatch${on ? ' is-active' : ''}`}
+                                        aria-pressed={on}
+                                        onClick={() => choose(t.id, fontId)}
+                                    >
                                         <span
                                             className="nv-swatch__chip"
                                             aria-hidden="true"
