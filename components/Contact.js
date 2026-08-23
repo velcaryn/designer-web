@@ -34,6 +34,7 @@ import {
     ArrowUpRight,
 } from '@phosphor-icons/react/ssr';
 import { contact, emailHref, waDefault, waEnquiry } from '@/config/site';
+import SectionLink from './SectionLink';
 
 const EMPTY = { name: '', email: '', company: '', brief: '' };
 
@@ -173,6 +174,7 @@ export default function Contact() {
                     <h2 className="nv-contact__title">
                         Tell us what you are <span className="nv-mark">building</span>.
                     </h2>
+                    <SectionLink target="contact" label="Get in touch" />
                     <p className="nv-lede nv-contact__body">
                         Send a couple of lines about the business and what the site has to
                         do. You get a real reply from the person who would run the project,

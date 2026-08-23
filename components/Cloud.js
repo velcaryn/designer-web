@@ -17,6 +17,7 @@
  */
 import { Cloud as CloudIcon, ShieldCheck, Buildings } from '@phosphor-icons/react/ssr';
 import Reveal from './Reveal';
+import SectionLink from './SectionLink';
 
 const CLUSTERS = [
     {
@@ -74,6 +75,7 @@ export default function Cloud() {
                         <h2 className="nv-cloud__title">
                             A website is the front door. This is the building behind it.
                         </h2>
+                    <SectionLink target="cloud" label="Cloud and ERP" />
                         <p className="nv-lede nv-cloud__body">
                             Velcaryn Cloud runs against your own instance, so the site, the
                             orders and the customer record are one system instead of three

@@ -36,6 +36,7 @@
  */
 import { useMemo, useState } from 'react';
 import { Check, ArrowUpRight, Clock } from '@phosphor-icons/react/ssr';
+import SectionLink from './SectionLink';
 
 /*
  * Each deliverable carries a [min, max] range in working weeks, and the scope
@@ -170,6 +171,7 @@ export default function Estimator() {
                     <h2 className="nv-est__title">
                         Roughly how long, and what is in it.
                     </h2>
+                    <SectionLink target="estimator" label="Scope and timeline" />
                     <p className="nv-lede nv-est__lede">
                         Pick what you need. You get a working-week range and a scope list,
                         not a price: every project is quoted after a conversation, and a

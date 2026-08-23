@@ -13,6 +13,7 @@
  */
 import { Check } from '@phosphor-icons/react/ssr';
 import Reveal from './Reveal';
+import SectionLink from './SectionLink';
 
 const PLANS = [
     {
@@ -60,6 +61,7 @@ export default function Engagements() {
                     <h2 className="nv-plans__title">
                         Three ways to work with us. One of them is the right one.
                     </h2>
+                    <SectionLink target="engagements" label="Ways to work with us" />
                 </div>
 
                 <div className="nv-plans__list">

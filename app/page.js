@@ -35,6 +35,7 @@ import Marquee from '@/components/Marquee';
 import Problem from '@/components/Problem';
 import Capabilities from '@/components/Capabilities';
 import CaseStudy from '@/components/CaseStudy';
+import Rescue from '@/components/Rescue';
 import Triad from '@/components/Triad';
 import Process from '@/components/Process';
 import Cloud from '@/components/Cloud';
@@ -53,6 +54,7 @@ export default function NewVenturePage() {
                 <Problem />
                 <Capabilities />
                 <CaseStudy />
+                <Rescue />
                 <Triad />
                 <Process />
                 <Cloud />

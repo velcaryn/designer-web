@@ -29,6 +29,7 @@
  */
 import './globals.css';
 import { nvFontVariables } from './fonts';
+import { labFontVariables } from './lab-fonts';
 
 export const metadata = {
     metadataBase: new URL('https://velbrant.studio'),
@@ -56,8 +57,24 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
+    /*
+     * The lab font variables go on <html>, ABOVE the element that carries
+     * `.nv-root`.
+     *
+     * This is the scoping rule from docs/FRONTEND_RULES.md, and getting it
+     * wrong is not theoretical: declaring them on a wrapper inside <body>
+     * put them BELOW `.nv-root`, so when the switcher set
+     * `--nv-font-display: var(--f-grotesk)` on <body> the variable did not
+     * exist in that scope, the declaration was invalid, and every heading
+     * silently rendered in Times. Custom properties inherit downward only.
+     *
+     * They are inert on the live page: nothing references `--f-*` unless the
+     * lab switcher points at one. They cost eleven font preloads, which is
+     * why this import and `labFontVariables` are deleted along with the rest
+     * of the lab once a combination is chosen.
+     */
     return (
-        <html lang="en">
+        <html lang="en" className={labFontVariables}>
             <body className={`${nvFontVariables} nv-root`}>
                 {children}
             </body>

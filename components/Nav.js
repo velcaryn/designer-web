@@ -22,6 +22,7 @@ import { List, X, ArrowUpRight } from '@phosphor-icons/react/ssr';
 const LINKS = [
     { href: '#capabilities', label: 'What we do' },
     { href: '#work', label: 'Work' },
+    { href: '#rebuild', label: 'Rebuild' },
     { href: '#process', label: 'Process' },
     { href: '#cloud', label: 'Cloud and ERP' },
     { href: '#engagements', label: 'Engagements' },

@@ -72,42 +72,53 @@
     --nv-font-display: var(--nv-font-outfit), "Outfit", ui-sans-serif, system-ui, sans-serif;
     --nv-font-text: var(--nv-font-jakarta), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
-    /* Ground and ink. Warm off-white, never pure white: pure white under
-       these muted blues reads cold and clinical, which is the opposite of
-       what the palette is for. */
-    --nv-paper: #faf8f6;
-    --nv-paper-warm: #f3efec;
+    /* ── THEME LAYER ───────────────────────────────────────────────────
+       Five values decide the whole palette. Everything below derives from
+       them, which is why swapping a theme is five lines rather than fifty,
+       and why /lab can repaint the entire site by setting five properties on
+       a single element.
 
-    /* The three brand colours, exactly as specified.
-         Abyss Blue     #17313E
-         Storm Blue     #415E72
-         Lavender Haze  #C5B0CD
+       The defaults here are the Abyss / Storm / Lavender set. When a theme is
+       chosen in the lab, its values replace these five, and the lab route,
+       config/themes.js and the switcher are all deleted.
 
-       Abyss doubles as the ink. That is the move that makes this palette
-       work: a near-black with blue in it ties every line of text to the
-       brand, where a neutral #222 would sit apart from all three. */
-    --nv-ink: #17313e;
-    --nv-storm: #415e72;
-    --nv-lav: #c5b0cd;
+         --t-ink      all text, all outlines, the primary button fill
+         --t-paper    the page ground
+         --t-accent   highlights, active states, the swipe behind a word
+         --t-support  secondary text and figures
+         --t-soft     section grounds and panel fills                      */
 
-    /* Tints, for section grounds and panel fills.
+    --t-ink: #17313e;
+    --t-paper: #faf8f6;
+    --t-accent: #c5b0cd;
+    --t-support: #415e72;
+    --t-soft: #ece4f0;
 
-       CONTRAST NOTES, measured against --nv-ink (#17313E):
-         Paper          12.7:1  anything
-         Lavender Haze   7.3:1  anything, including body copy
-         Storm tint      9.8:1  anything
-         Storm Blue      3.8:1  as a GROUND: large or bold text only. Paper
-                                on Storm Blue is 5.6:1 and is the pairing
-                                actually used, so Storm blocks carry paper
-                                text, never ink. */
-    --nv-lav-soft: #ece4f0;
-    --nv-storm-soft: #e2e9ee;
-    --nv-lav-deep: #b39dbd;
+    /* ── DERIVED ───────────────────────────────────────────────────────
+       Named for their job, not their colour, so no component rule ever needs
+       to know which theme is active.
 
-    /* Text. --nv-ink-soft is Storm Blue at 6.4:1 on paper, safe for body
-       copy; --nv-ink-faint is 4.6:1 and is capped at labels and captions. */
-    --nv-ink-soft: #415e72;
-    --nv-ink-faint: #6b8296;
+       CONTRAST. Every theme in config/themes.js was measured before being
+       offered: ink on paper never drops below 13:1, and the weakest accent
+       against paper is 4.3:1, which clears AA for the large bold type it is
+       used on. --nv-ink-faint sits nearest the floor and is therefore capped
+       at labels and captions, never body copy. */
+
+    --nv-ink: var(--t-ink);
+    --nv-paper: var(--t-paper);
+    --nv-lav: var(--t-accent);
+    --nv-storm: var(--t-support);
+    --nv-lav-soft: var(--t-soft);
+
+    /* Mixed rather than hand-picked, so a new theme needs no extra values.
+       color-mix holds each tint at a fixed distance from its parents however
+       the five above change. */
+    --nv-paper-warm: color-mix(in srgb, var(--t-soft) 45%, var(--t-paper) 55%);
+    --nv-storm-soft: color-mix(in srgb, var(--t-support) 14%, var(--t-paper) 86%);
+    --nv-lav-deep: color-mix(in srgb, var(--t-accent) 78%, var(--t-ink) 22%);
+
+    --nv-ink-soft: var(--t-support);
+    --nv-ink-faint: color-mix(in srgb, var(--t-support) 72%, var(--t-paper) 28%);
 
     --nv-stroke: 3px;
     --nv-radius: 20px;
@@ -203,6 +214,7 @@
 .nv-ground--lav { background: var(--nv-lav-soft); }
 .nv-ground--lav-full { background: var(--nv-lav); }
 .nv-ground--storm { background: var(--nv-storm-soft); }
+.nv-ground--soft { background: var(--nv-lav-soft); }
 
 /* The highlighter swipe is Lavender, so on the one full-Lavender section it
    would be invisible. Paper is the inverse of the same idea and reads as the
@@ -246,10 +258,17 @@
 *::after { box-sizing: border-box; }
 
 html {
-    /* Anchor links land under the sticky bar without this. */
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
 }
+
+/* Every anchor target clears the sticky nav.
+   `scroll-margin-top` is the fix, not padding or a spacer: it changes only
+   where the browser stops when scrolling to the element, and affects nothing
+   about layout. Without it a shared deep link lands with the heading tucked
+   under the bar, which is worst on a phone where the bar is proportionally
+   largest. The value is nav height plus air. */
+:where([id]) { scroll-margin-top: 92px; }
 
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -1152,6 +1171,123 @@ img, svg { display: block; max-width: 100%; }
     font-size: var(--nv-micro);
     font-weight: 700;
     color: var(--nv-ink);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Section deep links
+   ══════════════════════════════════════════════════════════════════════
+
+   Always visible and always 44px, never a hover-reveal. A link icon that
+   only appears on hover does not exist on a phone, which is the device most
+   likely to be sharing a link in the first place. On a pointer device it
+   simply dims until the section is hovered. */
+
+.nv-seclink {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    margin-top: 14px;
+    padding: 0 16px;
+    background: transparent;
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-micro);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--nv-ink);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color var(--nv-dur) var(--nv-ease),
+                opacity var(--nv-dur) var(--nv-ease);
+}
+
+/* Quiet by default on a pointer device, full strength once the section is
+   hovered or the button itself is focused. Touch never dims it. */
+@media (hover: hover) and (pointer: fine) {
+    .nv-seclink { opacity: 0.45; }
+    section:hover .nv-seclink,
+    .nv-seclink:hover,
+    .nv-seclink:focus-visible { opacity: 1; }
+    .nv-seclink:hover:not(.is-copied) { background: var(--nv-lav); }
+}
+
+.nv-seclink:active { transform: translate(1px, 1px); }
+
+/* Confirmation is carried by the icon and the word, not by colour alone. */
+.nv-seclink.is-copied {
+    background: var(--nv-lav);
+    opacity: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Rebuild an old site
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-rescue__head { max-width: 60ch; margin-bottom: clamp(36px, 4.5vw, 60px); }
+.nv-rescue__title { font-size: var(--nv-d2); }
+.nv-rescue__lede { margin-top: 20px; }
+
+.nv-rescue__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 700px) {
+    .nv-rescue__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.nv-rescue__item {
+    padding: 26px 24px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop-sm);
+    min-width: 0;
+}
+
+.nv-rescue__icon { display: block; color: var(--nv-ink); height: 26px; }
+
+.nv-rescue__itemTitle {
+    margin-top: 16px;
+    font-size: var(--nv-body-lg);
+    line-height: 1.2;
+}
+
+.nv-rescue__itemBody {
+    margin-top: 10px;
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+    line-height: 1.55;
+}
+
+.nv-rescue__cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: clamp(28px, 3vw, 44px);
+    padding: 26px 24px;
+    background: var(--nv-lav);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+}
+
+.nv-rescue__ctaText {
+    font-size: var(--nv-body);
+    font-weight: 600;
+    color: var(--nv-ink);
+    max-width: 52ch;
+    line-height: 1.5;
+}
+
+@media (max-width: 599px) {
+    .nv-rescue__cta { flex-direction: column; align-items: stretch; }
+    .nv-rescue__cta .nv-btn { width: 100%; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -2137,3 +2273,180 @@ img, svg { display: block; max-width: 100%; }
 
     .nv-ribbon__track .nv-panel[aria-hidden="true"] { display: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Theme lab
+   ══════════════════════════════════════════════════════════════════════
+
+   Scaffolding. Deleted along with components/ThemeLab.js, app/lab-fonts.js
+   and config/themes.js once a combination is chosen.
+
+   It sits below the footer rather than floating, so it never covers the
+   thing being judged. It is styled from the same tokens as the site, which
+   means the panel itself also repaints on every switch: useful, because a
+   theme that makes its own controls unreadable has failed a real test. */
+
+.nv-lab {
+    border-top: var(--nv-stroke) solid var(--nv-ink);
+    background: var(--nv-paper-warm);
+    padding-block: clamp(48px, 6vw, 88px);
+}
+
+.nv-lab__head { max-width: 62ch; margin-bottom: clamp(32px, 4vw, 52px); }
+
+.nv-lab__title {
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-d2);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.06;
+}
+
+.nv-lab__lede {
+    margin-top: 16px;
+    font-size: var(--nv-body);
+    color: var(--nv-ink-soft);
+    line-height: 1.55;
+}
+
+.nv-lab__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(36px, 4vw, 56px);
+}
+
+@media (min-width: 900px) {
+    .nv-lab__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.nv-lab__legend {
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--nv-ink-faint);
+    margin-bottom: 16px;
+}
+
+.nv-lab__options {
+    display: grid;
+    /* auto-fit rather than a fixed count: six options sit two-up on a phone
+       and three-up on a desktop with no breakpoint of their own. */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.nv-swatch {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Comfortably past the 44px touch bar on its own. */
+    min-height: 96px;
+    padding: 12px;
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    cursor: pointer;
+    text-align: left;
+    touch-action: manipulation;
+    transition: box-shadow var(--nv-dur) var(--nv-ease),
+                transform 0.12s var(--nv-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv-swatch:hover:not(.is-active) { box-shadow: var(--nv-pop-sm); }
+}
+
+.nv-swatch:active { transform: translate(2px, 2px); }
+
+/* The selected card is marked by the hard shadow and a tick, never by colour
+   alone: the palette is the variable under test, so colour cannot also be
+   the state signal. */
+.nv-swatch.is-active { box-shadow: var(--nv-pop); }
+
+.nv-swatch__chip {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    height: 40px;
+    padding: 0 10px;
+    border: 2px solid;
+    border-radius: 10px;
+}
+
+.nv-swatch__chip span {
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+}
+
+.nv-swatch__specimen {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding-left: 2px;
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--nv-ink);
+}
+
+.nv-swatch__name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    font-weight: 700;
+    color: var(--nv-ink);
+    line-height: 1.25;
+}
+
+.nv-lab__note {
+    margin-top: 16px;
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+    line-height: 1.5;
+    max-width: 52ch;
+    /* Reserved so switching between a short and a long note does not shift
+       the section below it. */
+    min-height: 4.5em;
+}
+
+.nv-lab__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: clamp(28px, 3vw, 44px);
+    padding-top: 22px;
+    border-top: 2px solid var(--nv-ink);
+}
+
+.nv-lab__current { font-size: var(--nv-small); color: var(--nv-ink-soft); }
+.nv-lab__current strong { color: var(--nv-ink); font-weight: 800; }
+
+.nv-lab__reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    font-weight: 700;
+    color: var(--nv-ink);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv-lab__reset:hover { background: var(--nv-lav); }
+}
+

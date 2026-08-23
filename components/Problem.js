@@ -21,6 +21,7 @@
  * undercut the honesty the section is trading on.
  */
 import Reveal from './Reveal';
+import SectionLink from './SectionLink';
 
 const FAILURES = [
     {
@@ -57,6 +58,7 @@ export default function Problem() {
                     <h2 className="nv-problem__title">
                         You have probably been burned by a website before.
                     </h2>
+                    <SectionLink target="problem" label="What goes wrong" />
                     <p className="nv-lede nv-problem__lede">
                         Most of the businesses that come to us are not starting from
                         nothing. They are starting from something that disappointed them.

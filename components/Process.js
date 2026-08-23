@@ -27,6 +27,7 @@
  */
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react';
+import SectionLink from './SectionLink';
 
 const STEPS = [
     {
@@ -81,6 +82,7 @@ export default function Process() {
                     <h2 className="nv-process__title">
                         How a project actually runs.
                     </h2>
+                    <SectionLink target="process" label="How a project runs" />
                 </div>
 
                 <div className="nv-rail" ref={rail}>

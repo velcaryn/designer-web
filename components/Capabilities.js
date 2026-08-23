@@ -37,6 +37,7 @@ import {
     InstagramLogo,
     TrendUp,
 } from '@phosphor-icons/react/ssr';
+import SectionLink from './SectionLink';
 
 const PANELS = [
     {
@@ -100,6 +101,7 @@ export default function Capabilities() {
             <div className="nv-shell nv-pan__head">
                 <p className="nv-eyebrow">What we do</p>
                 <h2 className="nv-pan__title">Five things, in the order they happen.</h2>
+                    <SectionLink target="capabilities" label="What we do" />
             </div>
 
             <div className="nv-ribbon">

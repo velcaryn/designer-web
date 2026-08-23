@@ -27,6 +27,7 @@
  */
 import Image from 'next/image';
 import Reveal from './Reveal';
+import SectionLink from './SectionLink';
 
 const FACTS = [
     { value: '2', label: 'Languages served, with Tamil given its own type scale rather than a translation bolt-on' },
@@ -44,6 +45,7 @@ export default function CaseStudy() {
                     <h2 className="nv-case__title">
                         A heritage food brand, built for how people actually buy.
                     </h2>
+                    <SectionLink target="work" label="Our client work" />
                     <p className="nv-lede nv-case__body">
                         One example, in full. Liha&rsquo;s Karuppati sells traditional
                         Palmyra palm jaggery from Tamil Nadu. The buyers are split between people who read English and people
