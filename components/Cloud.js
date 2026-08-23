@@ -40,13 +40,26 @@ const CLUSTERS = [
         ],
     },
     {
+        /*
+         * Mechanisms, not adjectives. "We take privacy seriously" is what
+         * every site says; for a healthcare or finance buyer the specifics
+         * below are the entire decision, and they are the questions their
+         * compliance reviewer will ask first. Each line is something we do,
+         * stated concretely enough to be checked. No certification is named,
+         * because we hold none: describing how we build is true, claiming an
+         * audit we have not passed would not be.
+         */
         name: 'Built to the DPDP Act',
         Icon: ShieldCheck,
         items: [
-            ['Consent that is real', 'Analytics and marketing cookies stay off until the visitor agrees, and the choice is as easy to reverse as it was to give.'],
-            ['Purpose and minimisation', 'Forms collect what the purpose needs and nothing extra, with retention set per field rather than kept forever.'],
-            ['Data principal rights', 'Access, correction and erasure requests have a route and a named owner from day one.'],
-            ['Sensitive sectors', 'Healthcare, finance, education and childrens services get a tightened build: stricter retention, audit logging, and residency confirmed in writing before launch.'],
+            ['Consent that is real', 'Analytics and marketing scripts stay off until the visitor agrees, and withdrawing is as easy as giving. Consent is logged with a timestamp and the wording shown at the time.'],
+            ['Your own tenant, isolated', 'Your records live in a database instance that is yours. No shared multi-tenant table, no pooled client data, and no analytics warehouse that mixes your customers with anyone elses.'],
+            ['No third-party trackers by default', 'Nothing is loaded from an ad network unless you ask for it. The default build sends no visitor data to a platform whose business model is resale.'],
+            ['Encrypted in transit and at rest', 'TLS on every connection, encryption at rest on the database, and access to production restricted to named people rather than a shared login.'],
+            ['Purpose and minimisation', 'Forms collect what the stated purpose needs and nothing extra, with a retention period set per field rather than kept indefinitely by default.'],
+            ['Data principal rights', 'Access, correction and erasure requests have a documented route and a named owner from day one, not improvised the first time one arrives.'],
+            ['Audit trail you can produce', 'Consent changes and access to personal data are logged, so when someone asks what happened to a record you have an answer rather than a guess.'],
+            ['Sensitive sectors, tightened', 'Healthcare, finance, education and childrens services get stricter retention, fuller audit logging, and data residency confirmed in writing before launch.'],
         ],
     },
 ];

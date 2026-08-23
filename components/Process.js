@@ -16,6 +16,14 @@
  *
  * The step names are the labels. There is no "Stage 1 / Stage 2" scaffolding
  * bolted on top of a word that already says what happens.
+ *
+ * NO TIMELINE CLAIMS, DELIBERATELY. This section used to be headed "Eight
+ * weeks from first call to live" with a week range on every step. Both are
+ * gone. A duration published before scope is known is a promise made in
+ * ignorance, and it is the first thing an unhappy client quotes back at you
+ * when week nine arrives. The estimator further down gives an indicative
+ * range against a scope the visitor actually selected, which is the honest
+ * place for that number. This section describes what happens, not when.
  */
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react';
@@ -25,37 +33,31 @@ const STEPS = [
         num: '01',
         title: 'Discover',
         body: 'We sit with you and get concrete about who buys, what they search for, what the competition already ranks on, and what the site actually has to achieve this year.',
-        meta: 'Week 1',
     },
     {
         num: '02',
         title: 'Architect',
         body: 'Sitemap, page-by-page content plan and wireframes at phone width first. You approve the structure before anyone argues about a colour.',
-        meta: 'Week 1 to 2',
     },
     {
         num: '03',
         title: 'Design',
         body: 'A design system built for your brand alone: type, colour, spacing, components and motion. Delivered as real screens, not a mood board.',
-        meta: 'Week 2 to 4',
     },
     {
         num: '04',
         title: 'Build',
         body: 'Next.js, responsive from 320px up, tested on real devices. Analytics, consent, schema and sitemaps are part of the build, not a follow-up ticket.',
-        meta: 'Week 4 to 7',
     },
     {
         num: '05',
         title: 'Launch',
         body: 'DNS, hosting, redirects from the old URLs, Search Console, and a Core Web Vitals pass we sign off on before we call it live.',
-        meta: 'Week 8',
     },
     {
         num: '06',
         title: 'Grow',
         body: 'The part most agencies leave out. Content calendar, SEO iteration, social and paid distribution, and a monthly report that says plainly what worked.',
-        meta: 'Ongoing',
     },
 ];
 
@@ -77,7 +79,7 @@ export default function Process() {
             <div className="nv-shell">
                 <div className="nv-process__head">
                     <h2 className="nv-process__title">
-                        Eight weeks from first call to live.
+                        How a project actually runs.
                     </h2>
                 </div>
 
@@ -95,13 +97,12 @@ export default function Process() {
                     />
 
                     <ol>
-                        {STEPS.map(({ num, title, body, meta }) => (
+                        {STEPS.map(({ num, title, body }) => (
                             <li className="nv-step" key={num}>
                                 <span className="nv-step__num" aria-hidden="true">{num}</span>
                                 <h3 className="nv-step__title">{title}</h3>
                                 <div>
                                     <p className="nv-step__body">{body}</p>
-                                    <span className="nv-step__meta">{meta}</span>
                                 </div>
                             </li>
                         ))}

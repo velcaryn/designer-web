@@ -1,38 +1,41 @@
 'use client';
 
 /**
- * Capabilities, as a pinned horizontal pan on desktop.
+ * Capabilities, as a horizontal rail.
  *
- * WHY THIS IS A PAN AND NOT A GRID
+ * WHY THIS IS A RAIL AND NOT A GRID
  * The five panels are one sequence: design, build, rank, reach, grow. A grid
  * says "pick one", a sideways track says "this is the order it happens in",
- * which is the actual argument the section is making. That is the whole
- * justification for the motion, and it is the only pinned section on the page.
+ * which is the argument the section is making.
  *
- * WHY IT IS NOT PINNED ON MOBILE
- * `gsap.matchMedia` builds the pin only above 1024px. Below that the same
- * markup is a native scroll-snap rail (see newventure.css), which the thumb
- * already knows how to drive. Pinning on a phone means intercepting the one
- * gesture the user has, and it is where premium desktop sites turn unusable
- * on the device most of the traffic arrives on. Reduced motion gets the rail
- * treatment too, at every width.
+ * THE PIN IS GONE, AND THAT WAS A BUG FIX.
+ * This was a GSAP ScrollTrigger pin that converted vertical scroll into
+ * horizontal pan on desktop. It felt wrong in exactly the way scroll hijacking
+ * always does: the page stopped moving when the user expected it to move, and
+ * clicking a panel or scrolling away produced a jump as the pin released and
+ * the pin-spacer collapsed. Reported as "gives a weird move when clicked or
+ * moved away from this system", which is the correct diagnosis.
  *
- * `matchMedia().revert()` on unmount tears down the pin, the pin-spacer and
- * every ScrollTrigger together. Without it, a client-side route change leaves
- * a pinned wrapper with a fixed height behind on the next page.
+ * It is now a native CSS scroll-snap rail at every width, which the playbook
+ * already prescribes: native gets hardware acceleration, real momentum and
+ * correct touch feel for free, and it never takes the scroll gesture away from
+ * the person using it. Arrow buttons drive it on desktop, where there is no
+ * thumb to swipe with.
+ *
+ * That also removes GSAP from the bundle entirely. Per the playbook's
+ * performance section, GSAP is roughly 70KB gzipped and is only worth carrying
+ * when an interaction genuinely needs it. This one did not.
  */
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
     PenNib,
     RocketLaunch,
     MagnifyingGlass,
     InstagramLogo,
     TrendUp,
+    CaretLeft,
+    CaretRight,
 } from '@phosphor-icons/react/ssr';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const PANELS = [
     {
@@ -73,76 +76,88 @@ const PANELS = [
 ];
 
 export default function Capabilities() {
-    const wrap = useRef(null);
     const track = useRef(null);
+    const [atStart, setAtStart] = useState(true);
+    const [atEnd, setAtEnd] = useState(false);
+
+    /* The arrows are disabled at the ends rather than wrapping, so a control
+       that cannot do anything says so instead of silently no-opping. */
+    const sync = useCallback(() => {
+        const el = track.current;
+        if (!el) return;
+        const max = el.scrollWidth - el.clientWidth;
+        setAtStart(el.scrollLeft <= 2);
+        setAtEnd(el.scrollLeft >= max - 2);
+    }, []);
 
     useEffect(() => {
-        const mm = gsap.matchMedia();
+        const el = track.current;
+        if (!el) return undefined;
+        sync();
+        el.addEventListener('scroll', sync, { passive: true });
+        window.addEventListener('resize', sync);
+        return () => {
+            el.removeEventListener('scroll', sync);
+            window.removeEventListener('resize', sync);
+        };
+    }, [sync]);
 
-        mm.add(
-            {
-                desktop: '(min-width: 1024px) and (prefers-reduced-motion: no-preference)',
-            },
-            () => {
-                const trackEl = track.current;
-                const wrapEl = wrap.current;
-                if (!trackEl || !wrapEl) return undefined;
-
-                /* Recomputed on refresh rather than captured once, so a resize
-                   or a late-loading font cannot leave the pan short and strand
-                   the last panel off screen. */
-                const distance = () => Math.max(
-                    0,
-                    trackEl.scrollWidth - wrapEl.clientWidth,
-                );
-
-                const tween = gsap.to(trackEl, {
-                    x: () => -distance(),
-                    ease: 'none',
-                    scrollTrigger: {
-                        trigger: wrapEl,
-                        start: 'top top',
-                        end: () => `+=${distance()}`,
-                        pin: true,
-                        scrub: 1,
-                        invalidateOnRefresh: true,
-                        anticipatePin: 1,
-                    },
-                });
-
-                return () => tween.kill();
-            },
-        );
-
-        return () => mm.revert();
-    }, []);
+    /* Scroll by one panel, measured from the real rendered width rather than
+       a hardcoded number, so it stays correct across every breakpoint. */
+    const nudge = (dir) => {
+        const el = track.current;
+        if (!el) return;
+        const panel = el.querySelector('.nv-panel');
+        const step = panel ? panel.getBoundingClientRect().width + 26 : el.clientWidth * 0.8;
+        el.scrollBy({ left: dir * step, behavior: 'smooth' });
+    };
 
     return (
         <section className="nv-pan" id="capabilities">
             <div className="nv-shell nv-pan__head">
                 <p className="nv-eyebrow">What we do</p>
-                <h2 className="nv-pan__title">Five things, in the order they happen.</h2>
+                <div className="nv-pan__headRow">
+                    <h2 className="nv-pan__title">Five things, in the order they happen.</h2>
+                    <div className="nv-pan__nav">
+                        <button
+                            type="button"
+                            className="nv-pan__arrow"
+                            onClick={() => nudge(-1)}
+                            disabled={atStart}
+                            aria-label="Previous capability"
+                        >
+                            <CaretLeft size={20} weight="bold" aria-hidden="true" />
+                        </button>
+                        <button
+                            type="button"
+                            className="nv-pan__arrow"
+                            onClick={() => nudge(1)}
+                            disabled={atEnd}
+                            aria-label="Next capability"
+                        >
+                            <CaretRight size={20} weight="bold" aria-hidden="true" />
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div className="nv-pan__viewport" ref={wrap}>
-                <ul className="nv-pan__track" ref={track}>
-                    {PANELS.map(({ index, Icon, title, body, tags }) => (
-                        <li className="nv-panel" key={index}>
-                            <span className="nv-panel__index">{index}</span>
-                            <span className="nv-panel__icon">
-                                <Icon size={28} weight="bold" aria-hidden="true" />
-                            </span>
-                            <h3 className="nv-panel__title">{title}</h3>
-                            <p className="nv-panel__body">{body}</p>
-                            <div className="nv-panel__list">
-                                {tags.map((tag) => (
-                                    <span className="nv-panel__tag" key={tag}>{tag}</span>
-                                ))}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            <ul className="nv-pan__track" ref={track}>
+                {PANELS.map(({ index, Icon, title, body, tags }) => (
+                    <li className="nv-panel" key={index}>
+                        <span className="nv-panel__index">{index}</span>
+                        <span className="nv-panel__icon">
+                            <Icon size={28} weight="bold" aria-hidden="true" />
+                        </span>
+                        <h3 className="nv-panel__title">{title}</h3>
+                        <p className="nv-panel__body">{body}</p>
+                        <div className="nv-panel__list">
+                            {tags.map((tag) => (
+                                <span className="nv-panel__tag" key={tag}>{tag}</span>
+                            ))}
+                        </div>
+                    </li>
+                ))}
+            </ul>
         </section>
     );
 }

@@ -10,9 +10,10 @@
  * nothing about ours. The client work now appears in the case study section,
  * where there is room to say what we actually did to it.
  *
- * Text elements are capped at four: brand line, headline, subtext, actions.
- * No trust strip, no tagline under the buttons, no scroll cue. Everything the
- * hero is tempted to add has a section of its own further down.
+ * Three text elements: headline, subtext, actions. The parent-company line
+ * that used to sit above the headline is gone. It was doing no work at the
+ * top of the page, where a first-time visitor has not yet learned who we are
+ * and so cannot care whose unit we are. The footer states it properly.
  */
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowUpRight, ArrowDown } from '@phosphor-icons/react/ssr';
@@ -45,10 +46,6 @@ export default function Hero() {
         <section className="nv-hero" id="top">
             <div className="nv-shell nv-hero__grid">
                 <div className="nv-hero__copy">
-                    <motion.p className="nv-eyebrow" {...anim(0)}>
-                        A unit of Velcaryn LLP
-                    </motion.p>
-
                     <motion.h1 className="nv-hero__title" {...anim(1)}>
                         Your website should<br />
                         <span className="nv-mark">earn its keep</span>.

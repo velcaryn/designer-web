@@ -25,7 +25,7 @@
  * anywhere public. They are held in one constant so there is exactly one
  * place to change, and no invented digits are printed on screen.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     WhatsappLogo,
     EnvelopeSimple,
@@ -33,19 +33,7 @@ import {
     CheckCircle,
     ArrowUpRight,
 } from '@phosphor-icons/react/ssr';
-
-/*
- * PLACEHOLDERS. Both of these must be replaced before this page is public.
- *
- * The number is deliberately an unroutable one rather than a plausible one:
- * a plausible placeholder is a number that belongs to a real person who then
- * receives your enquiries. Leave it obviously broken so it cannot ship
- * quietly.
- */
-const CONTACT = {
-    whatsapp: '910000000000',
-    email: 'hello@velbrant.studio',
-};
+import { contact, emailHref, waDefault, waEnquiry } from '@/config/site';
 
 const EMPTY = { name: '', email: '', company: '', brief: '' };
 
@@ -73,6 +61,31 @@ export default function Contact() {
     const [errors, setErrors] = useState({});
     const [state, setState] = useState('idle'); // idle | sending | sent
 
+    /* The estimator hands over the scope the visitor just built, so they do
+       not retype it. An event rather than shared state or a query parameter:
+       both components are islands under a server page, there is no provider
+       between them, and a URL parameter would survive a reload and silently
+       refill the field long after it was relevant. Appended rather than
+       assigned, so anything already typed is never destroyed. */
+    useEffect(() => {
+        const onPrefill = (e) => {
+            const incoming = e.detail;
+            if (!incoming) return;
+            setValues((v) => ({
+                ...v,
+                brief: v.brief.trim() ? `${v.brief.trim()}\n\n${incoming}` : incoming,
+            }));
+            setErrors((prev) => ({ ...prev, brief: undefined }));
+            /* Focus lands on the field so it is obvious what just changed. */
+            window.requestAnimationFrame(() => {
+                const el = document.getElementById('nv-brief');
+                if (el) { el.focus({ preventScroll: true }); }
+            });
+        };
+        window.addEventListener('nv:prefill-brief', onPrefill);
+        return () => window.removeEventListener('nv:prefill-brief', onPrefill);
+    }, []);
+
     const set = (field) => (e) => {
         const next = e.target.value;
         setValues((v) => ({ ...v, [field]: next }));
@@ -82,19 +95,16 @@ export default function Contact() {
         if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
     };
 
+    /* The message is assembled in config/site.js so its wording stays in step
+       with every other WhatsApp entry point on the site. */
     const handoff = () => {
-        const lines = [
-            'Hello Velbrant Studios.',
-            '',
-            `Name: ${values.name.trim()}`,
-            `Email: ${values.email.trim()}`,
-            values.company.trim() ? `Company: ${values.company.trim()}` : null,
-            '',
-            values.brief.trim(),
-        ].filter((line) => line !== null);
-
         window.open(
-            `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(lines.join('\n'))}`,
+            waEnquiry({
+                name: values.name.trim(),
+                email: values.email.trim(),
+                company: values.company.trim(),
+                brief: values.brief.trim(),
+            }),
             '_blank',
             'noopener,noreferrer',
         );
@@ -172,16 +182,16 @@ export default function Contact() {
                     <div className="nv-contact__direct">
                         <a
                             className="nv-contact__line"
-                            href={`https://wa.me/${CONTACT.whatsapp}`}
+                            href={waDefault}
                             target="_blank"
                             rel="noopener noreferrer"
                         >
                             <WhatsappLogo size={20} weight="fill" aria-hidden="true" />
                             Message us on WhatsApp
                         </a>
-                        <a className="nv-contact__line" href={`mailto:${CONTACT.email}`}>
+                        <a className="nv-contact__line" href={emailHref}>
                             <EnvelopeSimple size={20} weight="fill" aria-hidden="true" />
-                            {CONTACT.email}
+                            {contact.email}
                         </a>
                     </div>
                 </div>
@@ -192,7 +202,7 @@ export default function Contact() {
                             <CheckCircle size={20} weight="fill" aria-hidden="true" />
                             <span>
                                 WhatsApp should have opened with your message ready to send.
-                                If it did not, write to {CONTACT.email} and we will pick it
+                                If it did not, write to {contact.email} and we will pick it
                                 up from there.
                             </span>
                         </p>

@@ -54,12 +54,24 @@ function Wireframe({ cols }) {
     );
 }
 
-const PHONE_CYCLE_MS = 4200;
+/*
+ * Each device breathes between two widths on its own clock. The periods are
+ * deliberately coprime-ish so the three never resize in lockstep: a synchronised
+ * pulse reads as one animation applied three times, where staggered resizing
+ * reads as three independent viewports, which is the actual claim.
+ */
+const CYCLES = {
+    desktop: 5200,
+    tablet: 6300,
+    phone: 4100,
+};
 
 export default function HeroDevices() {
     const reduce = useReducedMotion();
     const scene = useRef(null);
     const [landscape, setLandscape] = useState(false);
+    const [deskNarrow, setDeskNarrow] = useState(false);
+    const [tabletNarrow, setTabletNarrow] = useState(false);
 
     /* Pointer parallax. Motion values, never state: a mouse move that goes
        through setState re-renders the tree on every frame and collapses the
@@ -92,14 +104,18 @@ export default function HeroDevices() {
         };
     }, [reduce, px, py]);
 
-    /* The phone turns to landscape and back. This is the one piece of the
-       illustration that is literally the argument: the same page, rotated,
-       still laid out properly. Off entirely under reduced motion, where the
-       phone simply stays portrait. */
+    /* Three independent timers, one per device. The phone turns to landscape,
+       the desktop and tablet narrow and widen. Each is the same argument made
+       three ways: the layout holds at whatever width it is given. All off
+       entirely under reduced motion, where the scene is a static composition. */
     useEffect(() => {
         if (reduce) return undefined;
-        const id = setInterval(() => setLandscape((v) => !v), PHONE_CYCLE_MS);
-        return () => clearInterval(id);
+        const timers = [
+            setInterval(() => setLandscape((v) => !v), CYCLES.phone),
+            setInterval(() => setDeskNarrow((v) => !v), CYCLES.desktop),
+            setInterval(() => setTabletNarrow((v) => !v), CYCLES.tablet),
+        ];
+        return () => timers.forEach(clearInterval);
     }, [reduce]);
 
     const float = (delay) => (reduce ? {} : {
@@ -113,15 +129,21 @@ export default function HeroDevices() {
                 className="nv-devices__stage"
                 style={reduce ? undefined : { rotateY, rotateX }}
             >
-                <motion.div className="nv-dev nv-dev--desktop" {...float(0)}>
+                <motion.div
+                    className={`nv-dev nv-dev--desktop${deskNarrow ? ' is-narrow' : ''}`}
+                    {...float(0)}
+                >
                     <div className="nv-dev__screen">
-                        <Wireframe cols={3} />
+                        <Wireframe cols={deskNarrow ? 2 : 3} />
                     </div>
                 </motion.div>
 
-                <motion.div className="nv-dev nv-dev--tablet" {...float(0.9)}>
+                <motion.div
+                    className={`nv-dev nv-dev--tablet${tabletNarrow ? ' is-narrow' : ''}`}
+                    {...float(0.9)}
+                >
                     <div className="nv-dev__screen">
-                        <Wireframe cols={2} />
+                        <Wireframe cols={tabletNarrow ? 1 : 2} />
                     </div>
                 </motion.div>
 

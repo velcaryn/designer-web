@@ -389,10 +389,14 @@ img, svg { display: block; max-width: 100%; }
     color: var(--nv-paper);
 }
 
-.nv-btn--primary:hover { background: var(--nv-storm); }
+@media (hover: hover) and (pointer: fine) {
+    .nv-btn--primary:hover { background: var(--nv-storm); }
+}
 
 .nv-btn--ghost { background: var(--nv-paper); }
-.nv-btn--ghost:hover { background: var(--nv-lav); }
+@media (hover: hover) and (pointer: fine) {
+    .nv-btn--ghost:hover { background: var(--nv-lav); }
+}
 
 .nv-btn:active {
     transform: translate(6px, 6px);
@@ -419,6 +423,39 @@ img, svg { display: block; max-width: 100%; }
 .nv-reveal.is-in {
     opacity: 1;
     transform: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Touch rules
+   ══════════════════════════════════════════════════════════════════════
+
+   From docs/PLAYBOOK.md section 3. These are not polish: they are the
+   difference between a site that feels native on a phone and a desktop site
+   shrunk down. The audience is on mid-range Android.
+
+   The important one is the hover guard. On a touch device `:hover` sticks
+   after a tap and leaves the element visually stuck in its hover state until
+   something else is tapped. Every hover effect on this site is therefore
+   inside `@media (hover: hover)`, and touch gets `:active` feedback instead,
+   which is already how the pressed states are written. */
+
+.nv-root {
+    /* Kills the 300ms tap delay and the grey flash on Android Chrome. */
+    -webkit-tap-highlight-color: transparent;
+}
+
+.nv-root button,
+.nv-root a,
+.nv-root input,
+.nv-root textarea,
+.nv-root [role="tab"] {
+    touch-action: manipulation;
+}
+
+/* Labels should not be selectable on a control the user is trying to press. */
+.nv-root button,
+.nv-root [role="tab"] {
+    user-select: none;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -487,7 +524,9 @@ img, svg { display: block; max-width: 100%; }
     background-repeat: no-repeat;
 }
 
-.nv-root .nv-wordmark:hover .nv-wordmark__mark { background-size: 100% 145%; }
+@media (hover: hover) and (pointer: fine) {
+    .nv-root .nv-wordmark:hover .nv-wordmark__mark { background-size: 100% 145%; }
+}
 
 .nv-wordmark__sub {
     font-weight: 700;
@@ -525,9 +564,11 @@ img, svg { display: block; max-width: 100%; }
 
 /* :not(.is-active) so the hover rule can never repaint the current section's
    link and strand its border. */
-.nv-root .nv-nav__link:hover:not(.is-active) {
-    color: var(--nv-ink);
-    background: var(--nv-paper-warm);
+@media (hover: hover) and (pointer: fine) {
+    .nv-root .nv-nav__link:hover:not(.is-active) {
+        color: var(--nv-ink);
+        background: var(--nv-paper-warm);
+    }
 }
 
 .nv-nav__link.is-active {
@@ -741,7 +782,15 @@ img, svg { display: block; max-width: 100%; }
     width: 78%;
     aspect-ratio: 16 / 10.5;
     transform: translateZ(-60px);
+    /* Width and aspect are animated, not scale: scaling would shrink the
+       wireframe inside it too, which would say "zoomed out" rather than
+       "narrower viewport". Resizing the frame makes the contents reflow,
+       which is the entire point of the illustration. */
+    transition: width 1.1s cubic-bezier(0.65, 0, 0.35, 1),
+                aspect-ratio 1.1s cubic-bezier(0.65, 0, 0.35, 1);
 }
+
+.nv-dev--desktop.is-narrow { width: 62%; aspect-ratio: 16 / 12; }
 
 /* Tablet: mid depth, right side, overlapping the desktop corner. */
 .nv-dev--tablet {
@@ -751,7 +800,11 @@ img, svg { display: block; max-width: 100%; }
     aspect-ratio: 3 / 4.1;
     transform: translateZ(40px);
     background: var(--nv-lav-soft);
+    transition: width 1.1s cubic-bezier(0.65, 0, 0.35, 1),
+                aspect-ratio 1.1s cubic-bezier(0.65, 0, 0.35, 1);
 }
+
+.nv-dev--tablet.is-narrow { width: 26%; aspect-ratio: 3 / 5.2; }
 
 /* Phone: nearest the viewer, bottom left, and the one that rotates. */
 .nv-dev--phone {
@@ -853,7 +906,9 @@ img, svg { display: block; max-width: 100%; }
     will-change: transform;
 }
 
-.nv-marquee:hover .nv-marquee__track { animation-play-state: paused; }
+@media (hover: hover) and (pointer: fine) {
+    .nv-marquee:hover .nv-marquee__track { animation-play-state: paused; }
+}
 
 @keyframes nv-marquee-slide {
     from { transform: translate3d(0, 0, 0); }
@@ -914,7 +969,7 @@ img, svg { display: block; max-width: 100%; }
 
 .nv-panel {
     flex: 0 0 min(82vw, 370px);
-    scroll-snap-align: center;
+    scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     min-height: 430px;
@@ -988,33 +1043,66 @@ img, svg { display: block; max-width: 100%; }
     color: var(--nv-ink);
 }
 
-/* Desktop: the pin takes over and the snap rail rules above are neutralised. */
+/* Desktop keeps the same native rail, just larger. There is no pin and no
+   scroll hijack: see components/Capabilities.js for why the ScrollTrigger
+   version was removed. */
 @media (min-width: 1024px) {
-    .nv-pan__viewport { overflow: hidden; }
-
     .nv-pan__track {
-        overflow: visible;
-        scroll-snap-type: none;
         gap: 26px;
-        align-items: stretch;
-        /* Room to the right of the last panel so it clears the edge at the
-           end of the pan rather than sitting flush against it. */
-        padding: 14px 40vw 14px var(--nv-gutter);
-        will-change: transform;
+        padding: 14px var(--nv-gutter) calc(var(--nv-section-y) + 10px);
+        scroll-padding-left: var(--nv-gutter);
     }
 
     .nv-panel {
         flex: 0 0 clamp(350px, 29vw, 440px);
         min-height: 510px;
         padding: 40px 36px;
-        transition: transform var(--nv-dur) var(--nv-ease),
-                    box-shadow var(--nv-dur) var(--nv-ease);
     }
+}
 
-    .nv-panel:hover {
-        transform: rotate(0deg) translateY(-6px);
-        box-shadow: var(--nv-pop-lg);
-    }
+/* Header row: the arrows sit beside the heading, not floating over the rail,
+   so they never cover a panel and never need a z-index. */
+.nv-pan__headRow {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.nv-pan__nav { display: none; gap: 10px; flex: none; }
+
+@media (min-width: 1024px) {
+    /* Touch devices swipe the rail directly, so the arrows are desktop only,
+       where there is no thumb to swipe with. */
+    .nv-pan__nav { display: flex; }
+}
+
+.nv-pan__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    color: var(--nv-ink);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color var(--nv-dur) var(--nv-ease),
+                opacity var(--nv-dur) var(--nv-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv-pan__arrow:hover:not([disabled]) { background: var(--nv-lav); }
+}
+
+.nv-pan__arrow:active:not([disabled]) { transform: translate(2px, 2px); }
+
+/* A disabled control says so rather than silently doing nothing. */
+.nv-pan__arrow[disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -1117,6 +1205,36 @@ img, svg { display: block; max-width: 100%; }
     }
 }
 
+/* Slow showcase pan. The image is taller than its frame, so translating it
+   upward reveals the rest of the page. Transform only, and only while the
+   frame is on screen: see components/ShowcaseScroll.js. */
+.nv-pan-shot img {
+    /* Overrides the 100% height the static crop used, so there is something
+       to pan through. */
+    height: auto;
+    min-height: 100%;
+    will-change: transform;
+}
+
+.nv-pan-shot.is-running img {
+    animation: nv-shot-pan var(--nv-shot-duration, 26s) ease-in-out infinite alternate;
+}
+
+/* Pausing rather than stopping, so a reader studying one part is not fighting
+   it, and it resumes from where it was. */
+@media (hover: hover) and (pointer: fine) {
+    .nv-pan-shot:hover img { animation-play-state: paused; }
+}
+
+.nv-pan-shot:focus-within img { animation-play-state: paused; }
+
+@keyframes nv-shot-pan {
+    from { transform: translate3d(0, 0, 0); }
+    /* Never a full -100%: the frame would end on blank space past the footer
+       of the screenshot. This stops with content still filling it. */
+    to { transform: translate3d(0, calc(-100% + 100px), 0); }
+}
+
 /* ══════════════════════════════════════════════════════════════════════
    CX / UX / UI - kinetic type
    ══════════════════════════════════════════════════════════════════════ */
@@ -1131,13 +1249,21 @@ img, svg { display: block; max-width: 100%; }
 }
 
 @media (min-width: 1024px) {
-    .nv-triad__grid { grid-template-columns: 1.15fr 0.85fr; }
+    /* Was 1.15fr / 0.85fr with the section's default gap, which left a broad
+       empty channel between the three words and the panel explaining them.
+       They are one unit and should read as one: the words get only the width
+       they need, and the gap is tightened to match. */
+    .nv-triad__grid {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: clamp(28px, 3vw, 52px);
+        align-items: center;
+    }
 }
 
 .nv-triad__stack {
     display: flex;
     flex-direction: column;
-    gap: clamp(4px, 0.8vw, 12px);
+    gap: clamp(2px, 0.4vw, 6px);
     min-width: 0;
 }
 
@@ -1167,13 +1293,14 @@ img, svg { display: block; max-width: 100%; }
                 transform var(--nv-dur) var(--nv-ease);
 }
 
-.nv-triad__term:hover:not(.is-active) { color: var(--nv-lav); }
+@media (hover: hover) and (pointer: fine) {
+    .nv-triad__term:hover:not(.is-active) { color: var(--nv-lav); }
+}
 
 .nv-triad__term.is-active { color: var(--nv-ink); }
 
-@media (min-width: 768px) {
-    .nv-triad__term.is-active { transform: translateX(clamp(8px, 1.4vw, 26px)); }
-}
+/* The active term used to slide right, which pushed it further from the
+   panel it belongs to. The fill already carries the state. */
 
 .nv-triad__panel {
     min-width: 0;
@@ -1234,7 +1361,9 @@ img, svg { display: block; max-width: 100%; }
     transition: background-color var(--nv-dur) var(--nv-ease);
 }
 
-.nv-triad__ctrl:hover { background: var(--nv-lav); }
+@media (hover: hover) and (pointer: fine) {
+    .nv-triad__ctrl:hover { background: var(--nv-lav); }
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    Process - vertical rail with a scroll-drawn line
@@ -1275,15 +1404,18 @@ img, svg { display: block; max-width: 100%; }
     position: relative;
     display: grid;
     grid-template-columns: 44px 1fr;
-    gap: 20px;
-    padding-bottom: clamp(40px, 5vw, 64px);
+    /* Tightened from 20px and from a 40-64px vertical rhythm. The rail is a
+       single connected sequence, and a wide channel between the drawn line
+       and the text made each step read as an unrelated block. */
+    gap: 16px;
+    padding-bottom: clamp(26px, 3vw, 40px);
 }
 
 @media (min-width: 768px) {
     .nv-step {
-        grid-template-columns: 56px 1fr 1fr;
-        gap: 32px;
-        align-items: start;
+        grid-template-columns: 56px minmax(0, 0.9fr) minmax(0, 1.4fr);
+        gap: 20px;
+        align-items: baseline;
     }
 }
 
@@ -1322,7 +1454,7 @@ img, svg { display: block; max-width: 100%; }
    title has to be told to sit under it in column 2 rather than wrapping back
    under the numeral in column 1. */
 @media (max-width: 767px) {
-    .nv-step > div { grid-column: 2; margin-top: 12px; }
+    .nv-step > div { grid-column: 2; margin-top: 8px; }
 }
 
 .nv-step__meta {
@@ -1433,7 +1565,9 @@ img, svg { display: block; max-width: 100%; }
                 box-shadow var(--nv-dur) var(--nv-ease);
 }
 
-.nv-plan:hover { transform: translateY(-5px); box-shadow: var(--nv-pop-lg); }
+@media (hover: hover) and (pointer: fine) {
+    .nv-plan:hover { transform: translateY(-5px); box-shadow: var(--nv-pop-lg); }
+}
 
 .nv-plan--lead { background: var(--nv-lav); }
 .nv-plan--support-a { background: var(--nv-lav-soft); }
@@ -1471,6 +1605,278 @@ img, svg { display: block; max-width: 100%; }
 }
 
 .nv-plan__item svg { flex: none; color: var(--nv-ink); margin-top: 2px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Problem
+   ══════════════════════════════════════════════════════════════════════
+
+   Two columns of plain text, no cards. The sections either side of this one
+   are card grids, and boxing these would make them read as a feature list
+   rather than as the accusation they are. A hairline above each item is the
+   only furniture. */
+
+.nv-problem__title { font-size: var(--nv-d2); max-width: 20ch; }
+.nv-problem__lede { margin-top: 22px; }
+
+.nv-problem__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin: clamp(40px, 5vw, 68px) 0 0;
+}
+
+@media (min-width: 860px) {
+    .nv-problem__list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: clamp(32px, 4vw, 64px);
+    }
+}
+
+.nv-problem__item {
+    padding: 26px 0;
+    border-top: 2px solid var(--nv-ink);
+    min-width: 0;
+}
+
+/* The failure, set in the display face so it carries. Storm rather than ink
+   for the body underneath, so the complaint reads first and the answer
+   second. */
+.nv-problem__wrong {
+    display: flex;
+    gap: 12px;
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-body-lg);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--nv-ink);
+}
+
+/* A struck-through marker rather than an icon: it says "not this" without
+   needing a colour to carry the meaning. */
+.nv-problem__wrong::before {
+    content: "";
+    flex: none;
+    width: 20px;
+    height: 2px;
+    margin-top: 0.62em;
+    background: var(--nv-lav-deep);
+}
+
+.nv-problem__right {
+    margin: 12px 0 0 32px;
+    font-size: var(--nv-body);
+    color: var(--nv-ink-soft);
+    line-height: 1.55;
+    max-width: 46ch;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Estimator
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-est__head { max-width: 62ch; margin-bottom: clamp(36px, 4.5vw, 60px); }
+.nv-est__title { font-size: var(--nv-d2); }
+.nv-est__lede { margin-top: 20px; }
+
+.nv-est__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(24px, 3vw, 40px);
+    align-items: start;
+}
+
+@media (min-width: 1024px) {
+    .nv-est__grid { grid-template-columns: 1.05fr 0.95fr; }
+}
+
+.nv-est__controls {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(26px, 3vw, 38px);
+    min-width: 0;
+}
+
+/* fieldset carries the grouping for assistive tech, so its default border and
+   padding are removed rather than the element being swapped for a div. */
+.nv-est__group {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+}
+
+.nv-est__legend {
+    padding: 0;
+    margin-bottom: 14px;
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--nv-ink-faint);
+}
+
+.nv-est__options { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Chips are pills, per the shape lock, and clear the 44px touch bar with
+   padding alone. */
+.nv-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 20px;
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    font-weight: 700;
+    color: var(--nv-ink);
+    cursor: pointer;
+    transition: background-color var(--nv-dur) var(--nv-ease),
+                transform 0.12s var(--nv-ease),
+                box-shadow 0.12s var(--nv-ease);
+}
+
+/* :not(.is-active) so hovering a selected chip can never repaint it and
+   strand its state. Guarded by npm run check:css. */
+@media (hover: hover) and (pointer: fine) {
+    .nv-chip:hover:not(.is-active) { background: var(--nv-storm-soft); }
+}
+
+.nv-chip.is-active {
+    background: var(--nv-lav);
+    box-shadow: var(--nv-pop-sm);
+}
+
+.nv-chip:active { transform: translate(2px, 2px); box-shadow: none; }
+
+/* The tick box appears only on the multi-select group, so selection is not
+   signalled by colour alone. */
+.nv-chip__box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex: none;
+    border: 2px solid var(--nv-ink);
+    border-radius: 6px;
+    background: var(--nv-paper);
+    color: var(--nv-ink);
+}
+
+.nv-est__result {
+    padding: clamp(26px, 3vw, 38px);
+    background: var(--nv-lav-soft);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+    min-width: 0;
+}
+
+@media (min-width: 1024px) {
+    .nv-est__result { position: sticky; top: 110px; }
+}
+
+.nv-est__resultLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--nv-ink-soft);
+}
+
+.nv-est__weeks {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 12px;
+    /* Fixed leading so a one-digit and a "1 to 3" result occupy identical
+       height and the panel does not jump between selections. */
+    min-height: 1em;
+    font-family: var(--nv-font-display);
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--nv-ink);
+}
+
+.nv-est__unit {
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--nv-ink-soft);
+}
+
+.nv-est__scope {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 2px solid var(--nv-ink);
+    /* No bottom margin here: the CTA below owns the gap, so a one-item scope
+       list and a four-item one both leave the same space above the button.
+       Without this the short panel collided the caveat into the CTA. */
+    margin-bottom: 0;
+}
+
+.nv-est__scopeItem {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+    line-height: 1.5;
+}
+
+.nv-est__scopeItem svg { flex: none; color: var(--nv-ink); margin-top: 2px; }
+
+.nv-est__note {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+    line-height: 1.5;
+}
+
+.nv-est__cta {
+    margin-top: 26px;
+    margin-bottom: 14px;
+    width: 100%;
+}
+
+.nv-est__caveat {
+    margin-top: 0;
+    font-size: var(--nv-micro);
+    color: var(--nv-ink-faint);
+    line-height: 1.5;
+}
+
+/* Empty state, sized close to the populated panel so choosing the first
+   option does not jump the page. */
+.nv-est__empty {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 260px;
+    color: var(--nv-ink-soft);
+    font-size: var(--nv-body);
+}
+
+.nv-est__empty svg { color: var(--nv-ink); }
 
 /* ══════════════════════════════════════════════════════════════════════
    Contact
@@ -1516,7 +1922,9 @@ img, svg { display: block; max-width: 100%; }
 }
 
 .nv-contact__line svg { color: var(--nv-ink); flex: none; }
-.nv-root .nv-contact__line:hover { background: var(--nv-lav); }
+@media (hover: hover) and (pointer: fine) {
+    .nv-root .nv-contact__line:hover { background: var(--nv-lav); }
+}
 
 .nv-form {
     display: flex;
@@ -1657,7 +2065,9 @@ img, svg { display: block; max-width: 100%; }
     text-decoration: none;
 }
 
-.nv-root .nv-footer__link:hover { color: var(--nv-lav-deep); }
+@media (hover: hover) and (pointer: fine) {
+    .nv-root .nv-footer__link:hover { color: var(--nv-lav-deep); }
+}
 
 .nv-footer__bottom {
     display: flex;
@@ -1690,7 +2100,6 @@ img, svg { display: block; max-width: 100%; }
        the capabilities section directly below, so parking it loses nothing. */
     .nv-marquee__track { animation: none; transform: none; }
 
-    .nv-triad__term.is-active { transform: none; }
 
     /* Static tilts are composition, not motion, so the panels and frames keep
        their rotation. Only the hover lift is removed. */

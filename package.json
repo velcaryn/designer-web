@@ -10,11 +10,11 @@
     "lint": "eslint app components",
     "check:emdash": "node scripts/check-em-dash.mjs",
     "check:css": "node scripts/check-css-collisions.mjs",
-    "verify": "npm run check:emdash && npm run check:css && npm run lint && npm run build"
+    "verify": "npm run check:emdash && npm run check:css && npm run check:brand && npm run lint && npm run build",
+    "check:brand": "node scripts/check-brand-leak.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
-    "gsap": "^3.15.0",
     "motion": "^12.42.2",
     "next": "^16.3.0",
     "react": "19.2.3",
