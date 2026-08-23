@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Velbrant Studios">
+  <!--
+    Placeholder mark until the brand has a real logo.
+
+    It is the two shapes the site already owns: an Abyss Blue ground and the
+    Lavender Haze swipe that sits under the wordmark in the header. The V is
+    drawn as a stroked path rather than set in Outfit, because a favicon has
+    no access to a webfont and a text element would fall back to whatever the
+    renderer has.
+  -->
+  <rect width="32" height="32" rx="8" fill="#17313E"/>
+  <path d="M8.5 9 L16 21.5 L23.5 9" fill="none" stroke="#FAF8F6"
+        stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="9" y="23.6" width="14" height="2.6" rx="1.3" fill="#C5B0CD"/>
+</svg>

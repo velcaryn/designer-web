@@ -1,0 +1,1699 @@
+/*
+  Velbrant Studios - stylesheet
+  =============================
+
+  Self-contained. Everything is prefixed `nv-` and every token is declared on
+  `.nv-root`, which sits on <body>. This file plus components/ is the entire
+  visual system: there is no second stylesheet and no inherited theme.
+
+  The `nv-` prefix is a holdover from when this site lived inside the Velcaryn
+  application at /newventure and needed to guarantee it collided with nothing.
+  It is kept because renaming every class buys nothing and would invalidate
+  every comment below that names one.
+
+  THE LOOK, IN ONE LINE
+  Bright paper, fat black outlines, hard offset shadows, saturated colour
+  blocks, things sitting very slightly off-square. Pop-poster, not SaaS. The
+  page is loud on purpose, because it is the portfolio piece: it has to prove
+  we can do this before anyone reads a word of it.
+
+  THE FOUR LOCKS (read before editing)
+
+  1. THEME LOCK. The page is light. All of it, top to bottom, including the
+     footer. Sections change COLOUR, never mode. Colour-blocking a bright
+     palette is the design; flipping to a dark section mid-scroll would read
+     as two templates stitched together.
+
+  2. COLOUR LOCK. Three brand colours, with fixed jobs that never swap:
+       --nv-ink    Abyss Blue.    Every word of text, every outline, and the
+                   fill of every primary button. Doubles as the ink, which
+                   is what ties the type to the brand.
+       --nv-lav    Lavender Haze. The highlight. Active states, the marquee
+                   band, the swipe behind a word, the step numerals.
+       --nv-storm  Storm Blue.    Secondary text and supporting figures. As
+                   a GROUND it carries paper text only, never ink.
+     Tints (`-soft`) are for section grounds. The page is quiet on purpose:
+     the loud thing is the layout, not the colour.
+
+  3. SHAPE LOCK. Exactly two radii, by role:
+       20px      every block, panel, image frame and input group
+       999px     every pill: buttons, tags, form fields
+     Chunky and round. No third radius, no sharp corners.
+
+  4. EDGE LOCK. One border weight and one shadow, everywhere:
+       border: var(--nv-stroke) solid var(--nv-ink)     (3px)
+       box-shadow: var(--nv-pop)                        (6px 6px 0 ink)
+     The shadow is hard, has zero blur and is always down-right. A blurred or
+     tinted shadow anywhere on this page is a bug: the whole style depends on
+     the offset reading as a printed second impression, not as depth.
+
+  HOVER VS ACTIVE
+  Every hover rule touching background / color / border-color on an element
+  that has an active variant carries `:not(.is-active)`. `.x:hover` is (0,2,0)
+  and beats `.x.is-active` on source order alone otherwise, which is how a
+  selected control gets repainted on hover and loses its label. Guarded by
+  `npm run check:css`, explained in CLAUDE.md.
+
+  MOTION
+  Only transform and opacity are animated. The press interaction is the
+  brutalist one: the element slides down-right by exactly the shadow offset
+  and the shadow collapses to zero, so it reads as a physical key being
+  pressed. Everything collapses in one `prefers-reduced-motion` block at the
+  bottom of the file.
+*/
+
+/* ══════════════════════════════════════════════════════════════════════
+   Tokens
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-root {
+    /* Composed here, not on :root, because the next/font variables land on
+       this same element. See fonts.js. */
+    --nv-font-display: var(--nv-font-outfit), "Outfit", ui-sans-serif, system-ui, sans-serif;
+    --nv-font-text: var(--nv-font-jakarta), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+    /* Ground and ink. Warm off-white, never pure white: pure white under
+       these muted blues reads cold and clinical, which is the opposite of
+       what the palette is for. */
+    --nv-paper: #faf8f6;
+    --nv-paper-warm: #f3efec;
+
+    /* The three brand colours, exactly as specified.
+         Abyss Blue     #17313E
+         Storm Blue     #415E72
+         Lavender Haze  #C5B0CD
+
+       Abyss doubles as the ink. That is the move that makes this palette
+       work: a near-black with blue in it ties every line of text to the
+       brand, where a neutral #222 would sit apart from all three. */
+    --nv-ink: #17313e;
+    --nv-storm: #415e72;
+    --nv-lav: #c5b0cd;
+
+    /* Tints, for section grounds and panel fills.
+
+       CONTRAST NOTES, measured against --nv-ink (#17313E):
+         Paper          12.7:1  anything
+         Lavender Haze   7.3:1  anything, including body copy
+         Storm tint      9.8:1  anything
+         Storm Blue      3.8:1  as a GROUND: large or bold text only. Paper
+                                on Storm Blue is 5.6:1 and is the pairing
+                                actually used, so Storm blocks carry paper
+                                text, never ink. */
+    --nv-lav-soft: #ece4f0;
+    --nv-storm-soft: #e2e9ee;
+    --nv-lav-deep: #b39dbd;
+
+    /* Text. --nv-ink-soft is Storm Blue at 6.4:1 on paper, safe for body
+       copy; --nv-ink-faint is 4.6:1 and is capped at labels and captions. */
+    --nv-ink-soft: #415e72;
+    --nv-ink-faint: #6b8296;
+
+    --nv-stroke: 3px;
+    --nv-radius: 20px;
+    --nv-radius-pill: 999px;
+    --nv-pop: 6px 6px 0 var(--nv-ink);
+    --nv-pop-sm: 4px 4px 0 var(--nv-ink);
+    --nv-pop-lg: 10px 10px 0 var(--nv-ink);
+
+    /* Spacious end of the density scale. This is a brand site, not a console. */
+    --nv-gutter: 20px;
+    --nv-shell: 1320px;
+    --nv-section-y: clamp(72px, 10vw, 150px);
+
+    /* Type scale. Fluid, clamped at both ends: no 200px headline on a 4K
+       monitor, no 12px one on a 320px phone. */
+    --nv-d0: clamp(3.6rem, 15vw, 8.5rem);
+    --nv-d1: clamp(2.3rem, 5.4vw, 4.6rem);
+    --nv-d2: clamp(1.85rem, 4.4vw, 3.7rem);
+    --nv-d3: clamp(1.3rem, 2.5vw, 2rem);
+    --nv-body-lg: clamp(1.05rem, 1.5vw, 1.28rem);
+    --nv-body: 1rem;
+    --nv-small: 0.875rem;
+    --nv-micro: 0.75rem;
+
+    --nv-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --nv-dur: 0.4s;
+
+    /* One layer scale for the whole site. Nothing invents its own z-index. */
+    --nv-z-base: 0;
+    --nv-z-raised: 10;
+    --nv-z-nav: 100;
+    --nv-z-drawer: 200;
+
+    min-height: 100dvh;
+    background: var(--nv-paper);
+    color: var(--nv-ink);
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    /* Rotated cards and an oversized marquee overhang the grid on purpose.
+       Without this a phone gets a horizontal scrollbar from one of them. */
+    overflow-x: clip;
+}
+
+@media (min-width: 768px) {
+    .nv-root { --nv-gutter: 40px; }
+}
+
+@media (min-width: 1200px) {
+    .nv-root { --nv-gutter: 64px; }
+}
+
+.nv-root *,
+.nv-root *::before,
+.nv-root *::after { box-sizing: border-box; }
+
+.nv-root h1,
+.nv-root h2,
+.nv-root h3 {
+    font-family: var(--nv-font-display);
+    font-weight: 800;
+    /* Outfit is already tightly fitted, so it needs far less negative
+       tracking than a display face like Syne, and it wants real leading.
+       0.95 on a geometric sans reads as cramped and is the main thing that
+       made the first pass hard to scan. */
+    letter-spacing: -0.02em;
+    line-height: 1.06;
+    margin: 0;
+    /* Descender reserve, still: `g` and `y` sit close at this leading. */
+    padding-bottom: 0.06em;
+}
+
+.nv-root p { margin: 0; }
+.nv-root ul { margin: 0; padding: 0; list-style: none; }
+
+.nv-shell {
+    width: 100%;
+    max-width: calc(var(--nv-shell) + var(--nv-gutter) * 2);
+    margin-inline: auto;
+    padding-inline: var(--nv-gutter);
+    /* A grid/flex child defaults to min-width:auto and refuses to shrink
+       below its content, which is how a wide child clips instead of
+       scrolling inside a phone. See docs/FRONTEND_RULES.md. */
+    min-width: 0;
+}
+
+.nv-section { padding-block: var(--nv-section-y); position: relative; }
+
+/* Section grounds. Colour, never mode. */
+.nv-ground--paper { background: var(--nv-paper); }
+.nv-ground--warm { background: var(--nv-paper-warm); }
+.nv-ground--lav { background: var(--nv-lav-soft); }
+.nv-ground--lav-full { background: var(--nv-lav); }
+.nv-ground--storm { background: var(--nv-storm-soft); }
+
+/* The highlighter swipe is Lavender, so on the one full-Lavender section it
+   would be invisible. Paper is the inverse of the same idea and reads as the
+   same gesture. */
+.nv-ground--lav-full .nv-mark {
+    background-image: linear-gradient(
+        to top,
+        transparent 0.14em,
+        var(--nv-paper) 0.14em,
+        var(--nv-paper) 0.46em,
+        transparent 0.46em
+    );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Base reset
+   ══════════════════════════════════════════════════════════════════════
+
+   Next.js ships no reset, so this is it. It is small on purpose: the only
+   defaults worth overriding are the ones that would otherwise fight the
+   design system above.
+
+   HISTORY WORTH KEEPING. In the Velcaryn repo this block did a different
+   job. The site lived at /newventure under an application-wide globals.css
+   whose typography rules set element-level colour:
+
+       h1..h6 { color: var(--secondary-color) }   Velcaryn purple
+       p      { color: var(--text-muted) }
+       a      { color: var(--primary-color) }
+
+   This stylesheet set font-family and size on headings but never contested
+   `color`, so every headline on the site rendered in another product's brand
+   purple. The fix there was a neutralising layer pitched at exactly (0,1,0),
+   which is gone now that nothing foreign reaches in. The lesson it leaves
+   behind is the reason the rules below set colour explicitly rather than
+   trusting inheritance: a base layer that declines to state a value is a
+   base layer that hands the decision to whatever loads next. */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+    /* Anchor links land under the sticky bar without this. */
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+}
+
+body { margin: 0; }
+
+/* Headings and paragraphs carry their own spacing from the components, so the
+   UA margins are removed once here rather than fought per section. */
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    color: var(--nv-ink);
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+p { margin: 0; }
+
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+dl, dd { margin: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+/* Form controls do not inherit type by default in any browser. */
+button, input, textarea, select {
+    font: inherit;
+    color: inherit;
+}
+
+button { background: none; border: 0; }
+
+img, svg { display: block; max-width: 100%; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Shared atoms
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Section eyebrow. Rationed to three on the entire page, which is why most
+   sections here open on the headline alone. */
+.nv-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 16px 7px 12px;
+    background: var(--nv-lav);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    box-shadow: var(--nv-pop-sm);
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--nv-ink);
+    margin-bottom: 24px;
+}
+
+.nv-eyebrow::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--nv-ink);
+    border: 2px solid var(--nv-ink);
+}
+
+.nv-lede {
+    font-size: var(--nv-body-lg);
+    color: var(--nv-ink-soft);
+    /* Measure cap. Long-form text across a full 1320px shell is unreadable
+       no matter how good the type is. */
+    max-width: 58ch;
+    line-height: 1.55;
+}
+
+/* A highlighter swipe behind a word. The one type flourish the page allows
+   itself, used in two headlines and nowhere else.
+
+   Painted as a background gradient on the element rather than as a `z-index:
+   -1` pseudo-element. A negative z-index only stays behind the text and in
+   front of the page if an ancestor happens to establish a stacking context;
+   where one does not, the swipe drops behind the section background and
+   disappears entirely. A background cannot do that. */
+.nv-mark {
+    display: inline-block;
+    padding-inline: 0.12em;
+    /* Descenders need the extra leading and the reserve below, or the `y` in
+       "audience" clips against the display line-height. */
+    line-height: 1.08;
+    padding-bottom: 0.06em;
+    background-image: linear-gradient(
+        to top,
+        transparent 0.14em,
+        var(--nv-lav) 0.14em,
+        var(--nv-lav) 0.46em,
+        transparent 0.46em
+    );
+}
+
+/* Buttons. Pill, outlined, hard shadow, and the press moves the element by
+   exactly the shadow offset so the shadow appears to be absorbed. */
+.nv-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    /* 54px tall at the default size. The 44px touch bar is cleared by the
+       padding alone, so there is no ::before faking the hit area (which
+       measures correctly and then does not receive taps). */
+    min-height: 54px;
+    padding: 0 28px;
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    box-shadow: var(--nv-pop);
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--nv-ink);
+    text-decoration: none;
+    cursor: pointer;
+    /* Labels are two or three words by design, but an edited label must not
+       silently become a two-line button. */
+    white-space: nowrap;
+    transition: transform 0.12s var(--nv-ease),
+                box-shadow 0.12s var(--nv-ease),
+                background-color var(--nv-dur) var(--nv-ease);
+}
+
+/* Abyss is the primary fill, everywhere, without exception. */
+/* Abyss fill, paper label: 12.7:1. The one place on the page where text is
+   not ink, and the reason the primary button cannot be mistaken for anything
+   else. Hover goes to Storm, which is the same hue one step lighter. */
+.nv-btn--primary {
+    background: var(--nv-ink);
+    color: var(--nv-paper);
+}
+
+.nv-btn--primary:hover { background: var(--nv-storm); }
+
+.nv-btn--ghost { background: var(--nv-paper); }
+.nv-btn--ghost:hover { background: var(--nv-lav); }
+
+.nv-btn:active {
+    transform: translate(6px, 6px);
+    box-shadow: 0 0 0 var(--nv-ink);
+}
+
+.nv-root :focus-visible {
+    outline: 3px solid var(--nv-ink);
+    outline-offset: 3px;
+}
+
+/* Scroll reveal. The `nv-reveal` class is added by JavaScript in the browser
+   and never appears in server HTML, so content is visible by default and the
+   animation is strictly an enhancement. See components/newventure/Reveal.js
+   for the three shipped bugs that led to this arrangement. */
+.nv-reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+        opacity 0.7s var(--nv-ease) var(--nv-reveal-delay, 0s),
+        transform 0.7s var(--nv-ease) var(--nv-reveal-delay, 0s);
+}
+
+.nv-reveal.is-in {
+    opacity: 1;
+    transform: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Navigation
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-nav {
+    position: sticky;
+    top: 0;
+    z-index: var(--nv-z-nav);
+    /* 70px, inside the 80px cap. A nav eating an eighth of a phone viewport
+       is a nav competing with the page. */
+    height: 70px;
+    display: flex;
+    align-items: center;
+    background: var(--nv-paper);
+    border-bottom: var(--nv-stroke) solid transparent;
+    transition: border-color var(--nv-dur) var(--nv-ease);
+}
+
+.nv-nav.is-stuck { border-bottom-color: var(--nv-ink); }
+
+.nv-nav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+}
+
+/* The wordmark IS the logo. There is no mark yet, so the typeface does the
+   identifying: Syne 800, tight, with the second word set back in weight and
+   size so the lockup has a hierarchy instead of reading as one long word. */
+.nv-wordmark {
+    display: inline-flex;
+    align-items: center;
+    /* Measured at 20px tall before this. It is a link, so it has to clear the
+       44px touch bar with real box size, not with a pseudo-element that
+       measures correctly and then does not receive the tap. */
+    min-height: 44px;
+    gap: 0.36em;
+    font-family: var(--nv-font-display);
+    font-weight: 800;
+    font-size: 1.28rem;
+    letter-spacing: -0.05em;
+    color: var(--nv-ink);
+    text-decoration: none;
+    line-height: 1;
+}
+
+.nv-wordmark__mark { position: relative; }
+
+/* A Buttercream swipe under the first word: the same highlighter shape as
+   `.nv-mark`, and the only piece of brand furniture that repeats site-wide.
+   A background gradient for the same stacking reason given at `.nv-mark`. */
+.nv-wordmark__mark {
+    padding-inline: 2px;
+    background-image: linear-gradient(
+        to top,
+        var(--nv-lav) 0,
+        var(--nv-lav) 0.26em,
+        transparent 0.26em
+    );
+    transition: background-size var(--nv-dur) var(--nv-ease);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
+
+.nv-root .nv-wordmark:hover .nv-wordmark__mark { background-size: 100% 145%; }
+
+.nv-wordmark__sub {
+    font-weight: 700;
+    font-size: 0.6em;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--nv-ink-faint);
+}
+
+.nv-nav__links {
+    display: none;
+    align-items: center;
+    gap: 2px;
+}
+
+@media (min-width: 1024px) {
+    .nv-nav__links { display: flex; }
+}
+
+.nv-nav__link {
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 14px;
+    border: 2px solid transparent;
+    border-radius: var(--nv-radius-pill);
+    font-size: var(--nv-small);
+    font-weight: 700;
+    color: var(--nv-ink-soft);
+    text-decoration: none;
+    transition: color var(--nv-dur) var(--nv-ease),
+                background-color var(--nv-dur) var(--nv-ease),
+                border-color var(--nv-dur) var(--nv-ease);
+}
+
+/* :not(.is-active) so the hover rule can never repaint the current section's
+   link and strand its border. */
+.nv-root .nv-nav__link:hover:not(.is-active) {
+    color: var(--nv-ink);
+    background: var(--nv-paper-warm);
+}
+
+.nv-nav__link.is-active {
+    color: var(--nv-ink);
+    background: var(--nv-lav);
+    border-color: var(--nv-ink);
+}
+
+.nv-nav__cta { display: none; }
+
+@media (min-width: 1024px) {
+    .nv-nav__cta { display: inline-flex; min-height: 46px; box-shadow: var(--nv-pop-sm); }
+    .nv-nav__cta:active { transform: translate(4px, 4px); }
+}
+
+/* Mobile menu trigger. A real 46px button, not an icon with a pseudo-element
+   pretending to be a hit area. */
+.nv-nav__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    background: var(--nv-lav);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    box-shadow: var(--nv-pop-sm);
+    color: var(--nv-ink);
+    cursor: pointer;
+    transition: transform 0.12s var(--nv-ease), box-shadow 0.12s var(--nv-ease);
+}
+
+.nv-nav__toggle:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--nv-ink);
+}
+
+@media (min-width: 1024px) {
+    .nv-nav__toggle { display: none; }
+}
+
+.nv-drawer {
+    position: fixed;
+    inset: 70px 0 0;
+    z-index: var(--nv-z-drawer);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 28px var(--nv-gutter) calc(32px + env(safe-area-inset-bottom));
+    background: var(--nv-paper-warm);
+    overflow-y: auto;
+}
+
+.nv-drawer__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Generous on purpose: this is the one-handed, thumb-reach surface. */
+    min-height: 64px;
+    padding: 0 22px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop-sm);
+    font-family: var(--nv-font-display);
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--nv-ink);
+    text-decoration: none;
+    transition: transform 0.12s var(--nv-ease), box-shadow 0.12s var(--nv-ease);
+}
+
+.nv-drawer__link:nth-child(2n) { background: var(--nv-lav-soft); }
+.nv-drawer__link:nth-child(3n) { background: var(--nv-storm-soft); }
+
+.nv-drawer__link:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--nv-ink);
+}
+
+.nv-drawer .nv-btn { margin-top: 12px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Hero - asymmetric split
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-hero {
+    position: relative;
+    /* dvh, never vh: the iOS address bar makes 100vh taller than the visible
+       viewport and the CTA lands under the chrome. */
+    min-height: calc(88dvh - 70px);
+    display: flex;
+    align-items: center;
+    /* Capped well under the pt-24 ceiling: hero content floating halfway down
+       the fold reads as a layout bug, not as space. */
+    padding-block: clamp(36px, 6vw, 80px);
+    overflow: hidden;
+}
+
+.nv-hero__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(40px, 6vw, 72px);
+    align-items: center;
+    width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .nv-hero__grid {
+        /* Asymmetric by design. A 50/50 split is the safe choice and reads
+           as one. */
+        grid-template-columns: 1.12fr 0.88fr;
+        gap: clamp(48px, 5vw, 88px);
+    }
+}
+
+.nv-hero__copy { min-width: 0; }
+
+.nv-hero__title {
+    font-size: var(--nv-d1);
+    text-wrap: balance;
+}
+
+.nv-hero__lede { margin-top: 26px; max-width: 46ch; }
+
+.nv-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 38px;
+}
+
+@media (max-width: 599px) {
+    .nv-hero__actions { flex-direction: column; align-items: stretch; }
+    .nv-hero__actions .nv-btn { width: 100%; }
+}
+
+/* The asset. Real work, in a frame that is tilted and outlined so it reads as
+   a designed object rather than a pasted rectangle. */
+.nv-hero__asset { position: relative; min-width: 0; }
+
+/* Caption under the device scene, naming the three widths it is showing. */
+.nv-hero__caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 14px;
+    /* Clearance for the phone, which is the nearest object in the scene and
+       hangs lowest. */
+    margin-top: 34px;
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+}
+
+.nv-hero__caption strong { color: var(--nv-ink); font-weight: 800; }
+
+@media (min-width: 1024px) {
+    .nv-hero__caption { margin-top: 30px; padding-left: 10px; }
+}
+
+/* ── Hero device scene ─────────────────────────────────────────────────
+   Three frames in one 3D space showing the same layout at three widths.
+   Everything is transform-based, so the tilt and float are composited and
+   cost no layout work. See src/components/newventure/HeroDevices.js for why
+   this is CSS rather than WebGL. */
+
+.nv-devices {
+    position: relative;
+    width: 100%;
+    /* The scene is sized in aspect ratio rather than pixels so it scales with
+       the column instead of overflowing it, and so the box is reserved before
+       paint. */
+    aspect-ratio: 4 / 3.4;
+    perspective: 1400px;
+    min-width: 0;
+}
+
+@media (min-width: 1024px) {
+    .nv-devices { aspect-ratio: 4 / 3.1; }
+}
+
+.nv-devices__stage {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    /* The resting angle. Pointer parallax rotates around this on desktop; on
+       touch it simply stays here. */
+    transform: rotateY(-12deg) rotateX(4deg);
+}
+
+.nv-dev {
+    position: absolute;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+    transform-style: preserve-3d;
+}
+
+.nv-dev__screen {
+    position: absolute;
+    inset: 7%;
+    overflow: hidden;
+}
+
+/* Desktop: furthest back, largest, anchored top-left. */
+.nv-dev--desktop {
+    left: 0;
+    top: 4%;
+    width: 78%;
+    aspect-ratio: 16 / 10.5;
+    transform: translateZ(-60px);
+}
+
+/* Tablet: mid depth, right side, overlapping the desktop corner. */
+.nv-dev--tablet {
+    right: 2%;
+    top: 20%;
+    width: 34%;
+    aspect-ratio: 3 / 4.1;
+    transform: translateZ(40px);
+    background: var(--nv-lav-soft);
+}
+
+/* Phone: nearest the viewer, bottom left, and the one that rotates. */
+.nv-dev--phone {
+    left: 12%;
+    bottom: 5%;
+    width: 20%;
+    aspect-ratio: 9 / 18;
+    transform: translateZ(110px);
+    background: var(--nv-lav);
+    /* The flip is a transform on a fixed-size box, so nothing around it
+       reflows while it turns. */
+    transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1),
+                width 0.9s cubic-bezier(0.65, 0, 0.35, 1),
+                aspect-ratio 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.nv-dev--phone.is-landscape {
+    width: 36%;
+    aspect-ratio: 18 / 9;
+    transform: translateZ(110px) translateY(-6%);
+}
+
+/* ── Wireframe contents ────────────────────────────────────────────────
+   Abstract layout blocks, not an imitation of a real interface. The column
+   count is the whole point: three, then two, then stacked. */
+
+.nv-wf {
+    display: flex;
+    flex-direction: column;
+    gap: 6%;
+    height: 100%;
+    padding: 7%;
+}
+
+.nv-wf__bar {
+    display: block;
+    flex: none;
+    border-radius: 999px;
+    background: var(--nv-ink);
+}
+
+.nv-wf__bar--title { width: 62%; height: 7%; min-height: 4px; }
+.nv-wf__bar--sub { width: 40%; height: 4%; min-height: 3px; background: var(--nv-storm); opacity: 0.55; }
+.nv-wf__bar--foot { width: 30%; height: 5%; min-height: 3px; background: var(--nv-lav-deep); }
+
+.nv-wf__grid {
+    flex: 1;
+    display: grid;
+    gap: 6%;
+    min-height: 0;
+}
+
+/* The reflow, stated three times. */
+.nv-wf--3 .nv-wf__grid { grid-template-columns: repeat(3, 1fr); }
+.nv-wf--2 .nv-wf__grid { grid-template-columns: repeat(2, 1fr); }
+.nv-wf--1 .nv-wf__grid { grid-template-columns: 1fr; }
+
+/* At one column six blocks would overflow a phone screen, so the stacked
+   view shows the first three and lets the rest fall outside the clip, which
+   is exactly what a real page does. */
+.nv-wf--1 .nv-wf__cell:nth-child(n + 4) { display: none; }
+
+.nv-wf__cell {
+    border-radius: 6px;
+    background: var(--nv-storm-soft);
+    border: 1.5px solid var(--nv-ink);
+    min-height: 0;
+}
+
+.nv-wf__cell:nth-child(3n + 1) { background: var(--nv-lav-soft); }
+
+/* The landscape phone gets its columns back, which is the reflow happening
+   live rather than being described. */
+.nv-dev--phone.is-landscape .nv-wf__grid { grid-template-columns: repeat(2, 1fr); }
+.nv-dev--phone.is-landscape .nv-wf__cell:nth-child(n + 4) { display: block; }
+.nv-dev--phone.is-landscape .nv-wf__cell:nth-child(n + 5) { display: none; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Marquee - one per page, and this is it
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-marquee {
+    position: relative;
+    padding-block: clamp(16px, 2.2vw, 26px);
+    border-block: var(--nv-stroke) solid var(--nv-ink);
+    background: var(--nv-lav);
+    overflow: hidden;
+    display: flex;
+}
+
+.nv-marquee__track {
+    display: flex;
+    flex: none;
+    align-items: center;
+    /* The list is rendered twice and the track translates by exactly -50%.
+       Those two numbers are a pair: change the duplication and the loop
+       seams. Transform-only, so it runs on the compositor. */
+    animation: nv-marquee-slide 34s linear infinite;
+    will-change: transform;
+}
+
+.nv-marquee:hover .nv-marquee__track { animation-play-state: paused; }
+
+@keyframes nv-marquee-slide {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-50%, 0, 0); }
+}
+
+.nv-marquee__item {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(20px, 2.6vw, 40px);
+    padding-right: clamp(20px, 2.6vw, 40px);
+    font-family: var(--nv-font-display);
+    font-size: clamp(1.05rem, 2.4vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+    color: var(--nv-ink);
+}
+
+.nv-marquee__dot {
+    width: clamp(8px, 0.9vw, 12px);
+    height: clamp(8px, 0.9vw, 12px);
+    flex: none;
+    border-radius: 50%;
+    background: var(--nv-ink);
+    border: 2px solid var(--nv-ink);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Capabilities - pinned horizontal pan (desktop) / snap rail (mobile)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-pan { position: relative; background: var(--nv-paper); }
+
+.nv-pan__head {
+    padding-top: var(--nv-section-y);
+    padding-bottom: clamp(32px, 4vw, 56px);
+}
+
+.nv-pan__title { font-size: var(--nv-d2); max-width: 16ch; }
+
+/* Mobile and tablet: no pin, no hijack. A scroll-snap rail the thumb already
+   knows how to drive. Pinning a section on a phone means intercepting the one
+   gesture the user has, and it is where premium desktop sites turn unusable
+   on the device most of the traffic arrives on. */
+.nv-pan__track {
+    display: flex;
+    gap: 16px;
+    /* Room for the hard shadows, which sit outside the border box. */
+    padding: 8px var(--nv-gutter) calc(var(--nv-section-y) + 10px);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.nv-pan__track::-webkit-scrollbar { display: none; }
+
+.nv-panel {
+    flex: 0 0 min(82vw, 370px);
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 430px;
+    padding: 30px 26px;
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+    min-width: 0;
+}
+
+/* Each panel gets its own colour, cycling through the palette. This is what
+   keeps a five-item sequence from reading as five identical cards. */
+.nv-panel:nth-child(1) { background: var(--nv-lav); }
+.nv-panel:nth-child(2) { background: var(--nv-storm-soft); }
+.nv-panel:nth-child(3) { background: var(--nv-paper-warm); }
+.nv-panel:nth-child(4) { background: var(--nv-lav-soft); }
+/* Lavender one step down rather than Abyss: an ink-filled panel would need
+   its whole text stack inverted, and that is a theme flip inside a rail. */
+.nv-panel:nth-child(5) { background: var(--nv-lav-deep); }
+
+/* Slight rotations, alternating, so the rail reads as laid-out objects
+   rather than a row of boxes. Kept under 1 degree: any more and the type
+   starts to look accidental. */
+@media (min-width: 1024px) {
+    .nv-panel:nth-child(odd) { transform: rotate(-0.7deg); }
+    .nv-panel:nth-child(even) { transform: rotate(0.6deg); }
+}
+
+.nv-panel__index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--nv-ink);
+    color: var(--nv-paper);
+    border-radius: 50%;
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-body);
+    font-weight: 800;
+}
+
+.nv-panel__icon {
+    margin-top: 26px;
+    color: var(--nv-ink);
+    /* Optical size lock: every icon at this level is 28px. */
+    height: 28px;
+}
+
+.nv-panel__title { margin-top: 18px; font-size: var(--nv-d3); line-height: 1.05; }
+
+.nv-panel__body { margin-top: 14px; color: var(--nv-ink-soft); font-size: var(--nv-body); }
+
+.nv-panel__list {
+    margin-top: auto;
+    padding-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.nv-panel__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 13px;
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    font-size: var(--nv-micro);
+    font-weight: 700;
+    color: var(--nv-ink);
+}
+
+/* Desktop: the pin takes over and the snap rail rules above are neutralised. */
+@media (min-width: 1024px) {
+    .nv-pan__viewport { overflow: hidden; }
+
+    .nv-pan__track {
+        overflow: visible;
+        scroll-snap-type: none;
+        gap: 26px;
+        align-items: stretch;
+        /* Room to the right of the last panel so it clears the edge at the
+           end of the pan rather than sitting flush against it. */
+        padding: 14px 40vw 14px var(--nv-gutter);
+        will-change: transform;
+    }
+
+    .nv-panel {
+        flex: 0 0 clamp(350px, 29vw, 440px);
+        min-height: 510px;
+        padding: 40px 36px;
+        transition: transform var(--nv-dur) var(--nv-ease),
+                    box-shadow var(--nv-dur) var(--nv-ease);
+    }
+
+    .nv-panel:hover {
+        transform: rotate(0deg) translateY(-6px);
+        box-shadow: var(--nv-pop-lg);
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Case study
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-case { position: relative; overflow: hidden; }
+
+.nv-case__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(36px, 5vw, 64px);
+    align-items: center;
+}
+
+@media (min-width: 1024px) {
+    .nv-case__grid { grid-template-columns: 0.9fr 1.1fr; }
+}
+
+.nv-case__title { font-size: var(--nv-d2); margin-top: 8px; }
+.nv-case__body { margin-top: 22px; }
+
+/* Build facts, as big numerals on cards. */
+.nv-case__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 40px;
+}
+
+.nv-case__facts > div {
+    padding: 20px 18px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop-sm);
+    min-width: 0;
+}
+
+.nv-fact__value {
+    font-family: var(--nv-font-display);
+    font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1;
+    color: var(--nv-storm);
+}
+
+.nv-fact__label {
+    margin: 10px 0 0;
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+    line-height: 1.45;
+}
+
+/* Two real screenshots, overlapped: the honest way to say "one responsive
+   build" without drawing a diagram. */
+.nv-case__shots { position: relative; min-width: 0; }
+
+.nv-case__shot-desktop {
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop-lg);
+    background: var(--nv-paper);
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+}
+
+.nv-case__shot-desktop img,
+.nv-case__shot-mobile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+}
+
+.nv-case__shot-mobile {
+    /* In flow on small screens: an absolutely overlapped phone on a 375px
+       viewport covers the desktop shot entirely and communicates nothing. */
+    margin-top: 16px;
+    width: 42%;
+    max-width: 180px;
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: 16px;
+    box-shadow: var(--nv-pop);
+    background: var(--nv-paper);
+    aspect-ratio: 9 / 17;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .nv-case__shot-mobile {
+        position: absolute;
+        right: -14px;
+        bottom: -48px;
+        margin-top: 0;
+        width: 26%;
+        transform: rotate(2.5deg);
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CX / UX / UI - kinetic type
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-triad { overflow: hidden; }
+
+.nv-triad__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(32px, 4vw, 64px);
+    align-items: center;
+}
+
+@media (min-width: 1024px) {
+    .nv-triad__grid { grid-template-columns: 1.15fr 0.85fr; }
+}
+
+.nv-triad__stack {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(4px, 0.8vw, 12px);
+    min-width: 0;
+}
+
+/* Each term is a real button with real state, not a clickable div. */
+.nv-triad__term {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    /* Clears the touch bar on its own at every width, and the padding also
+       stops adjacent terms sharing an edge, which made them easy to mis-tap. */
+    min-height: 56px;
+    padding: 4px 0;
+    background: transparent;
+    border: 0;
+    text-align: left;
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-d0);
+    font-weight: 800;
+    letter-spacing: -0.055em;
+    line-height: 0.86;
+    cursor: pointer;
+    /* Outlined by default, filled when active. The panel beside it also
+       changes, so colour is never the only signal of which term is current. */
+    color: transparent;
+    -webkit-text-stroke: 2px var(--nv-ink);
+    transition: color var(--nv-dur) var(--nv-ease),
+                transform var(--nv-dur) var(--nv-ease);
+}
+
+.nv-triad__term:hover:not(.is-active) { color: var(--nv-lav); }
+
+.nv-triad__term.is-active { color: var(--nv-ink); }
+
+@media (min-width: 768px) {
+    .nv-triad__term.is-active { transform: translateX(clamp(8px, 1.4vw, 26px)); }
+}
+
+.nv-triad__panel {
+    min-width: 0;
+    padding: 30px 26px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+}
+
+.nv-triad__label {
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--nv-ink-faint);
+}
+
+.nv-triad__headline { margin-top: 12px; font-size: var(--nv-d3); line-height: 1.1; }
+.nv-triad__body { margin-top: 14px; color: var(--nv-ink-soft); }
+
+.nv-triad__points {
+    margin-top: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.nv-triad__point {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+}
+
+.nv-triad__point svg { flex: none; color: var(--nv-ink); margin-top: 2px; }
+
+/* Controls for the rotation. Real previous / pause / next, not decoration. */
+.nv-triad__controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.nv-triad__ctrl {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+    border-radius: 50%;
+    color: var(--nv-ink);
+    cursor: pointer;
+    transition: background-color var(--nv-dur) var(--nv-ease);
+}
+
+.nv-triad__ctrl:hover { background: var(--nv-lav); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Process - vertical rail with a scroll-drawn line
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-process__head { margin-bottom: clamp(40px, 6vw, 76px); }
+.nv-process__title { font-size: var(--nv-d2); max-width: 18ch; }
+
+.nv-rail { position: relative; }
+
+.nv-rail__track {
+    position: absolute;
+    left: 21px;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    background: var(--nv-ink);
+    opacity: 0.15;
+}
+
+.nv-rail__progress {
+    position: absolute;
+    left: 21px;
+    top: 8px;
+    width: 3px;
+    background: var(--nv-ink);
+    transform-origin: top center;
+    /* scaleY is driven by scroll progress as a motion value, so it never
+       touches React state and never re-renders the tree. */
+}
+
+@media (min-width: 768px) {
+    .nv-rail__track,
+    .nv-rail__progress { left: 27px; }
+}
+
+.nv-step {
+    position: relative;
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 20px;
+    padding-bottom: clamp(40px, 5vw, 64px);
+}
+
+@media (min-width: 768px) {
+    .nv-step {
+        grid-template-columns: 56px 1fr 1fr;
+        gap: 32px;
+        align-items: start;
+    }
+}
+
+.nv-step__num {
+    position: relative;
+    z-index: var(--nv-z-raised);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--nv-lav);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-small);
+    font-weight: 800;
+    color: var(--nv-ink);
+}
+
+@media (min-width: 768px) {
+    .nv-step__num { width: 56px; height: 56px; font-size: var(--nv-body); }
+}
+
+/* The step's own name is the label. No "Stage 1 / Stage 2" scaffolding on top
+   of a name that already says what happens. */
+.nv-step__title { font-size: var(--nv-d3); }
+
+.nv-step__body {
+    color: var(--nv-ink-soft);
+    font-size: var(--nv-body);
+    max-width: 52ch;
+}
+
+/* Below 768px the rail is two columns, so the text block that follows the
+   title has to be told to sit under it in column 2 rather than wrapping back
+   under the numeral in column 1. */
+@media (max-width: 767px) {
+    .nv-step > div { grid-column: 2; margin-top: 12px; }
+}
+
+.nv-step__meta {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 14px;
+    padding: 6px 14px;
+    background: var(--nv-storm-soft);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    font-size: var(--nv-micro);
+    font-weight: 700;
+    color: var(--nv-ink);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Cloud and compliance - sticky heading beside grouped clusters
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-cloud__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(36px, 5vw, 72px);
+}
+
+@media (min-width: 1024px) {
+    .nv-cloud__grid { grid-template-columns: 0.85fr 1.15fr; align-items: start; }
+
+    .nv-cloud__aside {
+        position: sticky;
+        /* Nav height plus air, so the heading never tucks under the bar. */
+        top: 110px;
+    }
+}
+
+.nv-cloud__title { font-size: var(--nv-d2); }
+.nv-cloud__body { margin-top: 20px; }
+
+/* Grouped clusters, not a ten-row hairline table. Three groups, one rule per
+   group, which is a rhythm rather than a spreadsheet. */
+.nv-cluster + .nv-cluster { margin-top: clamp(32px, 4vw, 52px); }
+
+.nv-cluster__name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 18px;
+    border-top: var(--nv-stroke) solid var(--nv-ink);
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-body-lg);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.nv-cluster__name svg { color: var(--nv-storm); flex: none; }
+
+.nv-cluster__items {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px 32px;
+    margin-top: 22px;
+}
+
+@media (min-width: 600px) {
+    .nv-cluster__items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.nv-cluster__item { min-width: 0; }
+.nv-cluster__item dt { font-weight: 800; font-size: var(--nv-body); color: var(--nv-ink); }
+
+.nv-cluster__item dd {
+    margin: 6px 0 0;
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+    line-height: 1.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Engagements
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-plans__head { margin-bottom: clamp(36px, 5vw, 64px); }
+.nv-plans__title { font-size: var(--nv-d2); max-width: 20ch; }
+
+/* Deliberately not three equal cards: one lead offer at full width, then the
+   two supporting offers side by side underneath. */
+.nv-plans__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+
+@media (min-width: 900px) {
+    .nv-plans__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .nv-plan--lead { grid-column: 1 / -1; }
+}
+
+.nv-plan {
+    display: flex;
+    flex-direction: column;
+    padding: 30px 26px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+    min-width: 0;
+    transition: transform var(--nv-dur) var(--nv-ease),
+                box-shadow var(--nv-dur) var(--nv-ease);
+}
+
+.nv-plan:hover { transform: translateY(-5px); box-shadow: var(--nv-pop-lg); }
+
+.nv-plan--lead { background: var(--nv-lav); }
+.nv-plan--support-a { background: var(--nv-lav-soft); }
+.nv-plan--support-b { background: var(--nv-storm-soft); }
+
+@media (min-width: 900px) {
+    .nv-plan--lead {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 44px;
+        align-items: center;
+        padding: 44px 40px;
+    }
+}
+
+.nv-plan__name { font-size: var(--nv-d3); }
+.nv-plan--lead .nv-plan__name { font-size: clamp(1.7rem, 3.2vw, 2.5rem); }
+.nv-plan__body { margin-top: 14px; color: var(--nv-ink-soft); }
+
+.nv-plan__items {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nv-plan--lead .nv-plan__items { margin-top: 0; }
+
+.nv-plan__item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+}
+
+.nv-plan__item svg { flex: none; color: var(--nv-ink); margin-top: 2px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Contact
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-contact { position: relative; overflow: hidden; }
+
+.nv-contact__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(40px, 5vw, 72px);
+}
+
+@media (min-width: 1024px) {
+    .nv-contact__grid { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+
+.nv-contact__title { font-size: var(--nv-d1); }
+.nv-contact__body { margin-top: 22px; }
+
+.nv-contact__direct {
+    margin-top: 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.nv-contact__line {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 0 20px;
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    font-size: var(--nv-body);
+    font-weight: 700;
+    color: var(--nv-ink);
+    text-decoration: none;
+    transition: background-color var(--nv-dur) var(--nv-ease);
+}
+
+.nv-contact__line svg { color: var(--nv-ink); flex: none; }
+.nv-root .nv-contact__line:hover { background: var(--nv-lav); }
+
+.nv-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: clamp(24px, 3vw, 36px);
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop-lg);
+}
+
+.nv-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+/* Label above the input, always. Never a placeholder standing in for a label:
+   it disappears on focus and takes the field's meaning with it. */
+.nv-field label { font-size: var(--nv-small); font-weight: 800; color: var(--nv-ink); }
+
+.nv-field__hint { font-size: var(--nv-micro); color: var(--nv-ink-faint); }
+
+.nv-field input,
+.nv-field textarea {
+    width: 100%;
+    min-height: 54px;
+    padding: 14px 20px;
+    background: var(--nv-paper-warm);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    color: var(--nv-ink);
+    font-family: var(--nv-font-text);
+    /* 16px minimum. Anything smaller and iOS Safari zooms the viewport on
+       focus, which is the classic mobile form jump. */
+    font-size: 16px;
+    transition: box-shadow var(--nv-dur) var(--nv-ease),
+                background-color var(--nv-dur) var(--nv-ease);
+}
+
+.nv-field textarea { min-height: 140px; border-radius: var(--nv-radius); resize: vertical; }
+
+/* Placeholder is 4.6:1 on the warm ground, and the label above carries the
+   actual meaning regardless. */
+.nv-field input::placeholder,
+.nv-field textarea::placeholder { color: var(--nv-ink-faint); }
+
+.nv-field input:focus,
+.nv-field textarea:focus {
+    outline: none;
+    background: var(--nv-paper);
+    box-shadow: var(--nv-pop-sm);
+}
+
+/* A soft red, not a palette colour: an invalid field has to be legible as a
+   problem to someone who does not know the brand. */
+.nv-field.is-invalid input,
+.nv-field.is-invalid textarea { background: #fbeaea; }
+
+/* Error text below the field it belongs to, and never colour alone: the icon
+   and the wording both carry the failure. */
+.nv-field__error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--nv-small);
+    font-weight: 700;
+    color: #c2003c;
+}
+
+.nv-field__error svg { flex: none; }
+
+.nv-form__row { display: grid; grid-template-columns: 1fr; gap: 20px; }
+
+@media (min-width: 600px) {
+    .nv-form__row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.nv-form__submit { align-self: flex-start; }
+
+.nv-form__submit[disabled] { opacity: 0.6; cursor: not-allowed; }
+.nv-form__submit[disabled]:active { transform: none; box-shadow: var(--nv-pop); }
+
+.nv-form__status {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px 20px;
+    background: var(--nv-storm-soft);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    font-size: var(--nv-small);
+    color: var(--nv-ink);
+}
+
+.nv-form__status svg { flex: none; color: var(--nv-ink); margin-top: 2px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Footer
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-footer {
+    border-top: var(--nv-stroke) solid var(--nv-ink);
+    background: var(--nv-paper-warm);
+    padding-block: clamp(48px, 6vw, 84px) 28px;
+}
+
+.nv-footer__top {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 36px;
+}
+
+@media (min-width: 768px) {
+    .nv-footer__top { grid-template-columns: 1.4fr 1fr 1fr; gap: 48px; }
+}
+
+.nv-footer__pitch {
+    margin-top: 18px;
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+    max-width: 34ch;
+}
+
+.nv-footer__colhead {
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--nv-ink-faint);
+    margin-bottom: 6px;
+}
+
+.nv-footer__link {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: var(--nv-small);
+    font-weight: 600;
+    color: var(--nv-ink-soft);
+    text-decoration: none;
+}
+
+.nv-root .nv-footer__link:hover { color: var(--nv-lav-deep); }
+
+.nv-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: clamp(40px, 5vw, 60px);
+    padding-top: 22px;
+    border-top: 2px solid var(--nv-ink);
+    font-size: var(--nv-micro);
+    color: var(--nv-ink-faint);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Reduced motion - one block, so the degraded state has one place to check
+   ══════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    .nv-root *,
+    .nv-root *::before,
+    .nv-root *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    /* The marquee is decorative and every item in it is spelled out again in
+       the capabilities section directly below, so parking it loses nothing. */
+    .nv-marquee__track { animation: none; transform: none; }
+
+    .nv-triad__term.is-active { transform: none; }
+
+    /* Static tilts are composition, not motion, so the panels and frames keep
+       their rotation. Only the hover lift is removed. */
+    .nv-panel:hover { transform: none; }
+    .nv-plan:hover { transform: none; }
+}
