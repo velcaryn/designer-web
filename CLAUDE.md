@@ -32,10 +32,19 @@ to guess.
 6. **Run `npm run verify` after any bulk edit.** It runs all three guards plus
    lint and the build.
 7. **Run `npm run check:contrast` after touching any colour.** It renders the
-   lab, switches through every theme, and measures the real painted contrast
-   of every text node against the background actually behind it. It needs the
-   production server running (`npm run build && npm start`), which is why it
-   is not inside `verify`.
+   home page, switches through every theme in the brand preview, and measures
+   the real painted contrast of every text node against the background
+   actually behind it. It needs the production server running
+   (`npm run build && npm start`), which is why it is not inside `verify`.
+
+## The site's own look is decided
+
+Pearl White with Fraunces and Inter, in the token block at the top of
+`app/globals.css` and in `app/fonts.js`. The other four palettes and three
+pairings in `config/themes.js` are a customer-facing demonstration, not
+candidates: they exist so a visitor can repaint the page and see the design
+system hold. Any preview always reverts to ours after ten seconds and nothing
+is persisted.
 
 ## Colour rules
 

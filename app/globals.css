@@ -69,8 +69,8 @@
 .nv-root {
     /* Composed here, not on :root, because the next/font variables land on
        this same element. See fonts.js. */
-    --nv-font-display: var(--nv-font-outfit), "Outfit", ui-sans-serif, system-ui, sans-serif;
-    --nv-font-text: var(--nv-font-jakarta), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --nv-font-display: var(--nv-font-fraunces), "Fraunces", Georgia, serif;
+    --nv-font-text: var(--nv-font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
 
     /* ── THEME LAYER ───────────────────────────────────────────────────
        Five values decide the whole palette. Everything below derives from
@@ -89,11 +89,18 @@
          --t-soft     section grounds and panel fills
          --t-on-fill  the label on a filled button, see below              */
 
-    --t-ink: #17313e;
-    --t-paper: #faf8f6;
-    --t-accent: #c5b0cd;
-    --t-support: #415e72;
-    --t-soft: #ece4f0;
+    /* PEARL WHITE, the chosen default.
+         Space Gray   #1D1D1F   text and outlines
+         Pearl        #FBFBFD   the page
+         Sapphire     #0066CC   accent and the primary button
+         Slate        #5C5C61   secondary text
+       Off-white rather than pure white so long reading sessions are easier on
+       the eye, with a sapphire that carries trust without shouting. */
+    --t-ink: #1d1d1f;
+    --t-paper: #fbfbfd;
+    --t-accent: #0066cc;
+    --t-support: #5c5c61;
+    --t-soft: #eef0f4;
 
     /* WHY A SIXTH TOKEN EXISTS.
        The primary button is filled with --t-ink and labelled with --t-paper,
@@ -110,7 +117,7 @@
        So the fill colour and its label are stated per theme rather than
        derived. Every value in config/themes.js was measured before shipping;
        the weakest button in the set is 4.8:1. */
-    --t-on-fill: #faf8f6;
+    --t-on-fill: #fbfbfd;
 
     /* ── DERIVED ───────────────────────────────────────────────────────
        Named for their job, not their colour, so no component rule ever needs
@@ -137,7 +144,8 @@
 
     /* The filled-button pair. --t-fill defaults to the ink so existing light
        themes are unchanged; dark themes point it at their accent. */
-    --nv-fill: var(--t-fill, var(--t-ink));
+    /* Pearl White fills its primary button with the sapphire, not the ink. */
+    --nv-fill: var(--t-fill, #0066cc);
     --nv-on-fill: var(--t-on-fill);
 
     /* Text on an ACCENT-FILLED surface: the marquee band, the lead plan card,
@@ -150,7 +158,7 @@
        --t-on-accent is stated per theme for the same reason --t-on-fill is:
        it cannot be derived, because whether black or white wins depends on
        the accent's luminance, not on whether the theme is light or dark. */
-    --nv-on-accent: var(--t-on-accent, var(--t-ink));
+    --nv-on-accent: var(--t-on-accent, #fbfbfd);
 
     /* Secondary text on an accent surface. Body copy inside an accent-filled
        card was still using --nv-ink-soft, which is a PAGE-level colour: it
@@ -236,11 +244,10 @@
 .nv-root h3 {
     font-family: var(--nv-font-display);
     font-weight: 800;
-    /* Outfit is already tightly fitted, so it needs far less negative
-       tracking than a display face like Syne, and it wants real leading.
-       0.95 on a geometric sans reads as cramped and is the main thing that
-       made the first pass hard to scan. */
-    letter-spacing: -0.02em;
+    /* Fraunces is a serif with an optical-size axis, so it tightens itself
+       as it grows and needs almost no manual tracking. The -0.02em that
+       suited a geometric sans makes a serif's joins collide. */
+    letter-spacing: -0.005em;
     line-height: 1.06;
     margin: 0;
     /* Descender reserve, still: `g` and `y` sit close at this leading. */
@@ -1124,16 +1131,28 @@ img, svg { display: block; max-width: 100%; }
 
 .nv-pan__title { font-size: var(--nv-d2); max-width: 16ch; }
 
-/* The ribbon. NOT a scroll container: `overflow: hidden`, never `auto`. A
-   horizontally scrollable element captures the mouse wheel whenever the
-   pointer is over it, which stops the page dead. See Capabilities.js. */
+/* The ribbon is a REAL scroller that also drives itself.
+   `overflow-x: auto` so a swipe, a drag or a trackpad flick moves it
+   directly, and components/Ribbon.js animates the same `scrollLeft` value.
+   Because both use one mechanism there is nothing to reconcile when control
+   passes between them.
+
+   `overscroll-behavior-x: contain` is what stops it trapping the page: the
+   wheel scrolls the rail while there is rail left, and does not chain
+   outward at the ends. Vertical wheel still reaches the page throughout. */
 .nv-ribbon {
     position: relative;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
     padding-block: 8px calc(var(--nv-section-y) + 10px);
-    /* Nothing in here should ever intercept a scroll or swipe. */
-    touch-action: pan-y;
+    /* Horizontal panning here, vertical panning to the page. */
+    touch-action: pan-x pan-y;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
+
+.nv-ribbon::-webkit-scrollbar { display: none; }
 
 .nv-ribbon__track {
     display: flex;
@@ -1141,24 +1160,7 @@ img, svg { display: block; max-width: 100%; }
     gap: 20px;
     width: max-content;
     padding-inline: var(--nv-gutter);
-    /* The list is rendered twice and this moves it exactly half its width,
-       so the second copy lands where the first began. The two numbers are a
-       pair. */
-    animation: nv-ribbon-roll 52s linear infinite;
-    will-change: transform;
 }
-
-@keyframes nv-ribbon-roll {
-    from { transform: translate3d(0, 0, 0); }
-    to { transform: translate3d(calc(-50% - 10px), 0, 0); }
-}
-
-/* Pause for anyone actually reading, by pointer or by keyboard. */
-@media (hover: hover) and (pointer: fine) {
-    .nv-ribbon:hover .nv-ribbon__track { animation-play-state: paused; }
-}
-
-.nv-ribbon__track:focus-within { animation-play-state: paused; }
 
 .nv-panel {
     flex: 0 0 min(82vw, 370px);
@@ -1178,10 +1180,6 @@ img, svg { display: block; max-width: 100%; }
         flex: 0 0 clamp(350px, 29vw, 440px);
         min-height: 510px;
         padding: 40px 36px;
-    }
-    @keyframes nv-ribbon-roll {
-        from { transform: translate3d(0, 0, 0); }
-        to { transform: translate3d(calc(-50% - 13px), 0, 0); }
     }
 }
 
@@ -2384,65 +2382,46 @@ img, svg { display: block; max-width: 100%; }
        their rotation. Only the hover lift is removed. */
     .nv-plan:hover { transform: none; }
 
-    /* The ribbon stops, so the track becomes a wrapping grid instead of a
-       row that runs off the side. The duplicate copy is hidden: with no
-       motion it is simply the same five panels printed twice. */
-    .nv-ribbon__track {
-        animation: none;
-        width: auto;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
+    /* Under reduced motion the roll never starts (Ribbon.js returns early),
+       so the rail stays a plain horizontal scroller the reader drives
+       themselves. The duplicate copy is hidden: with no motion there is no
+       seam to hide and it would just be the same five panels twice. */
     .nv-ribbon__track .nv-panel[aria-hidden="true"] { display: none; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   Theme lab
+   Brand preview
    ══════════════════════════════════════════════════════════════════════
 
-   Scaffolding. Deleted along with components/ThemeLab.js, app/lab-fonts.js
-   and config/themes.js once a combination is chosen.
+   A live demonstration that the whole site is built on tokens, offered to
+   visitors as an argument for how we work. It is styled from those same
+   tokens, so the panel repaints along with everything else: a palette that
+   makes its own controls unreadable has failed in front of the customer,
+   which is the correct place for it to fail. */
 
-   It sits below the footer rather than floating, so it never covers the
-   thing being judged. It is styled from the same tokens as the site, which
-   means the panel itself also repaints on every switch: useful, because a
-   theme that makes its own controls unreadable has failed a real test. */
-
-.nv-lab {
+.nv-preview {
     border-top: var(--nv-stroke) solid var(--nv-ink);
     background: var(--nv-paper-warm);
-    padding-block: clamp(48px, 6vw, 88px);
+    padding-block: clamp(52px, 6vw, 92px);
 }
 
-.nv-lab__head { max-width: 62ch; margin-bottom: clamp(32px, 4vw, 52px); }
+.nv-preview__head { max-width: 62ch; margin-bottom: clamp(32px, 4vw, 52px); }
 
-.nv-lab__title {
-    font-family: var(--nv-font-display);
-    font-size: var(--nv-d2);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1.06;
-}
+.nv-preview__title { font-size: var(--nv-d2); }
 
-.nv-lab__lede {
-    margin-top: 16px;
-    font-size: var(--nv-body);
-    color: var(--nv-ink-soft);
-    line-height: 1.55;
-}
+.nv-preview__lede { margin-top: 18px; }
 
-.nv-lab__grid {
+.nv-preview__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: clamp(36px, 4vw, 56px);
+    gap: clamp(32px, 4vw, 52px);
 }
 
 @media (min-width: 900px) {
-    .nv-lab__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .nv-preview__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-.nv-lab__legend {
+.nv-preview__legend {
     font-family: var(--nv-font-text);
     font-size: var(--nv-micro);
     font-weight: 800;
@@ -2452,13 +2431,11 @@ img, svg { display: block; max-width: 100%; }
     margin-bottom: 16px;
 }
 
-.nv-lab__legend--spaced { margin-top: 26px; }
-
-.nv-lab__options {
+.nv-preview__options {
     display: grid;
-    /* auto-fit rather than a fixed count: six options sit two-up on a phone
-       and three-up on a desktop with no breakpoint of their own. */
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    /* auto-fit, so five and four options both sit sensibly at every width
+       without a breakpoint of their own. */
+    grid-template-columns: repeat(auto-fit, minmax(152px, 1fr));
     gap: 12px;
 }
 
@@ -2466,7 +2443,7 @@ img, svg { display: block; max-width: 100%; }
     display: flex;
     flex-direction: column;
     gap: 10px;
-    /* Comfortably past the 44px touch bar on its own. */
+    /* Past the 44px touch bar on its own. */
     min-height: 96px;
     padding: 12px;
     background: var(--nv-paper);
@@ -2485,9 +2462,8 @@ img, svg { display: block; max-width: 100%; }
 
 .nv-swatch:active { transform: translate(2px, 2px); }
 
-/* The selected card is marked by the hard shadow and a tick, never by colour
-   alone: the palette is the variable under test, so colour cannot also be
-   the state signal. */
+/* Selection is marked by the hard shadow and a tick, never by colour alone:
+   the palette is the thing under test, so it cannot also be the signal. */
 .nv-swatch.is-active { box-shadow: var(--nv-pop); }
 
 .nv-swatch__chip {
@@ -2521,6 +2497,7 @@ img, svg { display: block; max-width: 100%; }
 .nv-swatch__name {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 6px;
     font-family: var(--nv-font-text);
     font-size: var(--nv-small);
@@ -2529,49 +2506,115 @@ img, svg { display: block; max-width: 100%; }
     line-height: 1.25;
 }
 
-.nv-lab__note {
+/* Marks the site's own combination, so the visitor always knows which one is
+   the real thing rather than having to remember. */
+.nv-swatch__tag {
+    padding: 2px 8px;
+    border: 1.5px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.nv-preview__note {
     margin-top: 16px;
     font-size: var(--nv-small);
     color: var(--nv-ink-soft);
     line-height: 1.5;
     max-width: 52ch;
-    /* Reserved so switching between a short and a long note does not shift
-       the section below it. */
+    /* Reserved, so switching between a short and a long note does not shift
+       the layout underneath. */
     min-height: 4.5em;
 }
 
-.nv-lab__foot {
+/* ── The revert bar ────────────────────────────────────────────────────
+   Fixed to the bottom of the viewport, because the visitor is meant to
+   scroll UP and look at the page while the preview runs. A bar that stayed
+   in the preview section would be invisible exactly when it matters. */
+
+/* While the bar is up, the page gets bottom padding equal to its height, so
+   nothing at the end of the document sits underneath it. Set as a variable on
+   :root by the component so the value cannot drift from the real height. */
+.nv-root:has(.nv-revert) {
+    padding-bottom: var(--nv-revert-h, 108px);
+}
+
+.nv-revert {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--nv-z-nav);
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
+    border-top: 2px solid var(--nv-ink);
+    /* Clears the home indicator on a phone. */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.nv-revert__inner {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin-top: clamp(28px, 3vw, 44px);
-    padding-top: 22px;
-    border-top: 2px solid var(--nv-ink);
+    justify-content: center;
+    gap: 10px 18px;
+    max-width: calc(var(--nv-shell) + var(--nv-gutter) * 2);
+    margin-inline: auto;
+    padding: 12px var(--nv-gutter);
 }
 
-.nv-lab__current { font-size: var(--nv-small); color: var(--nv-ink-soft); }
-.nv-lab__current strong { color: var(--nv-ink); font-weight: 800; }
+.nv-revert__text {
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    text-align: center;
+}
 
-.nv-lab__reset {
+.nv-revert__text strong { font-weight: 800; }
+
+.nv-revert__count {
+    display: inline-block;
+    /* Fixed width so the bar does not jitter as the number changes. */
+    min-width: 2.4em;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+}
+
+.nv-revert__btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
     min-height: 44px;
     padding: 0 18px;
-    background: var(--nv-paper);
-    border: 2px solid var(--nv-ink);
+    background: transparent;
+    border: 2px solid currentColor;
     border-radius: var(--nv-radius-pill);
     font-family: var(--nv-font-text);
     font-size: var(--nv-small);
     font-weight: 700;
-    color: var(--nv-ink);
+    color: inherit;
     cursor: pointer;
     touch-action: manipulation;
+    transition: background-color var(--nv-dur) var(--nv-ease);
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .nv-lab__reset:hover { background: var(--nv-lav); color: var(--nv-on-accent); }
+    .nv-revert__btn:hover { background: color-mix(in srgb, currentColor 18%, transparent); }
 }
 
+/* The countdown, drawn as a draining rule. Transform only, so it costs no
+   layout, and the 250ms transition matches the tick interval, which is what
+   makes it read as continuous rather than stepped. */
+.nv-revert__bar {
+    display: block;
+    height: 3px;
+    background: currentColor;
+    opacity: 0.55;
+    transform-origin: left center;
+    transition: transform 0.25s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nv-revert__bar { transition: none; }
+}

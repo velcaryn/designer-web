@@ -25,7 +25,7 @@ const LINKS = [
     { href: '#rebuild', label: 'Rebuild' },
     { href: '#process', label: 'Process' },
     { href: '#cloud', label: 'Cloud and ERP' },
-    { href: '#engagements', label: 'Engagements' },
+    { href: '#preview', label: 'Make it yours' },
 ];
 
 export default function Nav() {

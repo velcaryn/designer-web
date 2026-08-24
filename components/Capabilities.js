@@ -1,30 +1,14 @@
 /**
  * Capabilities, as a continuously rolling ribbon.
  *
- * WHY IT IS NOT A SCROLL CONTAINER ANY MORE
- * The previous version was an `overflow-x: auto` rail. On a trackpad or a
- * mouse wheel that traps the page: once the pointer is over a horizontally
- * scrollable element the browser routes the wheel to it, and the page stops
- * moving until the rail reaches its end. Reported as "vertical scroll getting
- * stuck if the pointer is inside the elements there", which is exactly what
- * it is. The version before that was a GSAP ScrollTrigger pin, which hijacked
- * scroll in a louder way and released with a visible jump.
+ * The rolling behaviour and the scrolling live in components/Ribbon.js. The
+ * short version: it is driven by `scrollLeft` rather than a CSS transform, so
+ * the animation and the user's own swipe are the same mechanism and cannot
+ * fight each other. Three earlier versions did fight, in three different
+ * ways, and each is documented there.
  *
- * Both were the same mistake: the panels are a sequence to be seen, not a
- * list to be operated. The ribbon now rolls on its own and the page keeps
- * every scroll gesture. Nothing here consumes wheel, touch or key input, and
- * there is no scroll container to get caught in.
- *
- * HOW THE LOOP WORKS
- * The five panels are rendered twice and the track translates by exactly
- * -50%. Those two numbers are a pair: change the duplication and the loop
- * seams. It is a CSS animation on a transform, so it runs on the compositor
- * and costs no main-thread work. The second copy is `aria-hidden`, so a
- * screen reader hears five panels rather than ten.
- *
- * It pauses on hover and on focus-within, so anyone reading a panel can
- * finish. Under reduced motion it does not move at all and the track becomes
- * a wrapping grid, which keeps every panel reachable without animation.
+ * The panels are rendered twice so the loop has no seam. The second copy is
+ * `aria-hidden`, so a screen reader hears five panels rather than ten.
  *
  * No GSAP. Per the playbook's performance section that is roughly 70KB
  * gzipped, only worth carrying when an interaction genuinely needs it. This
@@ -38,6 +22,7 @@ import {
     TrendUp,
 } from '@phosphor-icons/react/ssr';
 import SectionLink from './SectionLink';
+import Ribbon from './Ribbon';
 
 const PANELS = [
     {
@@ -104,20 +89,18 @@ export default function Capabilities() {
                     <SectionLink target="capabilities" label="What we do" />
             </div>
 
-            <div className="nv-ribbon">
-                <ul className="nv-ribbon__track">
-                    {PANELS.map((panel) => (
-                        <li className="nv-panel" key={panel.index}>
-                            <Panel {...panel} />
-                        </li>
-                    ))}
-                    {PANELS.map((panel) => (
-                        <li className="nv-panel" key={`dup-${panel.index}`} aria-hidden="true">
-                            <Panel {...panel} />
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            <Ribbon>
+                {PANELS.map((panel) => (
+                    <li className="nv-panel" key={panel.index}>
+                        <Panel {...panel} />
+                    </li>
+                ))}
+                {PANELS.map((panel) => (
+                    <li className="nv-panel" key={`dup-${panel.index}`} aria-hidden="true">
+                        <Panel {...panel} />
+                    </li>
+                ))}
+            </Ribbon>
         </section>
     );
 }

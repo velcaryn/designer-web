@@ -14,6 +14,8 @@
  *   process       what the eight weeks actually contain
  *   cloud         the thing a design shop cannot offer
  *   engagements   how to buy
+ *   preview       proof that the build is theirs and not a template: they
+ *                 repaint the page and watch it hold
  *   estimator     they scope it themselves, and arrive at the form having
  *                 already specified the project
  *   contact       the ask
@@ -43,6 +45,7 @@ import Engagements from '@/components/Engagements';
 import Estimator from '@/components/Estimator';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
+import BrandPreview from '@/components/BrandPreview';
 
 export default function NewVenturePage() {
     return (
@@ -59,6 +62,7 @@ export default function NewVenturePage() {
                 <Process />
                 <Cloud />
                 <Engagements />
+                <BrandPreview />
                 <Estimator />
                 <Contact />
             </main>

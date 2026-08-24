@@ -30,7 +30,7 @@
  */
 import puppeteer from 'puppeteer';
 
-const URL = process.env.CONTRAST_URL || 'http://localhost:4000/lab';
+const URL = process.env.CONTRAST_URL || 'http://localhost:4000/';
 
 const AUDIT = () => {
     const cv = document.createElement('canvas');
@@ -104,7 +104,7 @@ try {
 }
 await new Promise((r) => setTimeout(r, 3000));
 
-const COLOUR_GRID = '.nv-lab__grid > div:first-child .nv-swatch';
+const COLOUR_GRID = '.nv-preview__grid > div:first-child .nv-swatch';
 
 const names = await page.evaluate(
     (sel) => [...document.querySelectorAll(sel)]

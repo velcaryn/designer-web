@@ -14,12 +14,14 @@
  * trade for a page whose whole argument is that we make things people can
  * use.
  *
- *   Outfit            geometric sans, near-circular bowls, very wide
- *                     apertures. Holds its shape at 80px and still reads
- *                     cleanly at 20px, so one face covers every heading.
- *   Plus Jakarta Sans body face with a tall x-height and open counters,
- *                     which is what keeps 15px legible on a phone in
- *                     daylight. Distinctly not Inter.
+ *   Fraunces  a serif display with real personality: the optical-size axis
+ *             makes it sharpen as it grows, so headlines have character
+ *             without the body text inheriting it. It is the strongest
+ *             signal on the page that design is the product here rather
+ *             than a side effect.
+ *   Inter     the most tested interface face there is, and deliberately
+ *             plain underneath a display serif. The contrast between the
+ *             two is the point of the pairing.
  *
  * Both are variable-weight on Google Fonts, so the weight range below costs
  * one file per family rather than one per weight.
@@ -33,20 +35,21 @@
  * docs/FRONTEND_RULES.md that silently fell every heading back to the body
  * font.
  */
-import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
+import { Fraunces, Inter } from 'next/font/google';
 
-export const outfit = Outfit({
+/* Variable weight with an optical-size axis. The range is what gives the
+   headings their character, so no weight list is pinned. */
+export const fraunces = Fraunces({
     subsets: ['latin'],
-    weight: ['500', '600', '700', '800'],
     display: 'swap',
-    variable: '--nv-font-outfit',
+    variable: '--nv-font-fraunces',
 });
 
-export const jakarta = Plus_Jakarta_Sans({
+export const inter = Inter({
     subsets: ['latin'],
-    weight: ['400', '500', '600', '700', '800'],
+    weight: ['400', '500', '600', '700'],
     display: 'swap',
-    variable: '--nv-font-jakarta',
+    variable: '--nv-font-inter',
 });
 
-export const nvFontVariables = [outfit.variable, jakarta.variable].join(' ');
+export const nvFontVariables = [fraunces.variable, inter.variable].join(' ');
