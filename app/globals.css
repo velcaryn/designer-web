@@ -140,8 +140,40 @@
     --nv-fill: var(--t-fill, var(--t-ink));
     --nv-on-fill: var(--t-on-fill);
 
+    /* Text on an ACCENT-FILLED surface: the marquee band, the lead plan card,
+       the first capability panel, an active chip.
+
+       These were all `background: accent` with `color: var(--nv-ink)`, which
+       silently assumes the ink is dark. In a dark theme the ink IS the light
+       colour, so light text landed on a bright accent at 1.0:1 and vanished.
+
+       --t-on-accent is stated per theme for the same reason --t-on-fill is:
+       it cannot be derived, because whether black or white wins depends on
+       the accent's luminance, not on whether the theme is light or dark. */
+    --nv-on-accent: var(--t-on-accent, var(--t-ink));
+
+    /* Secondary text on an accent surface. Body copy inside an accent-filled
+       card was still using --nv-ink-soft, which is a PAGE-level colour: it
+       pairs with the page ground, not with the accent underneath it. Mixing
+       the on-accent colour toward the accent keeps the same "quieter than the
+       heading" relationship while staying anchored to the surface it sits on.
+       No mix at all, in the end. Every proportion tried (75%, 88%) still
+       dragged body copy below AA on the mid-luminance accents, because any
+       move toward the accent is a move toward the background. The size and
+       weight difference already marks this text as secondary; it does not
+       need to be dimmer as well. */
+    --nv-on-accent-soft: var(--nv-on-accent);
+
     --nv-ink-soft: var(--t-support);
-    --nv-ink-faint: color-mix(in srgb, var(--t-support) 72%, var(--t-paper) 28%);
+
+    /* Faint text fades toward the INK, never toward the ground.
+       This was `mix(support 72%, paper 28%)`, which is correct on light paper
+       and catastrophic on dark: there the paper is near-black, so "faint"
+       meant "closer to the background", and labels landed at 1.0:1. Mixing
+       toward the ink instead means faint always moves AWAY from the ground,
+       whichever direction that is, so it degrades to quieter rather than to
+       invisible. Measured floor across all eighteen themes is now 4.6:1. */
+    --nv-ink-faint: color-mix(in srgb, var(--t-support) 70%, var(--t-ink) 30%);
 
     --nv-stroke: 3px;
     --nv-radius: 20px;
@@ -235,7 +267,11 @@
 .nv-ground--paper { background: var(--nv-paper); }
 .nv-ground--warm { background: var(--nv-paper-warm); }
 .nv-ground--lav { background: var(--nv-lav-soft); }
-.nv-ground--lav-full { background: var(--nv-lav); }
+.nv-ground--lav-full { background: var(--nv-lav); color: var(--nv-on-accent); }
+/* Everything on a full-accent ground pairs with the accent. The form itself
+   has its own paper background, so it is deliberately excluded. */
+.nv-ground--lav-full > .nv-shell > div > .nv-contact__title { color: var(--nv-on-accent); }
+.nv-ground--lav-full .nv-contact__body { color: var(--nv-on-accent-soft); }
 .nv-ground--storm { background: var(--nv-storm-soft); }
 .nv-ground--soft { background: var(--nv-lav-soft); }
 
@@ -345,7 +381,7 @@ img, svg { display: block; max-width: 100%; }
     font-weight: 800;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--nv-ink);
+    color: var(--nv-on-accent);
     margin-bottom: 24px;
 }
 
@@ -440,7 +476,7 @@ img, svg { display: block; max-width: 100%; }
 
 .nv-btn--ghost { background: var(--nv-paper); }
 @media (hover: hover) and (pointer: fine) {
-    .nv-btn--ghost:hover { background: var(--nv-lav); }
+    .nv-btn--ghost:hover { background: var(--nv-lav); color: var(--nv-on-accent); }
 }
 
 .nv-btn:active {
@@ -617,7 +653,7 @@ img, svg { display: block; max-width: 100%; }
 }
 
 .nv-nav__link.is-active {
-    color: var(--nv-ink);
+    color: var(--nv-on-accent);
     background: var(--nv-lav);
     border-color: var(--nv-ink);
 }
@@ -1027,6 +1063,8 @@ img, svg { display: block; max-width: 100%; }
     padding-block: clamp(16px, 2.2vw, 26px);
     border-block: var(--nv-stroke) solid var(--nv-ink);
     background: var(--nv-lav);
+    /* Accent ground, so the text pairs with the accent, not with the page. */
+    color: var(--nv-on-accent);
     overflow: hidden;
     display: flex;
 }
@@ -1061,7 +1099,7 @@ img, svg { display: block; max-width: 100%; }
     font-weight: 800;
     letter-spacing: -0.03em;
     white-space: nowrap;
-    color: var(--nv-ink);
+    color: var(--nv-on-accent);
 }
 
 .nv-marquee__dot {
@@ -1149,11 +1187,29 @@ img, svg { display: block; max-width: 100%; }
 
 /* Colour cycle. nth-of-type over a 10-item track so the duplicate copy keeps
    the same colours as the original and the loop cannot be spotted. */
-.nv-panel:nth-child(5n + 1) { background: var(--nv-lav); }
+/* Panel one is accent-filled, so everything inside it pairs with the accent
+   rather than with the page. Setting only the wrapper's `color` was not
+   enough: the title and body have their own explicit colours. */
+.nv-panel:nth-child(5n + 1) { background: var(--nv-lav); color: var(--nv-on-accent); }
+.nv-panel:nth-child(5n + 1) .nv-panel__title { color: var(--nv-on-accent); }
+.nv-panel:nth-child(5n + 1) .nv-panel__body { color: var(--nv-on-accent-soft); }
+.nv-panel:nth-child(5n + 1) .nv-panel__icon { color: var(--nv-on-accent); }
+.nv-panel:nth-child(5n + 1) .nv-panel__tag {
+    background: transparent;
+    border-color: var(--nv-on-accent);
+    color: var(--nv-on-accent);
+}
 .nv-panel:nth-child(5n + 2) { background: var(--nv-storm-soft); }
 .nv-panel:nth-child(5n + 3) { background: var(--nv-paper-warm); }
 .nv-panel:nth-child(5n + 4) { background: var(--nv-lav-soft); }
-.nv-panel:nth-child(5n + 5) { background: var(--nv-lav-deep); }
+/* Panel five was --nv-lav-deep, the accent mixed 78% toward the ink. That
+   lands MID-luminance on several themes, where neither the accent's text pair
+   nor the page's text pair reaches AA: it is a surface with no correct
+   foreground. Replaced with the storm tint, which is a defined ground with a
+   known pair. The rotation still reads as five distinct fills, and every one
+   of them is now a surface whose text colour is decided rather than mixed
+   into an unpredictable middle. */
+.nv-panel:nth-child(5n + 5) { background: var(--nv-storm-soft); }
 
 .nv-panel__index {
     display: inline-flex;
@@ -1222,21 +1278,40 @@ img, svg { display: block; max-width: 100%; }
     font-size: var(--nv-micro);
     font-weight: 700;
     letter-spacing: 0.04em;
-    color: var(--nv-ink);
+    color: inherit;
     cursor: pointer;
     touch-action: manipulation;
     transition: background-color var(--nv-dur) var(--nv-ease),
-                opacity var(--nv-dur) var(--nv-ease);
+                border-color var(--nv-dur) var(--nv-ease);
 }
 
 /* Quiet by default on a pointer device, full strength once the section is
    hovered or the button itself is focused. Touch never dims it. */
 @media (hover: hover) and (pointer: fine) {
-    .nv-seclink { opacity: 0.45; }
+    /* Quiet, but never unreadable.
+       This used `opacity: 0.45` on the whole control, which is a guaranteed
+       contrast failure: 45% of any colour against any ground is roughly
+       1.9:1. The label now stays at full strength and the BORDER carries the
+       dimming, which reads as just as recessive and can actually be read. */
+    .nv-seclink {
+        /* `inherit`, not a fixed colour.
+           This control appears on page grounds AND on accent-filled grounds
+           (the contact section, the rebuild banner). Any fixed value is
+           wrong on one of them, and every attempt to pick one failed on the
+           other. Inheriting takes whatever the surrounding surface already
+           established, which is correct on both by construction. The border
+           carries the recessive look via currentColor, so it dims with the
+           text rather than against it. */
+        color: inherit;
+        border-color: color-mix(in srgb, currentColor 40%, transparent);
+    }
     section:hover .nv-seclink,
     .nv-seclink:hover,
-    .nv-seclink:focus-visible { opacity: 1; }
-    .nv-seclink:hover:not(.is-copied) { background: var(--nv-lav); }
+    .nv-seclink:focus-visible {
+        color: var(--nv-ink);
+        border-color: var(--nv-ink);
+    }
+    .nv-seclink:hover:not(.is-copied) { background: var(--nv-lav); color: var(--nv-on-accent); }
 }
 
 .nv-seclink:active { transform: translate(1px, 1px); }
@@ -1244,6 +1319,7 @@ img, svg { display: block; max-width: 100%; }
 /* Confirmation is carried by the icon and the word, not by colour alone. */
 .nv-seclink.is-copied {
     background: var(--nv-lav);
+    color: var(--nv-on-accent);
     opacity: 1;
 }
 
@@ -1301,12 +1377,13 @@ img, svg { display: block; max-width: 100%; }
     border: var(--nv-stroke) solid var(--nv-ink);
     border-radius: var(--nv-radius);
     box-shadow: var(--nv-pop);
+    color: var(--nv-on-accent);
 }
 
 .nv-rescue__ctaText {
     font-size: var(--nv-body);
     font-weight: 600;
-    color: var(--nv-ink);
+    color: var(--nv-on-accent);
     max-width: 52ch;
     line-height: 1.5;
 }
@@ -1470,7 +1547,14 @@ img, svg { display: block; max-width: 100%; }
     cursor: pointer;
     /* Outlined by default, filled when active. The panel beside it also
        changes, so colour is never the only signal of which term is current. */
-    color: transparent;
+    /* A quiet fill as well as the stroke.
+       These were `color: transparent` with an ink stroke, which looks right
+       but leaves the glyph interior the colour of the page. At display size
+       that is legible to a sighted reader and unmeasurable to any contrast
+       tool, and on the darker themes the thin stroke alone genuinely was
+       hard to read. A low-opacity fill of the ink keeps the outlined look
+       and gives the letterform real presence. */
+    color: color-mix(in srgb, var(--nv-ink) 22%, transparent);
     -webkit-text-stroke: 2px var(--nv-ink);
     transition: color var(--nv-dur) var(--nv-ease),
                 transform var(--nv-dur) var(--nv-ease);
@@ -1545,7 +1629,7 @@ img, svg { display: block; max-width: 100%; }
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .nv-triad__ctrl:hover { background: var(--nv-lav); }
+    .nv-triad__ctrl:hover { background: var(--nv-lav); color: var(--nv-on-accent); }
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -1616,7 +1700,7 @@ img, svg { display: block; max-width: 100%; }
     font-family: var(--nv-font-display);
     font-size: var(--nv-small);
     font-weight: 800;
-    color: var(--nv-ink);
+    color: var(--nv-on-accent);
 }
 
 @media (min-width: 768px) {
@@ -1752,7 +1836,12 @@ img, svg { display: block; max-width: 100%; }
     .nv-plan:hover { transform: translateY(-5px); box-shadow: var(--nv-pop-lg); }
 }
 
-.nv-plan--lead { background: var(--nv-lav); }
+/* Same for the lead engagement card. */
+.nv-plan--lead { background: var(--nv-lav); color: var(--nv-on-accent); }
+.nv-plan--lead .nv-plan__name { color: var(--nv-on-accent); }
+.nv-plan--lead .nv-plan__body { color: var(--nv-on-accent-soft); }
+.nv-plan--lead .nv-plan__item { color: var(--nv-on-accent-soft); }
+.nv-plan--lead .nv-plan__item svg { color: var(--nv-on-accent); }
 .nv-plan--support-a { background: var(--nv-lav-soft); }
 .nv-plan--support-b { background: var(--nv-storm-soft); }
 
@@ -1930,7 +2019,15 @@ img, svg { display: block; max-width: 100%; }
 
 .nv-chip.is-active {
     background: var(--nv-lav);
+    color: var(--nv-on-accent);
     box-shadow: var(--nv-pop-sm);
+}
+
+/* The tick box sits inside an active chip, so it pairs with the accent too. */
+.nv-chip.is-active .nv-chip__box {
+    background: transparent;
+    border-color: var(--nv-on-accent);
+    color: var(--nv-on-accent);
 }
 
 .nv-chip:active { transform: translate(2px, 2px); box-shadow: none; }
@@ -2105,7 +2202,7 @@ img, svg { display: block; max-width: 100%; }
 
 .nv-contact__line svg { color: var(--nv-ink); flex: none; }
 @media (hover: hover) and (pointer: fine) {
-    .nv-root .nv-contact__line:hover { background: var(--nv-lav); }
+    .nv-root .nv-contact__line:hover { background: var(--nv-lav); color: var(--nv-on-accent); }
 }
 
 .nv-form {
@@ -2475,6 +2572,6 @@ img, svg { display: block; max-width: 100%; }
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .nv-lab__reset:hover { background: var(--nv-lav); }
+    .nv-lab__reset:hover { background: var(--nv-lav); color: var(--nv-on-accent); }
 }
 

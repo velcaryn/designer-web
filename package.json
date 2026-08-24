@@ -11,7 +11,8 @@
     "check:emdash": "node scripts/check-em-dash.mjs",
     "check:css": "node scripts/check-css-collisions.mjs",
     "verify": "npm run check:emdash && npm run check:css && npm run check:brand && npm run lint && npm run build",
-    "check:brand": "node scripts/check-brand-leak.mjs"
+    "check:brand": "node scripts/check-brand-leak.mjs",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "eslint": "^9",
-    "eslint-config-next": "^16.1.6"
+    "eslint-config-next": "^16.1.6",
+    "puppeteer": "^25.8.0"
   }
 }

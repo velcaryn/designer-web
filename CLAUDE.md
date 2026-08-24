@@ -31,6 +31,30 @@ to guess.
    `.x:hover:not(.is-active)`. Guarded by `npm run check:css`.
 6. **Run `npm run verify` after any bulk edit.** It runs all three guards plus
    lint and the build.
+7. **Run `npm run check:contrast` after touching any colour.** It renders the
+   lab, switches through every theme, and measures the real painted contrast
+   of every text node against the background actually behind it. It needs the
+   production server running (`npm run build && npm start`), which is why it
+   is not inside `verify`.
+
+## Colour rules
+
+Text colour must always pair with the surface it sits ON, never with the page.
+The tokens exist for exactly this:
+
+| Surface | Text token |
+|---|---|
+| page ground, soft grounds | `--nv-ink`, `--nv-ink-soft`, `--nv-ink-faint` |
+| accent-filled surface | `--nv-on-accent`, `--nv-on-accent-soft` |
+| filled primary button | `--nv-on-fill` |
+
+Two traps, both of which shipped:
+
+- **Never fade text toward the background.** `color-mix(ink, paper)` means
+  "closer to invisible", and on a dark theme it produced 1.0:1 labels. Fade
+  toward the ink or the support colour instead.
+- **Never use `opacity` to make text quiet.** 45% of anything is roughly
+  1.9:1. Dim a border, or pick a quieter colour.
 
 ## Content rules specific to this site
 
