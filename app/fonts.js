@@ -1,5 +1,5 @@
 /**
- * Typefaces for Velbrant Studios, loaded locally to this route rather than in
+ * Typefaces for VelBiz Digital, loaded locally to this route rather than in
  * src/lib/fonts.js.
  *
  * WHY LOCAL

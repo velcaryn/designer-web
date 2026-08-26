@@ -16,34 +16,32 @@
  */
 
 export const brand = {
-    name: 'Velbrant Studios',
-    shortName: 'Velbrant',
+    name: 'VelBiz Digital',
+    shortName: 'VelBiz',
     parent: 'A unit of Velcaryn LLP',
     tagline: 'Websites, launched and grown',
-    domain: 'velbrant.studio',
+    domain: 'velbiz.com',
     description:
         'We design and build websites, take them live, and run the SEO, content and social work that brings people to them.',
-    /* Coimbatore, working across India. Kept here because it appears in the
-       footer and would otherwise be typed into prose. */
-    base: 'Coimbatore',
+    /* Kept here because it appears in more than one footer and would
+       otherwise be hand-typed into prose in each. */
+    base: 'Tirunelveli, Tamil Nadu, India',
 };
 
 /**
- * PLACEHOLDERS. Both must be replaced before this site is public.
- *
  * `phone` is digits only, country code included, no plus and no spaces.
- *
- * It is deliberately an unroutable number rather than a plausible one. A
- * plausible placeholder is a real person's line that then receives your
- * enquiries: an earlier draft of this site briefly carried a number lifted
- * from a client's website for exactly that reason.
  */
 export const contact = {
-    phone: '910000000000',
-    phoneDisplay: '+91 00000 00000',
-    email: 'hello@velbrant.studio',
-    instagram: 'https://instagram.com/velbrant.studio',
-    instagramHandle: '@velbrant.studio',
+    phone: '919944788655',
+    phoneDisplay: '+91 99447 88655',
+    email: 'help@velbiz.com',
+    /* Both are real inboxes, not the primary contact route. Kept here, not
+       hand-typed into a component, for the same reason `phone` is: one
+       place to update if either changes. */
+    emailContact: 'contact@velbiz.com',
+    emailInfo: 'info@velbiz.com',
+    instagram: 'https://instagram.com/velbiz.digital',
+    instagramHandle: '@velbiz.digital',
 };
 
 export const phoneHref = `tel:+${contact.phone}`;

@@ -1,72 +1,86 @@
-/**
- * Velbrant Studios, single-page site.
- *
- * SECTION ORDER IS THE ARGUMENT, in this order for a reason:
- *   hero          the claim, plus proof it is not talk (real work, on screen)
- *   marquee       the breadth, in one glance
- *   problem       what is wrong with the site they already have. Before any
- *                 pitching, because a reader who has not recognised their own
- *                 problem has no reason to care about the solution
- *   capabilities  the five services, as a sequence rather than a menu
- *   work          the proof, properly
- *   triad         CX / UX / UI, because the buyer has heard all three and
- *                 been told they are the same thing
- *   process       what the eight weeks actually contain
- *   cloud         the thing a design shop cannot offer
- *   engagements   how to buy
- *   preview       proof that the build is theirs and not a template: they
- *                 repaint the page and watch it hold
- *   estimator     they scope it themselves, and arrive at the form having
- *                 already specified the project
- *   contact       the ask
- *
- * LAYOUT FAMILIES, so no two neighbouring sections rhyme: asymmetric split,
- * scrolling band, pinned horizontal rail, overlapped image feature, kinetic
- * type with a panel, vertical numbered rail with a drawn line, sticky aside
- * beside grouped definitions, one-plus-two offer grid, split form. Nine
- * sections, nine shapes.
- *
- * EYEBROW BUDGET: four, for eleven sections. Spent on the hero,
- * capabilities, cloud and the estimator. Every other section opens on its headline, which is why the page
- * does not have the uniform label-then-heading rhythm that gives away a
- * generated layout.
- */
-import Nav from '@/components/Nav';
-import Hero from '@/components/Hero';
-import Marquee from '@/components/Marquee';
-import Problem from '@/components/Problem';
-import Capabilities from '@/components/Capabilities';
-import CaseStudy from '@/components/CaseStudy';
-import Rescue from '@/components/Rescue';
-import Triad from '@/components/Triad';
-import Process from '@/components/Process';
-import Cloud from '@/components/Cloud';
-import Engagements from '@/components/Engagements';
-import Estimator from '@/components/Estimator';
-import Contact from '@/components/Contact';
-import Footer from '@/components/Footer';
-import BrandPreview from '@/components/BrandPreview';
+'use client';
 
-export default function NewVenturePage() {
+/**
+ * The home page: the growth landing page, now living at `/` directly.
+ *
+ * This used to be a separate route, `/claudelanding`, built alongside the
+ * original homepage while that homepage's design was still current. Once
+ * this page replaced it as the real homepage, keeping both around stopped
+ * making sense: two competing homepages is exactly the "duplicate code"
+ * this project's rule against it exists to prevent. The original homepage
+ * and its components, and the satellite pages that only made sense next to
+ * it (/newlanding, /faq, /rebuild, /tech-stack, and the old /cloud-replica
+ * and its login/onboarding stubs), were removed in the same change that
+ * moved this page here. This file is the whole surviving homepage.
+ *
+ * Nine sections, in the order the argument runs:
+ *
+ *   hero+setup  the outcome, then the visitor names their business
+ *   grow        the three beats, now about their business
+ *   what        the six things we do
+ *   cloud       the bridge to the back office
+ *   tech        who built this and will it last
+ *   lab         the design system holding together under a different skin
+ *   work        the proof, last rather than fourth
+ *   talk        one action
+ *   crowd       the closing full-bleed strip, just above the footer
+ *
+ * ClDock carries every navigation link at every width; ClHeader is brand
+ * and one CTA only. LabProvider wraps everything because both ClLab (the
+ * writer) and ClDock (a reader, for the countdown pill) need it.
+ *
+ * WHY THIS IS A CLIENT COMPONENT
+ *
+ * The business name and the lab's live theme are context every section can
+ * read, and both providers have to sit above all of them. A client
+ * component cannot export `metadata`, which is why this route's metadata
+ * lives in app/layout.js instead, merged into the root layout now that this
+ * page IS the root.
+ *
+ * The stylesheet is imported here rather than added to app/globals.css,
+ * which stays the small shared token file every route (this one and
+ * /cloud) builds on.
+ */
+import './claudelanding.css';
+
+import { BusinessProvider } from '@/components/claudelanding/BusinessContext';
+import { LabProvider } from '@/components/claudelanding/LabContext';
+import ClHeader from '@/components/claudelanding/ClHeader';
+import ClDock from '@/components/claudelanding/ClDock';
+import ClHero from '@/components/claudelanding/ClHero';
+import ClGrowth from '@/components/claudelanding/ClGrowth';
+import ClBento from '@/components/claudelanding/ClBento';
+import ClCloudTeaser from '@/components/claudelanding/ClCloudTeaser';
+import ClTech from '@/components/claudelanding/ClTech';
+import ClLab from '@/components/claudelanding/ClLab';
+import ClProof from '@/components/claudelanding/ClProof';
+import ClContact from '@/components/claudelanding/ClContact';
+import ClCrowd from '@/components/claudelanding/ClCrowd';
+import ClFooter from '@/components/claudelanding/ClFooter';
+
+export default function HomePage() {
     return (
-        <>
-            <Nav />
-            <main>
-                <Hero />
-                <Marquee />
-                <Problem />
-                <Capabilities />
-                <CaseStudy />
-                <Rescue />
-                <Triad />
-                <Process />
-                <Cloud />
-                <Engagements />
-                <BrandPreview />
-                <Estimator />
-                <Contact />
-            </main>
-            <Footer />
-        </>
+        <BusinessProvider>
+            <LabProvider>
+                <ClHeader />
+                <main>
+                    <ClHero />
+                    <ClGrowth />
+                    <ClBento />
+                    <ClCloudTeaser />
+                    <ClTech />
+                    <ClLab />
+                    <ClProof />
+                    <ClContact />
+                    {/* Last thing in <main>, immediately above the footer:
+                        a full-bleed blue crowd strip is the final
+                        impression before the page's administrative
+                        content. */}
+                    <ClCrowd />
+                </main>
+                <ClFooter />
+                <ClDock />
+            </LabProvider>
+        </BusinessProvider>
     );
 }

@@ -1,5 +1,5 @@
 /**
- * Root layout for the Velbrant Studios site.
+ * Root layout for the VelBiz Digital site.
  *
  * This repo was extracted from the Velcaryn application, where the site lived
  * at /newventure behind Velcaryn's own root layout. Two things changed in the
@@ -14,12 +14,10 @@
  *   2. There is no consent banner, no analytics and no providers inherited
  *      from a parent layout. Anything this site needs, it declares here.
  *
- * NOINDEX IS STILL ON, deliberately. The brand name has not been cleared: the
- * MCA company-name check and the IP India trademark search (class 42 for
- * software, class 35 for business consulting) have not been run against
- * "Velbrant". Indexing a name that may have to change means the eventual real
- * name launches competing with a dead one. Flip `robots` below once the name
- * is cleared and the domain is live.
+ * The site shipped under the working name "Velbrant Studios" while the real
+ * name and domain were still being decided. Both are now settled: VelBiz
+ * Digital, velbiz.com. `robots` is open now that there is a real name and
+ * domain to index rather than a placeholder.
  *
  * The font variables and `.nv-root` sit on the SAME element. That is required,
  * not stylistic: a custom property is substituted in the scope where it is
@@ -30,24 +28,30 @@
 import './globals.css';
 import { nvFontVariables } from './fonts';
 import { labFontVariables } from './lab-fonts';
+import { brand } from '@/config/site';
 
+/* The title and description below used to belong to app/claudelanding's own
+   layout.js, back when that was a separate route sitting next to the
+   original homepage. Now that it IS the homepage, its metadata replaces
+   the old homepage's generic brand tagline here, in the one root layout
+   every route shares. The `template` still lets /cloud, /credits, /privacy
+   and /terms each set their own page-specific `title` and have it appended
+   to the brand name automatically. */
 export const metadata = {
-    metadataBase: new URL('https://velbrant.studio'),
+    metadataBase: new URL(`https://${brand.domain}`),
     title: {
-        default: 'Velbrant Studios | Websites, launched and grown',
-        template: '%s | Velbrant Studios',
+        default: 'Grow your brand, grow your business',
+        template: `%s | ${brand.name}`,
     },
-    description:
-        'We design and build websites, take them live, and run the SEO, content and social work that brings people to them. A unit of Velcaryn LLP.',
+    description: `${brand.shortName} builds the website, gets you found, and gives you one place to run the orders, the customers and the money.`,
     openGraph: {
-        title: 'Velbrant Studios | Websites, launched and grown',
-        description:
-            'We design and build websites, take them live, and run the SEO, content and social work that brings people to them.',
-        siteName: 'Velbrant Studios',
+        title: `${brand.name} | ${brand.tagline}`,
+        description: brand.description,
+        siteName: brand.name,
         locale: 'en_IN',
         type: 'website',
     },
-    robots: { index: false, follow: false },
+    robots: { index: true, follow: true },
 };
 
 export const viewport = {
