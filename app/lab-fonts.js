@@ -49,41 +49,58 @@ import {
  * Weights are kept tight on purpose. Display faces get only the weights the
  * headings use, body faces get four. Loading every weight of eleven families
  * would make the lab too slow to judge anything by.
+ *
+ * `preload: false` ON EVERY ONE, AND IT MATTERS
+ *
+ * next/font preloads by default, so these fourteen families were emitting
+ * twenty-one <link rel="preload"> font files into the head of EVERY page,
+ * about 500KB of render-blocking weight. Two of those faces are the site's
+ * own; the rest exist so a visitor can repaint the page in the lab, which
+ * most visitors never touch. /cloud and the legal pages carry no lab at all
+ * and were paying the same cost.
+ *
+ * They still work: the CSS variables are still declared on <html>, and the
+ * browser fetches a face the moment the lab actually applies it. What is
+ * gone is the promise to fetch all of them up front. This is the largest
+ * single performance win available on this site, and page speed is a
+ * ranking factor.
+ *
+ * app/fonts.js keeps its default preload, because those two ARE the page.
  */
 export const outfit = Outfit({
-    subsets: ['latin'], display: 'swap', weight: ['600', '700', '800'], variable: '--f-outfit',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700', '800'], variable: '--f-outfit',
 });
 export const jakarta = Plus_Jakarta_Sans({
-    subsets: ['latin'], display: 'swap', weight: ['400', '500', '600', '700', '800'], variable: '--f-jakarta',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700', '800'], variable: '--f-jakarta',
 });
 export const grotesk = Space_Grotesk({
-    subsets: ['latin'], display: 'swap', weight: ['600', '700'], variable: '--f-grotesk',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700'], variable: '--f-grotesk',
 });
 export const inter = Inter({
-    subsets: ['latin'], display: 'swap', weight: ['400', '500', '600', '700'], variable: '--f-inter',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-inter',
 });
 /* Fraunces is variable-weight with an optical-size axis, and the range is
    what gives the headings their character, so no weight list is pinned. */
 export const fraunces = Fraunces({
-    subsets: ['latin'], display: 'swap', variable: '--f-fraunces',
+    subsets: ['latin'], display: 'swap', preload: false, variable: '--f-fraunces',
 });
 export const archivo = Archivo({
-    subsets: ['latin'], display: 'swap', weight: ['600', '700', '800'], variable: '--f-archivo',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700', '800'], variable: '--f-archivo',
 });
 export const workSans = Work_Sans({
-    subsets: ['latin'], display: 'swap', weight: ['400', '500', '600', '700'], variable: '--f-work',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-work',
 });
 export const lexend = Lexend({
-    subsets: ['latin'], display: 'swap', weight: ['600', '700', '800'], variable: '--f-lexend',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700', '800'], variable: '--f-lexend',
 });
 export const sourceSans = Source_Sans_3({
-    subsets: ['latin'], display: 'swap', weight: ['400', '500', '600', '700'], variable: '--f-source',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-source',
 });
 export const bodoni = Bodoni_Moda({
-    subsets: ['latin'], display: 'swap', weight: ['600', '700', '800'], variable: '--f-bodoni',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700', '800'], variable: '--f-bodoni',
 });
 export const jost = Jost({
-    subsets: ['latin'], display: 'swap', weight: ['400', '500', '600', '700'], variable: '--f-jost',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-jost',
 });
 
 /*
@@ -102,25 +119,25 @@ export const jost = Jost({
  * originals. If a paid family is bought later, swapping it in is one entry.
  */
 export const geist = Geist({
-    subsets: ['latin'], display: 'swap', weight: ['500', '600', '700', '800'], variable: '--f-geist',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['500', '600', '700', '800'], variable: '--f-geist',
 });
 export const geistMono = Geist_Mono({
-    subsets: ['latin'], display: 'swap', weight: ['400', '500', '600'], variable: '--f-geistmono',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600'], variable: '--f-geistmono',
 });
 export const bricolage = Bricolage_Grotesque({
-    subsets: ['latin'], display: 'swap', variable: '--f-bricolage',
+    subsets: ['latin'], display: 'swap', preload: false, variable: '--f-bricolage',
 });
 export const figtree = Figtree({
-    subsets: ['latin'], display: 'swap', weight: ['400', '500', '600', '700'], variable: '--f-figtree',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-figtree',
 });
 export const dmSerif = DM_Serif_Display({
-    subsets: ['latin'], display: 'swap', weight: ['400'], variable: '--f-dmserif',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['400'], variable: '--f-dmserif',
 });
 export const poppins = Poppins({
-    subsets: ['latin'], display: 'swap', weight: ['400', '500', '600', '700'], variable: '--f-poppins',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-poppins',
 });
 export const instrument = Instrument_Serif({
-    subsets: ['latin'], display: 'swap', weight: ['400'], variable: '--f-instrument',
+    subsets: ['latin'], display: 'swap', preload: false, weight: ['400'], variable: '--f-instrument',
 });
 
 export const labFontVariables = [

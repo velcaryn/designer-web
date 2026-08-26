@@ -29,6 +29,7 @@ import './globals.css';
 import { nvFontVariables } from './fonts';
 import { labFontVariables } from './lab-fonts';
 import { brand } from '@/config/site';
+import StructuredData from '@/components/StructuredData';
 
 /* The title and description below used to belong to app/claudelanding's own
    layout.js, back when that was a separate route sitting next to the
@@ -40,18 +41,46 @@ import { brand } from '@/config/site';
 export const metadata = {
     metadataBase: new URL(`https://${brand.domain}`),
     title: {
-        default: 'Grow your brand, grow your business',
+        /* The brand name is IN the default title, not only in the
+           template. The template appends it to child pages, but the home
+           page uses `default` and so carried no brand name at all: it
+           listed as "Grow your brand, grow your business", which is a
+           slogan nobody searches for and which nothing ties to VelBiz. */
+        default: `${brand.name} | ${brand.tagline}`,
         template: `%s | ${brand.name}`,
     },
-    description: `${brand.shortName} builds the website, gets you found, and gives you one place to run the orders, the customers and the money.`,
+    description: `${brand.shortName} builds the website, gets you found, and gives you one place to run the orders, the customers and the money. Based in ${brand.base}.`,
+    /* Tells a crawler which URL is the real one for a page it can reach
+       by more than one address (trailing slash, query string, the
+       *.netlify.app host). Without it, duplicates compete with each
+       other and the ranking is split between them. `alternates` on a
+       child page is relative to metadataBase. */
+    alternates: {
+        canonical: '/',
+    },
     openGraph: {
         title: `${brand.name} | ${brand.tagline}`,
         description: brand.description,
         siteName: brand.name,
+        url: `https://${brand.domain}`,
         locale: 'en_IN',
         type: 'website',
     },
-    robots: { index: true, follow: true },
+    robots: {
+        index: true,
+        follow: true,
+        /* Let Google show a full text snippet, a large image preview and
+           any video length. Left unset, Google picks conservatively and
+           the result gets a shorter snippet and a thumbnail rather than
+           the OG card. */
+        googleBot: {
+            index: true,
+            follow: true,
+            'max-snippet': -1,
+            'max-image-preview': 'large',
+            'max-video-preview': -1,
+        },
+    },
 };
 
 export const viewport = {
@@ -80,6 +109,7 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en" className={labFontVariables}>
             <body className={`${nvFontVariables} nv-root`}>
+                <StructuredData />
                 {children}
             </body>
         </html>

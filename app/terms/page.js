@@ -13,6 +13,7 @@ import ClFooter from '@/components/claudelanding/ClFooter';
 export const metadata = {
     title: 'Terms',
     description: `The terms of using ${brand.shortName}'s website.`,
+    alternates: { canonical: '/terms' },
 };
 
 export default function TermsPage() {

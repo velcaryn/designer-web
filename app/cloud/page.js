@@ -27,6 +27,7 @@ import ClFooter from '@/components/claudelanding/ClFooter';
 export const metadata = {
     title: 'VelBiz Cloud',
     description: `Orders, customers, stock, staff and the money in one system, wired to the website ${brand.shortName} builds you.`,
+    alternates: { canonical: '/cloud' },
 };
 
 export default function CloudPage() {

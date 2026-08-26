@@ -14,6 +14,7 @@ import ClFooter from '@/components/claudelanding/ClFooter';
 export const metadata = {
     title: 'Privacy',
     description: `What ${brand.shortName} collects on this site, and what it does not.`,
+    alternates: { canonical: '/privacy' },
 };
 
 export default function PrivacyPage() {

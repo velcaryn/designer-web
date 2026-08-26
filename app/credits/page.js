@@ -23,6 +23,7 @@ import ClFooter from '@/components/claudelanding/ClFooter';
 export const metadata = {
     title: 'Credits',
     description: `Third-party assets and open-source work used to build ${brand.shortName}'s website.`,
+    alternates: { canonical: '/credits' },
 };
 
 export default function CreditsPage() {
