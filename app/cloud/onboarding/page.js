@@ -109,7 +109,15 @@ export default function CloudOnboardingPage() {
     const [success, setSuccess] = useState(false);
 
     /* Both bot signals from the source route: a honeypot field no human
-       sees, and how long the form was open before it was submitted. */
+       sees, and how long the form was open before it was submitted.
+
+       Set in an effect, which is the only place a timestamp may be taken:
+       Date.now() during render is impure and the lint rule rejects it.
+       That leaves the ref at 0 until after mount, so the submit path
+       below must never send that 0 through. A submission carrying _t: 0
+       fails the server's plausibility gate, and that gate answers 200
+       and sends nothing, so the visitor would read "You are on the list"
+       over a submission that never reached Telegram. */
     const formLoadedAt = useRef(0);
     useEffect(() => {
         formLoadedAt.current = Date.now();
@@ -183,7 +191,12 @@ export default function CloudOnboardingPage() {
                 },
                 gstin: form.gstin.toUpperCase().trim(),
                 bot_trap: form.bot_trap,
-                _t: formLoadedAt.current,
+                /* Falls back to now if the effect has not run. A human
+                   who has typed a whole form has self-evidently been on
+                   the page, so the honest reading of a missing timestamp
+                   is "unknown", not "instant". Sending 0 would silently
+                   bin a real signup. */
+                _t: formLoadedAt.current || Date.now(),
             });
             setSuccess(true);
         } catch (err) {
