@@ -9,6 +9,7 @@ const nextConfig = {
         formats: ['image/avif', 'image/webp'],
     },
     poweredByHeader: false,
+    allowedDevOrigins: ['*.trycloudflare.com', 'statutory-src-packs-senators.trycloudflare.com'],
 };
 
 export default nextConfig;

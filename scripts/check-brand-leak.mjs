@@ -31,7 +31,7 @@ const TIER1 = [
     { name: 'tel: link', re: /tel:\+?\d{6,}/g },
     { name: 'bare phone number', re: /\b\d{12}\b|\+91[\s-]?\d{5}[\s-]?\d{5}/g },
 ];
-const TIER2 = [{ name: 'brand name in prose', re: /Velbrant/g }];
+const TIER2 = [{ name: 'brand name in prose', re: /Velbrant|VelBiz/g }];
 
 function walk(dir, out = []) {
     for (const entry of readdirSync(dir)) {

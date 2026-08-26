@@ -2,7 +2,7 @@
   "name": "designer-web",
   "version": "0.1.0",
   "private": true,
-  "description": "Velbrant Studios, a unit of Velcaryn LLP. Marketing site.",
+  "description": "VelBiz Digital, a unit of Velcaryn LLP. Marketing site.",
   "scripts": {
     "dev": "next dev -p 4000",
     "build": "next build",
@@ -16,14 +16,18 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
+    "gsap": "^3.15.0",
     "motion": "^12.42.2",
     "next": "^16.3.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "three": "^0.185.1"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "eslint": "^9",
     "eslint-config-next": "^16.1.6",
-    "puppeteer": "^25.8.0"
+    "puppeteer": "^25.8.0",
+    "tailwindcss": "^4.3.3"
   }
 }
