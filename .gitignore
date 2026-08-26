@@ -10,3 +10,8 @@ npm-debug.log*
 .vercel
 next-env.d.ts
 *.tsbuildinfo
+
+# Raw source screenshots kept for reference; compressed WebP derivatives
+# actually used by the site live in public/showcase/ and are tracked.
+public/Screenshots/
+dev.log
