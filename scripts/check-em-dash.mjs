@@ -17,7 +17,11 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, extname } from 'node:path';
 
-const ROOTS = ['app', 'components', 'scripts'];
+/* `lib` and `content` added alongside the demo sites. `content/` holds
+   sixteen files of business copy, which is the largest prose surface in
+   the repo and therefore the likeliest place for a stray em dash to
+   appear and ship unnoticed. */
+const ROOTS = ['app', 'components', 'scripts', 'lib', 'content'];
 const EXTS = new Set(['.js', '.jsx', '.mjs', '.ts', '.tsx', '.css', '.md', '.json']);
 // `skills` holds vendored third-party skill definitions. They are not our prose,
 // and rewriting them would only create conflicts the next time they are updated

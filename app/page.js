@@ -45,6 +45,7 @@ import './claudelanding.css';
 
 import { BusinessProvider } from '@/components/claudelanding/BusinessContext';
 import { LabProvider } from '@/components/claudelanding/LabContext';
+import StructuredData from '@/components/StructuredData';
 import ClHeader from '@/components/claudelanding/ClHeader';
 import ClDock from '@/components/claudelanding/ClDock';
 import ClHero from '@/components/claudelanding/ClHero';
@@ -54,6 +55,9 @@ import ClCloudTeaser from '@/components/claudelanding/ClCloudTeaser';
 import ClTech from '@/components/claudelanding/ClTech';
 import ClLab from '@/components/claudelanding/ClLab';
 import ClProof from '@/components/claudelanding/ClProof';
+import ClWho from '@/components/claudelanding/ClWho';
+import ClInvest from '@/components/claudelanding/ClInvest';
+import ClFaq from '@/components/claudelanding/ClFaq';
 import ClContact from '@/components/claudelanding/ClContact';
 import ClCrowd from '@/components/claudelanding/ClCrowd';
 import ClFooter from '@/components/claudelanding/ClFooter';
@@ -62,6 +66,7 @@ export default function HomePage() {
     return (
         <BusinessProvider>
             <LabProvider>
+                <StructuredData />
                 <ClHeader />
                 <main>
                     <ClHero />
@@ -71,6 +76,18 @@ export default function HomePage() {
                     <ClTech />
                     <ClLab />
                     <ClProof />
+                    {/* Price then questions then the ask, in that order.
+                        Both are objection handling, so they belong
+                        immediately before the CTA rather than earlier:
+                        a visitor who has not yet seen the work has no
+                        reason to care what it costs. */}
+                    {/* Between the work and the price. Someone who has
+                        just seen what we build and is about to see what
+                        it costs is exactly the person wondering who they
+                        would be paying. */}
+                    <ClWho />
+                    <ClInvest />
+                    <ClFaq />
                     <ClContact />
                     {/* Last thing in <main>, immediately above the footer:
                         a full-bleed blue crowd strip is the final

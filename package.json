@@ -10,9 +10,17 @@
     "lint": "eslint app components",
     "check:emdash": "node scripts/check-em-dash.mjs",
     "check:css": "node scripts/check-css-collisions.mjs",
-    "verify": "npm run check:emdash && npm run check:css && npm run check:brand && npm run lint && npm run build",
+    "verify": "npm run check:emdash && npm run check:css && npm run check:brand && npm run check:demo-proof && npm run check:demo-unique && npm run check:demo-maps && npm run check:demo-images && npm run lint && npm run build",
     "check:brand": "node scripts/check-brand-leak.mjs",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "verify:full": "node scripts/verify-full.mjs",
+    "check:demo-weight": "node scripts/check-demo-weight.mjs",
+    "check:demo-proof": "node scripts/check-demo-proof.mjs",
+    "check:demo-unique": "node scripts/check-demo-unique.mjs",
+    "check:demo-maps": "node scripts/check-demo-maps.mjs",
+    "check:demo-align": "node scripts/check-demo-align.mjs",
+    "check:demo-images": "node scripts/check-demo-images.mjs",
+    "gen:demo-images": "node scripts/make-demo-srcset.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

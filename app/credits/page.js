@@ -17,6 +17,7 @@
  */
 import { brand } from '@/config/site';
 import '../claudelanding.css';
+import StructuredData from '@/components/StructuredData';
 import ClLegalNav from '@/components/claudelanding/ClLegalNav';
 import ClFooter from '@/components/claudelanding/ClFooter';
 
@@ -29,6 +30,7 @@ export const metadata = {
 export default function CreditsPage() {
     return (
         <>
+            <StructuredData />
             <ClLegalNav current="/credits" />
 
             <main>

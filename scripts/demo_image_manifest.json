@@ -1,0 +1,338 @@
+[
+  {
+    "slug": "bakery",
+    "type": "hero",
+    "path": "public/demo/bakery/hero.webp",
+    "aspect": "3:2",
+    "prompt": "A small artisan bakery counter in Bengaluru, early morning. Wooden shelves behind the counter stacked with rustic sourdough boules and golden milk-bread loaves cooling on wire racks. Warm low-angle sunlight coming in from a window on the left, flour dust visible in the light. Cream and amber tones, worn wood, brass fittings. Shallow depth of field. No people in focus, no text, no signage. Documentary food photography, natural light, not styled or glossy."
+  },
+  {
+    "slug": "bakery",
+    "type": "story",
+    "path": "public/demo/bakery/story.webp",
+    "aspect": "4:3",
+    "prompt": "A baker's hands shaping sourdough on a flour-dusted wooden work surface, seen from above and slightly to the side. Only hands and forearms visible. Warm indoor light, deep shadows, flour scattered across dark wood. Cream and amber tones. Documentary style, close and tactile. No faces, no text."
+  },
+  {
+    "slug": "bakery",
+    "type": "detail",
+    "path": "public/demo/bakery/detail.webp",
+    "aspect": "1:1",
+    "prompt": "Close-up of a single cut sourdough loaf on brown paper, open crumb visible, dusted with flour. Warm side light. Cream background, amber highlights on the crust. Overhead angle. Nothing else in frame. No text, no props, no hands."
+  },
+  {
+    "slug": "restaurant",
+    "type": "hero",
+    "path": "public/demo/restaurant/hero.webp",
+    "aspect": "16:9",
+    "prompt": "The interior of a Chettinad restaurant in Chennai at dinner, shot wide and slightly dark. Warm pendant lights over dark wooden tables, brass serving vessels, a plantain leaf laid at one setting. Deep shadows on the left third of the frame so text can sit over it. Rich oranges and browns against near-black. Atmospheric, cinematic, low light. No people in focus, no text, no signage."
+  },
+  {
+    "slug": "restaurant",
+    "type": "story",
+    "path": "public/demo/restaurant/story.webp",
+    "aspect": "4:3",
+    "prompt": "Stone-ground masala being prepared in a South Indian kitchen. A stone grinder with red chilli, coriander and pepper mid-grind, hands visible at the edge of frame only. Warm tungsten light from above, steam, dark stone surfaces. Deep reds and browns. Documentary, close, not styled. No faces, no text."
+  },
+  {
+    "slug": "restaurant",
+    "type": "detail",
+    "path": "public/demo/restaurant/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A single serving of Chettinad chicken curry in a brass bowl on a dark wooden table, curry leaves and a piece of parotta beside it. Overhead shot. Warm directional light, deep orange gravy, glossy. Dark background. Nothing else in frame. No text, no hands."
+  },
+  {
+    "slug": "retail",
+    "type": "hero",
+    "path": "public/demo/retail/hero.webp",
+    "aspect": "16:9",
+    "prompt": "The inside of a neighbourhood provisions shop in Chennai, shot straight down the aisle. Sacks of rice and dal open at the front, shelves of everyday grocery packets receding into the background, bunches of curry leaves. Bright even daylight from the shop front. Greens, browns, warm neutrals. Busy but orderly. No people in focus, no readable text on any packet."
+  },
+  {
+    "slug": "retail",
+    "type": "story",
+    "path": "public/demo/retail/story.webp",
+    "aspect": "4:3",
+    "prompt": "An open jute sack of Ponni boiled rice with a metal scoop resting in it, on a shop floor beside two more sacks of dal. Shot from standing height looking down. Natural daylight, soft shadows. Warm neutrals and greens. Documentary, unstyled. No people, no text."
+  },
+  {
+    "slug": "retail",
+    "type": "detail",
+    "path": "public/demo/retail/detail.webp",
+    "aspect": "1:1",
+    "prompt": "Fresh Ooty carrots and tomatoes in shallow woven baskets, shot overhead against a plain surface. Water droplets, just-washed. Bright daylight, saturated orange and red against neutral background. Nothing else in frame. No text, no hands."
+  },
+  {
+    "slug": "dental-clinic",
+    "type": "hero",
+    "path": "public/demo/dental-clinic/hero.webp",
+    "aspect": "3:4",
+    "prompt": "A modern dental treatment room in Bengaluru, empty and clean. Dental chair in soft focus, overhead light, instrument tray in the foreground. Cool teal and white tones, bright even lighting, calm rather than clinical-cold. Shot vertically. Nothing intimidating in frame, no close-up instruments. No people, no text."
+  },
+  {
+    "slug": "dental-clinic",
+    "type": "story",
+    "path": "public/demo/dental-clinic/story.webp",
+    "aspect": "4:3",
+    "prompt": "A dental consultation desk with a digital X-ray displayed on a monitor turned toward the patient side, a printed treatment estimate on the desk beside it. Only hands visible at the edge. Soft daylight from a window, teal and white palette. Calm and administrative rather than medical. No faces, no readable text on the paper or screen."
+  },
+  {
+    "slug": "dental-clinic",
+    "type": "detail",
+    "path": "public/demo/dental-clinic/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A sterilised dental instrument tray laid out on pale blue cloth, shot directly overhead. Precise, evenly spaced, very clean. Bright neutral light, teal and stainless tones. Minimal, almost graphic. Nothing else in frame. No text."
+  },
+  {
+    "slug": "wellness-and-beauty",
+    "type": "hero",
+    "path": "public/demo/wellness-and-beauty/hero.webp",
+    "aspect": "3:4",
+    "prompt": "The interior of an upmarket salon in Hyderabad, shot vertically. A styling chair in front of a large mirror, warm bulbs around the frame, marble counter with folded towels. Soft violet and warm neutral palette, diffused light. Calm and expensive, not busy. No people, no text, no product labels."
+  },
+  {
+    "slug": "wellness-and-beauty",
+    "type": "story",
+    "path": "public/demo/wellness-and-beauty/story.webp",
+    "aspect": "4:3",
+    "prompt": "An Ayurvedic treatment room, dimly lit. A massage table with folded white linen, small brass bowls of oil, a lit lamp. Warm low light, deep shadows, violet and amber tones. Very quiet and still. Documentary rather than spa-brochure. No people, no text."
+  },
+  {
+    "slug": "wellness-and-beauty",
+    "type": "detail",
+    "path": "public/demo/wellness-and-beauty/detail.webp",
+    "aspect": "1:1",
+    "prompt": "Small brass bowls of Ayurvedic oils on a dark stone surface, shot overhead. Three or four bowls, different oil colours, one with a wooden spoon. Warm directional light, violet-tinted shadows. Minimal, nothing else in frame. No text, no hands."
+  },
+  {
+    "slug": "home-stay",
+    "type": "hero",
+    "path": "public/demo/home-stay/hero.webp",
+    "aspect": "16:9",
+    "prompt": "A colonial plantation bungalow in the Nilgiris seen from across a lawn, tea bushes and pines behind it, mist rolling over the ridge in the background. Late afternoon, low sun, long shadows. Deep greens, weathered white walls, red tile roof. The upper left of the frame is open sky and mist so text can sit over it. Wide, atmospheric. No people, no text, no signage."
+  },
+  {
+    "slug": "home-stay",
+    "type": "story",
+    "path": "public/demo/home-stay/story.webp",
+    "aspect": "4:3",
+    "prompt": "Rows of tea bushes on a Nilgiris hillside in morning mist, a narrow path running through them, pines silhouetted at the ridge line. Cool green and grey, soft diffused light, visible moisture in the air. Landscape photography, no people, no text."
+  },
+  {
+    "slug": "home-stay",
+    "type": "detail",
+    "path": "public/demo/home-stay/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A cup of tea on a wooden verandah rail, garden and mist out of focus behind it. Early morning light, steam visible. Warm brass and green tones against cool grey mist. Shallow depth of field. Nothing else in frame. No text, no hands."
+  },
+  {
+    "slug": "online-shop",
+    "type": "hero",
+    "path": "public/demo/online-shop/hero.webp",
+    "aspect": "16:9",
+    "prompt": "Kanchipuram silk sarees folded and stacked on a shop shelf, shot straight on and cropped wide. Deep maroon, arakku red, mustard and green silks with gold zari borders catching the light. Rich saturated colour against a neutral background. Even soft lighting to show the fabric sheen. No people, no text, no labels."
+  },
+  {
+    "slug": "online-shop",
+    "type": "story",
+    "path": "public/demo/online-shop/story.webp",
+    "aspect": "4:3",
+    "prompt": "A handloom mid-weave with a half-finished silk saree on it, gold zari thread visible in the warp. Wooden loom parts, shuttle, spools of thread. Hands at the edge of frame only. Warm workshop light from a side window, deep shadows. Documentary, tactile. No faces, no text."
+  },
+  {
+    "slug": "online-shop",
+    "type": "detail",
+    "path": "public/demo/online-shop/detail.webp",
+    "aspect": "1:1",
+    "prompt": "Extreme close-up of a Kanchipuram silk border, gold zari against deep maroon, the temple motif clearly visible. Raking light across the weave to show texture and metallic thread. Fills the frame. Nothing else. No text, no hands."
+  },
+  {
+    "slug": "photo-studio",
+    "type": "hero",
+    "path": "public/demo/photo-studio/hero.webp",
+    "aspect": "16:9",
+    "prompt": "A Kerala wedding scene at dusk, shot wide and dark. Warm lamps strung overhead, silhouetted figures in the mid distance, deep shadow in the foreground. Gold and amber highlights against near-black. Very low key, cinematic, film grain. The left half is mostly shadow so text can sit over it. No faces in focus, no text."
+  },
+  {
+    "slug": "photo-studio",
+    "type": "story",
+    "path": "public/demo/photo-studio/story.webp",
+    "aspect": "4:3",
+    "prompt": "A photographer's hands holding a camera at waist level, dark room, only the camera body and hands lit by a single warm source. Deep blacks, gold rim light. Shallow depth of field. Moody and quiet. No faces, no visible brand on the camera, no text."
+  },
+  {
+    "slug": "photo-studio",
+    "type": "detail",
+    "path": "public/demo/photo-studio/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A printed wedding album open on a dark table, one page showing a blurred warm-toned image, the binding visible. Single warm light from above left, deep shadows. Gold and black. Overhead angle. No readable text on the page, no hands."
+  },
+  {
+    "slug": "clinic",
+    "type": "hero",
+    "path": "public/demo/clinic/hero.webp",
+    "aspect": "3:4",
+    "prompt": "The waiting area of a small family clinic in Chennai, shot vertically. Simple chairs in a row, a window with daylight, a plant, notice board with nothing readable on it. Clean, ordinary, well kept rather than corporate. Blue and white palette, bright daylight. Slightly worn and real. No people, no text."
+  },
+  {
+    "slug": "clinic",
+    "type": "story",
+    "path": "public/demo/clinic/story.webp",
+    "aspect": "4:3",
+    "prompt": "A consulting room desk with a stethoscope, a prescription pad and a patient file, seen from the patient's side of the desk. Daylight from a window on the right. Blue and white, clean and simple. Nothing high-tech. No people, no readable text on the pad or file."
+  },
+  {
+    "slug": "clinic",
+    "type": "detail",
+    "path": "public/demo/clinic/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A small on-site pathology lab bench, blood sample tubes in a rack, a centrifuge out of focus behind. Shot overhead. Cool blue-white lighting, clinical but not cold. Minimal, ordered. Nothing else in frame. No text, no hands."
+  },
+  {
+    "slug": "hospital",
+    "type": "hero",
+    "path": "public/demo/hospital/hero.webp",
+    "aspect": "3:4",
+    "prompt": "The entrance canopy of a mid-size private hospital in Coimbatore at dusk, shot vertically from outside. Lit portico, glass doors, an ambulance bay to one side, warm interior light spilling out. Blue and white palette against evening sky. Calm and reassuring, not dramatic. No people in focus, no text, no signage, no red cross."
+  },
+  {
+    "slug": "hospital",
+    "type": "story",
+    "path": "public/demo/hospital/story.webp",
+    "aspect": "4:3",
+    "prompt": "A hospital corridor with daylight from windows down one side, empty, looking toward a nurses' station in the distance. Clean, bright, orderly. Blue and white, soft shadows. Wide angle, calm. No people in focus, no text or signage."
+  },
+  {
+    "slug": "hospital",
+    "type": "detail",
+    "path": "public/demo/hospital/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A cardiac monitor and ECG leads coiled neatly on a trolley, shot overhead. Screen off or showing only a blank trace. Cool blue-white light, stainless and white surfaces. Clean and precise. Nothing else in frame. No text."
+  },
+  {
+    "slug": "lodging",
+    "type": "hero",
+    "path": "public/demo/lodging/hero.webp",
+    "aspect": "16:9",
+    "prompt": "The lobby of a business hotel in Chennai, shot wide from the entrance. Double-height ceiling, indigo and grey furnishings, a reception desk in the mid distance, warm downlights. Evening, exterior dark through the glass. The right third is quieter so text can sit over it. Polished and corporate but not sterile. No people in focus, no text."
+  },
+  {
+    "slug": "lodging",
+    "type": "story",
+    "path": "public/demo/lodging/story.webp",
+    "aspect": "4:3",
+    "prompt": "A deluxe hotel room, curtains open on a city view at dusk, bed made, desk with a chair. Indigo and grey palette, warm bedside lamps against cool evening light. Wide, calm, well composed. No people, no text."
+  },
+  {
+    "slug": "lodging",
+    "type": "detail",
+    "path": "public/demo/lodging/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A banquet hall table setting, shot overhead. Folded napkin, glassware, cutlery on white linen, one small floral element. Warm light, indigo accents. Precise and symmetrical. Nothing else in frame. No text."
+  },
+  {
+    "slug": "ecommerce",
+    "type": "hero",
+    "path": "public/demo/ecommerce/hero.webp",
+    "aspect": "16:9",
+    "prompt": "Over-ear headphones and a mechanical keyboard arranged on a dark desk, shot straight down and cropped to a wide strip. Matte black surfaces, violet rim lighting from one side, subtle reflections. Very dark background, high contrast, product photography. Precise and technical. No text, no visible brand marks, no hands."
+  },
+  {
+    "slug": "ecommerce",
+    "type": "story",
+    "path": "public/demo/ecommerce/story.webp",
+    "aspect": "4:3",
+    "prompt": "An over-ear headphone partly disassembled on a dark work surface, ear pad removed and set beside it, a small screwdriver present. Violet key light against near-black. Shallow depth of field. Suggests repairability rather than luxury. No text, no brand marks, no hands."
+  },
+  {
+    "slug": "ecommerce",
+    "type": "detail",
+    "path": "public/demo/ecommerce/detail.webp",
+    "aspect": "1:1",
+    "prompt": "Extreme close-up of a mechanical keyboard switch and keycap, shot at a low angle against a dark background. Violet edge light picking out the switch housing. Sharp, technical, almost macro. Nothing else in frame. No text, no legends on the keycap."
+  },
+  {
+    "slug": "small-business",
+    "type": "hero",
+    "path": "public/demo/small-business/hero.webp",
+    "aspect": "3:2",
+    "prompt": "The counter of an industrial electrical supplies shop in Peenya, Bengaluru. Contactors, MCBs and coils of copper cable on shelves behind the counter, everything organised in labelled bins with no readable text. Bright fluorescent shop lighting. Rust, grey and copper tones. Working and slightly cluttered, not showroom clean. No people, no readable text."
+  },
+  {
+    "slug": "small-business",
+    "type": "story",
+    "path": "public/demo/small-business/story.webp",
+    "aspect": "4:3",
+    "prompt": "Coils of copper cable and a reel being cut to length on a shop counter, cable cutters resting beside them. Hands at the edge of frame only. Hard overhead light, copper against grey steel. Industrial, unstyled. No faces, no text."
+  },
+  {
+    "slug": "small-business",
+    "type": "detail",
+    "path": "public/demo/small-business/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A row of MCBs and a contactor arranged on a grey steel surface, shot directly overhead, evenly spaced. Hard even light, technical product photography. Grey and rust tones. Almost graphic in its ordering. Nothing else in frame. No text or markings."
+  },
+  {
+    "slug": "education",
+    "type": "hero",
+    "path": "public/demo/education/hero.webp",
+    "aspect": "16:9",
+    "prompt": "A small coaching-centre classroom in Chennai, empty, shot wide from the back. Around thirty chairs with folding desks facing a whiteboard, daylight from windows on the left. Warm neutral tones, amber wood. Ordinary and well used rather than glossy. No people, no readable writing on the board."
+  },
+  {
+    "slug": "education",
+    "type": "story",
+    "path": "public/demo/education/story.webp",
+    "aspect": "4:3",
+    "prompt": "A student's desk with an open physics textbook, worked problems in a notebook, a pencil and a calculator. Shot from above at an angle. Warm afternoon light from a window. Amber and cream tones. Handwriting present but not legible. No faces, no readable text."
+  },
+  {
+    "slug": "education",
+    "type": "detail",
+    "path": "public/demo/education/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A whiteboard corner with a partly erased diagram, marker resting on the tray. Shot straight on, close. Warm light, amber and white. Diagram is geometric and abstract, no legible words or equations. Nothing else in frame."
+  },
+  {
+    "slug": "logistics",
+    "type": "hero",
+    "path": "public/demo/logistics/hero.webp",
+    "aspect": "3:2",
+    "prompt": "A freight truck yard in Bhiwandi at dawn, shot wide. Two container trucks parked at a loading dock, one being loaded, low sun behind creating long shadows and haze. Orange and steel grey against pale sky. Industrial, working, atmospheric. No people in focus, no company names or text on the trucks."
+  },
+  {
+    "slug": "logistics",
+    "type": "story",
+    "path": "public/demo/logistics/story.webp",
+    "aspect": "4:3",
+    "prompt": "The inside of a truck trailer being loaded, boxes stacked and strapped, shot from the open rear doors looking in. Hard daylight at the opening falling off into shadow. Orange strapping against brown cartons. No people in focus, no readable labels."
+  },
+  {
+    "slug": "logistics",
+    "type": "detail",
+    "path": "public/demo/logistics/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A cargo strap ratchet tensioned over stacked boxes, shot close and overhead. Orange webbing, steel ratchet, cardboard. Hard directional light. Industrial macro, very sharp. Nothing else in frame. No text."
+  },
+  {
+    "slug": "warehouse",
+    "type": "hero",
+    "path": "public/demo/warehouse/hero.webp",
+    "aspect": "3:2",
+    "prompt": "The interior of a modern warehouse near Sriperumbudur, shot down a racking aisle with high steel shelving on both sides receding to a vanishing point. Pallets stacked and shrink-wrapped, yellow safety markings on the floor, high-bay lighting overhead. Grey, steel and yellow. Vast, orderly, clean. No people, no readable labels."
+  },
+  {
+    "slug": "warehouse",
+    "type": "story",
+    "path": "public/demo/warehouse/story.webp",
+    "aspect": "4:3",
+    "prompt": "A cold storage room with its heavy insulated door partly open, pallets visible inside, cold vapour spilling out at floor level. Shot from outside looking in. Cool blue-white interior light against warmer ambient. Grey and yellow. Industrial. No people, no text."
+  },
+  {
+    "slug": "warehouse",
+    "type": "detail",
+    "path": "public/demo/warehouse/detail.webp",
+    "aspect": "1:1",
+    "prompt": "A wrapped pallet on a warehouse floor with yellow safety lines marked around it, shot from above at a slight angle. Shrink wrap catching the overhead light. Grey concrete, yellow paint, clear plastic. Minimal and graphic. Nothing else in frame. No text or labels."
+  }
+]

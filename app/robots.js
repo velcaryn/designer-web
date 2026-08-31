@@ -8,6 +8,16 @@
  * `/api/` is disallowed because nothing under it is a page. It is one
  * POST-only route that answers a form, and there is nothing there for a
  * crawler to read or index.
+ *
+ * `/demo-site/` is disallowed because everything under it is a fictional
+ * business. Those pages exist to be sent to a prospect on WhatsApp, not
+ * to be found in search: a fake bakery ranking for a real query is thin
+ * content, and someone landing on one cold has none of the context that
+ * it is a sample. Two other mechanisms say the same thing, deliberately:
+ * a noindex robots meta from the demo layout, and an X-Robots-Tag header
+ * in next.config.mjs. Disallow alone would not be enough, because a page
+ * that is merely disallowed can still be indexed if something links to
+ * it; the meta and the header are what actually keep it out.
  */
 import { brand } from '@/config/site';
 
@@ -16,7 +26,7 @@ export default function robots() {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: '/api/',
+            disallow: ['/api/', '/demo-site/'],
         },
         sitemap: `https://${brand.domain}/sitemap.xml`,
     };

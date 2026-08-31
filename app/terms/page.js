@@ -7,6 +7,7 @@
 import Link from 'next/link';
 import { brand, contact } from '@/config/site';
 import '../claudelanding.css';
+import StructuredData from '@/components/StructuredData';
 import ClLegalNav from '@/components/claudelanding/ClLegalNav';
 import ClFooter from '@/components/claudelanding/ClFooter';
 
@@ -19,6 +20,7 @@ export const metadata = {
 export default function TermsPage() {
     return (
         <>
+            <StructuredData />
             <ClLegalNav current="/terms" />
 
             <main>

@@ -16,6 +16,12 @@ import { brand } from '@/config/site';
 const PAGES = [
     { path: '', priority: 1.0, changeFrequency: 'monthly' },
     { path: '/cloud', priority: 0.9, changeFrequency: 'monthly' },
+    /* The three service pages. High priority because they are the only
+       pages on this site written to be found cold from a search rather
+       than reached from the home page. */
+    { path: '/services/websites', priority: 0.9, changeFrequency: 'monthly' },
+    { path: '/services/seo', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/services/content-and-social', priority: 0.8, changeFrequency: 'monthly' },
     { path: '/cloud/onboarding', priority: 0.6, changeFrequency: 'yearly' },
     { path: '/privacy', priority: 0.3, changeFrequency: 'yearly' },
     { path: '/terms', priority: 0.3, changeFrequency: 'yearly' },

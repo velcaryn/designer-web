@@ -30,26 +30,71 @@
  */
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { ChatCircle } from '@phosphor-icons/react';
-import { brand } from '@/config/site';
-import ClMenu from './ClMenu';
+import ClTopbar from './ClTopbar';
 
+/* THREE IN THE BAR. EVERYTHING ELSE IN THE MENU.
+
+   This was nine links, which is a site map rather than navigation and is
+   what pushed the bar to the full width of the viewport. The three that
+   stay are the ones a reader would not find by scrolling: Tech and Lab
+   are sections they would not know to look for, and Cloud is a separate
+   product. */
 const LINKS = [
+    { href: '#tech', label: 'Tech' },
+    { href: '#lab', label: 'Lab' },
+    { href: '/cloud', label: 'Cloud' },
+];
+
+/* The full set, for the menu sheet, ordered as the page is ordered so it
+   reads as a table of contents rather than a leftovers list. */
+const MENU_LINKS = [
     { href: '#top', label: 'Home' },
     { href: '#grow', label: 'How it works' },
     { href: '#tech', label: 'Tech' },
     { href: '#lab', label: 'Lab' },
     { href: '#work', label: 'Work' },
+    { href: '/services/websites', label: 'Services' },
+    { href: '#invest', label: 'Pricing' },
+    { href: '#faq', label: 'FAQ' },
+    { href: '/cloud', label: 'Cloud' },
 ];
+
+/* WHICH BAR LINK OWNS WHICH SECTION.
+
+   The bar shows three links and the page has eleven sections, so a link
+   owns only the sections it actually covers. A first attempt mapped every
+   section to the nearest link above it, which kept something lit but left
+   "Lab" highlighted across Work, Pricing, FAQ and Contact: 12 of 24
+   scroll positions claiming a section the reader had long since left. A
+   highlight that lies is worse than none.
+
+   Everything else maps to the lockup, which lights a small dot meaning
+   "on this page, not in one of these three". That is true everywhere, and
+   the dock at the bottom carries the finer-grained position. */
+const SECTION_OWNER = {
+    top: null,
+    start: null,
+    grow: null,
+    what: null,
+    tech: '#tech',
+    lab: '#lab',
+    work: null,
+    who: null,
+    invest: null,
+    faq: null,
+    talk: null,
+};
 
 export default function ClHeader() {
     const pathname = usePathname();
     const [active, setActive] = useState('top');
-    const [menuOpen, setMenuOpen] = useState(false);
 
     useEffect(() => {
-        const ids = ['top', 'grow', 'tech', 'lab', 'work', 'talk'];
+        /* Every section is observed, not just the ones with a link. This
+           used to derive the list from LINKS, which was right while the
+           bar carried nine of them; once it was cut to three, two thirds
+           of the page went unobserved and the highlight simply went out. */
+        const ids = Object.keys(SECTION_OWNER);
         const nodes = ids.map((id) => document.getElementById(id)).filter(Boolean);
         if (nodes.length === 0) return undefined;
         const io = new IntersectionObserver(
@@ -65,78 +110,20 @@ export default function ClHeader() {
         return () => io.disconnect();
     }, []);
 
+    const owner = SECTION_OWNER[active];
+
+    const withActive = (list) =>
+        list.map((l) => ({
+            ...l,
+            active: l.href.startsWith('#') ? owner === l.href : pathname === l.href,
+        }));
+
     return (
-        <header className="cl-topbar">
-            <div className="nv-shell cl-topbar__inner">
-                <Link href="/" className="cl-topbar__brand">
-                    {/* The wordmark image, not just the type: the header
-                        had been text-only since it was first built, and the
-                        actual mark that /Nav.js and every other header on
-                        the site uses was never wired in here. */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src="/vb-mark.svg"
-                        alt=""
-                        className="cl-topbar__brandIcon"
-                    />
-                    {brand.shortName}
-                    <span className="cl-topbar__brandMark">Digital</span>
-                </Link>
-
-                <nav className="cl-topbar__links" aria-label="Main">
-                    {LINKS.map((link) => {
-                        const isActive = active === link.href.slice(1);
-                        return (
-                            <a
-                                key={link.href}
-                                href={link.href}
-                                className={`cl-topbar__link${isActive ? ' is-active' : ''}`}
-                                aria-current={isActive ? 'page' : undefined}
-                            >
-                                {link.label}
-                            </a>
-                        );
-                    })}
-                    <Link
-                        href="/cloud"
-                        className={`cl-topbar__link${pathname === '/cloud' ? ' is-active' : ''}`}
-                    >
-                        Cloud
-                    </Link>
-                </nav>
-
-                <div className="cl-topbar__end">
-                    {/* Always visible, at every width. On a phone the
-                        text CTA is hidden to make room for the menu, and
-                        a visitor who wants to get in touch should not
-                        have to open a menu to find out how. */}
-                    <a
-                        href="#talk"
-                        className="cl-topbar__icon"
-                        aria-label="Contact us"
-                    >
-                        <ChatCircle size={20} weight="bold" />
-                    </a>
-
-                    <a href="#talk" className="nv-btn nv-btn--primary cl-topbar__cta">
-                        Contact us
-                    </a>
-
-                    <ClMenu
-                        open={menuOpen}
-                        onOpen={() => setMenuOpen(true)}
-                        onClose={() => setMenuOpen(false)}
-                        links={[
-                            ...LINKS.map((l) => ({
-                                ...l,
-                                active: active === l.href.slice(1),
-                            })),
-                            { href: '/cloud', label: 'Cloud', active: pathname === '/cloud' },
-                        ]}
-                        cta={{ href: '#talk', label: 'Contact us' }}
-                    />
-                </div>
-            </div>
-        </header>
+        <ClTopbar
+            qualifier="Digital"
+            links={withActive(LINKS)}
+            menuLinks={withActive(MENU_LINKS)}
+            home="#top"
+        />
     );
 }

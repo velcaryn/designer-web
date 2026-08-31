@@ -41,6 +41,9 @@ import { useBusiness } from './BusinessContext';
 import { COMMON_SECTORS, GROUPS, sectorsInGroup } from './sectors';
 import useReducedMotionPref from './useReducedMotionPref';
 import Reveal from '@/components/Reveal';
+import ClLeadForm from './ClLeadForm';
+import { waLink } from '@/config/site';
+import { track } from '@/lib/analytics';
 
 export default function ClBusinessSetup() {
     const {
@@ -51,6 +54,10 @@ export default function ClBusinessSetup() {
         locked,
         placeholderName,
         setFieldFocused,
+        displayName,
+        type,
+        submitted,
+        markSubmitted,
     } = useBusiness();
     const [morePanel, setMorePanel] = useState(false);
     const cardRef = useRef(null);
@@ -177,11 +184,60 @@ export default function ClBusinessSetup() {
                         </button>
                     </fieldset>
 
+                    {/* The ask, revealed only once BOTH halves of the
+                        commit are true: a real name typed and a sector
+                        deliberately picked. At that point the visitor has
+                        told us what their business is called and what it
+                        does, so the form asks for one thing rather than
+                        four, and WhatsApp still sits above it as the
+                        louder option. Before the commit there is nothing
+                        here at all, which is what keeps the card feeling
+                        like a toy rather than a gate. */}
                     {locked && (
-                        <p className="cl-setup__locked" role="status">
-                            Set. Scroll down and watch it turn into a
-                            website below.
-                        </p>
+                        <div className="cl-setup__after">
+                            <p className="cl-setup__locked" role="status">
+                                Set. Scroll down and watch it turn into a
+                                website below.
+                            </p>
+
+                            {submitted ? (
+                                <p className="cl-setup__thanks" role="status">
+                                    Thanks. We will be in touch about
+                                    {' '}
+                                    {displayName}
+                                    .
+                                </p>
+                            ) : (
+                                <div className="cl-setup__ask">
+                                    <p className="cl-setup__askLead">
+                                        Want us to price it? Send it over on
+                                        WhatsApp, or leave a number and we
+                                        will call.
+                                    </p>
+
+                                    <a
+                                        href={waLink(
+                                            `Hello, I run ${displayName}, a ${type.noun}. I would like to talk about a website.`,
+                                        )}
+                                        className="nv-btn nv-btn--primary cl-setup__wa"
+                                        rel="noreferrer noopener"
+                                        onClick={() => track('whatsapp_clicked', { source: 'setup' })}
+                                    >
+                                        Message us on WhatsApp
+                                    </a>
+
+                                    <ClLeadForm
+                                        variant="setup"
+                                        source="setup"
+                                        businessName={displayName}
+                                        sector={type.label || type.id}
+                                        submitLabel="Call me back"
+                                        doneMessage="Thanks. We will call you back."
+                                        onDone={markSubmitted}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     )}
                     </div>
                 </Reveal>

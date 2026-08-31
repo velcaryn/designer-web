@@ -16,6 +16,7 @@
 import '../claudelanding.css';
 
 import { brand } from '@/config/site';
+import StructuredData from '@/components/StructuredData';
 import CloudNav from '@/components/cloud/CloudNav';
 import CloudHero from '@/components/cloud/CloudHero';
 import CloudDemo from '@/components/cloud/CloudDemo';
@@ -23,6 +24,7 @@ import CloudModules from '@/components/cloud/CloudModules';
 import CloudSecurity from '@/components/cloud/CloudSecurity';
 import CloudCta from '@/components/cloud/CloudCta';
 import ClFooter from '@/components/claudelanding/ClFooter';
+import ClMiniDock from '@/components/claudelanding/ClMiniDock';
 
 export const metadata = {
     title: 'VelBiz Cloud',
@@ -33,6 +35,7 @@ export const metadata = {
 export default function CloudPage() {
     return (
         <>
+            <StructuredData />
             <CloudNav />
             <main>
                 <CloudHero />
@@ -41,6 +44,7 @@ export default function CloudPage() {
                 <CloudSecurity />
                 <CloudCta />
             </main>
+            <ClMiniDock />
             <ClFooter />
         </>
     );

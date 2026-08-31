@@ -25,11 +25,12 @@
  * only resolves if next/font's variable exists on that element too. Splitting
  * them silently drops every heading back to the body font.
  */
+import Script from 'next/script';
 import './globals.css';
 import { nvFontVariables } from './fonts';
 import { labFontVariables } from './lab-fonts';
 import { brand } from '@/config/site';
-import StructuredData from '@/components/StructuredData';
+import CookieBanner from '@/components/CookieBanner';
 
 /* The title and description below used to belong to app/claudelanding's own
    layout.js, back when that was a separate route sitting next to the
@@ -66,6 +67,17 @@ export const metadata = {
         locale: 'en_IN',
         type: 'website',
     },
+    /* Geo meta, per the playbook's SEO section. These are not a ranking
+       factor on their own, but they are cheap, they are read by several
+       local directories and aggregators, and they say the same thing the
+       LocalBusiness JSON-LD says. Two places agreeing is the point: a
+       crawler that cannot parse one still gets the other. */
+    other: {
+        'geo.region': 'IN-TN',
+        'geo.placename': 'Tirunelveli',
+        'geo.position': '8.7139;77.7567',
+        ICBM: '8.7139, 77.7567',
+    },
     robots: {
         index: true,
         follow: true,
@@ -90,6 +102,7 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
+    const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
     /*
      * The lab font variables go on <html>, ABOVE the element that carries
      * `.nv-root`.
@@ -101,16 +114,72 @@ export default function RootLayout({ children }) {
      * exist in that scope, the declaration was invalid, and every heading
      * silently rendered in Times. Custom properties inherit downward only.
      *
-     * They are inert on the live page: nothing references `--f-*` unless the
-     * lab switcher points at one. They cost eleven font preloads, which is
-     * why this import and `labFontVariables` are deleted along with the rest
-     * of the lab once a combination is chosen.
+     * They are inert on the live page: nothing references `--f-*` unless
+     * the lab switcher points at one, or a /demo-site route names one in
+     * its theme. Every family is declared `preload: false`, so this costs
+     * @font-face rules rather than font downloads: a page fetches only the
+     * faces it paints. Measured on / after the SEO pass, that is two.
+     *
+     * They stay on <html>, ABOVE .nv-root, and that position is not
+     * negotiable for the reason given above. An earlier attempt to move
+     * them onto a wrapper inside <body> is what put them below .nv-root
+     * and silently rendered every heading in Times.
      */
     return (
         <html lang="en" className={labFontVariables}>
             <body className={`${nvFontVariables} nv-root`}>
-                <StructuredData />
+                {/* GA4, loaded with consent DENIED and page views OFF.
+                    Both matter. Denied by default means a visitor who
+                    never answers the banner is never tracked, which is
+                    the DPDP Act 2023 position. `send_page_view: false`
+                    means the automatic view does not fire before consent
+                    can possibly have been read: an automatic view is
+                    sent the moment the tag initialises, which is always
+                    earlier than a human can answer. CookieBanner sends
+                    the withheld view itself on accept, so accepting does
+                    not lose the visit it was accepted during.
+
+                    Rendered only when the measurement id is set, so a
+                    local checkout with no env file ships no tag at all.
+
+                    lib/analytics.js re-checks consent before every
+                    event, so a bug here cannot start collection. */}
+                {GA_ID && (
+                    <>
+                        <Script
+                            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+                            strategy="afterInteractive"
+                        />
+                        <Script id="ga4-init" strategy="afterInteractive">
+                            {`
+                                window.dataLayer = window.dataLayer || [];
+                                function gtag(){dataLayer.push(arguments);}
+                                gtag('js', new Date());
+                                gtag('consent', 'default', { analytics_storage: 'denied' });
+                                gtag('config', '${GA_ID}', { send_page_view: false });
+                            `}
+                        </Script>
+                    </>
+                )}
+                {/* <StructuredData /> is deliberately NOT here.
+                    It emits VelBiz's ProfessionalService graph: the real
+                    phone number, the real Tirunelveli address, the real
+                    organisation identity. In the root layout that graph
+                    wrapped EVERY route, which was fine while every route
+                    was VelBiz's own.
+                    The demo sites under /demo-site are fictional
+                    businesses. Emitting our identity around a page whose
+                    visible content is an invented bakery is structured
+                    data contradicting the page, which is a manual-action
+                    risk rather than merely a wasted signal.
+                    You cannot escape a root layout in the App Router, so
+                    the fix is to stop putting it in one: the five real
+                    pages import it themselves, the same per-page pattern
+                    this repo already uses for claudelanding.css, and the
+                    demo routes become structurally incapable of carrying
+                    it. */}
                 {children}
+                <CookieBanner />
             </body>
         </html>
     );

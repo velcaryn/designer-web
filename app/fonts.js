@@ -35,7 +35,7 @@
  * docs/FRONTEND_RULES.md that silently fell every heading back to the body
  * font.
  */
-import { Fraunces, Inter } from 'next/font/google';
+import { Fraunces, Inter, Poppins } from 'next/font/google';
 
 /* Variable weight with an optical-size axis. The range is what gives the
    headings their character, so no weight list is pinned. */
@@ -52,4 +52,27 @@ export const inter = Inter({
     variable: '--nv-font-inter',
 });
 
-export const nvFontVariables = [fraunces.variable, inter.variable].join(' ');
+/* THE WORDMARK FACE.
+ *
+ * The brand is set in Sifonn, which is a commercial face from Zeune Ink:
+ * not on Google Fonts, not licensed here, and not something that can be
+ * fetched. Poppins at 800 was chosen as the substitute by rendering the
+ * wordmark in six candidates side by side and comparing them against the
+ * VB mark: Sifonn is a heavy geometric sans with near-circular bowls and
+ * tight apertures, and Poppins 800 is the closest of what is available.
+ * Outfit 900 was the runner-up and reads more condensed than the mark.
+ *
+ * ONE WEIGHT ONLY. The wordmark is the only thing that uses this, so
+ * pulling the other eight weights would be 8 unused font files on every
+ * page. If the real Sifonn licence arrives, swap this declaration for a
+ * next/font/local pointing at the woff2 and nothing else changes: every
+ * consumer reads --nv-font-wordmark.
+ */
+export const wordmark = Poppins({
+    subsets: ['latin'],
+    weight: ['800'],
+    display: 'swap',
+    variable: '--nv-font-wordmark',
+});
+
+export const nvFontVariables = [fraunces.variable, inter.variable, wordmark.variable].join(' ');

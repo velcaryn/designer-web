@@ -3,28 +3,47 @@
 /**
  * The close.
  *
- * One action, WhatsApp, because that is how the businesses this page is
- * written for already talk to everyone. There is no form: a form asks a shop
- * owner on a phone to fill four fields to start a conversation they could
- * have started in one tap.
+ * WhatsApp first, because that is how the businesses this page is written
+ * for already talk to everyone, and because a shop owner on a phone can
+ * open it in one tap.
  *
- * Every contact detail comes from config/site.js through waLink(). Nothing
- * here is hand-typed, and a `wa.me` URL written by hand in this file would
- * fail npm run check:brand outright. The reason is in that file's header: on
- * an earlier build the phone number lived in eight files, and cloning the
- * repo while missing one occurrence ships the previous client's number.
+ * PHASE 2: TWO MORE DOORS, BOTH QUIETER THAN THE FIRST
  *
- * The message is prefilled with the business name the visitor typed, so the
- * conversation opens with context instead of "hello". If they typed nothing
- * the fallback is used and the message still reads correctly.
+ * The original version of this file offered WhatsApp and a `mailto:` and
+ * argued against a form: four fields to start a conversation you could
+ * start in one tap is friction bought with nothing. That is still true
+ * for the visitor it describes.
+ *
+ * It is not true for the one it does not. A B2B buyer at a desk, on a
+ * machine with no WhatsApp session and no configured mail client, had
+ * two dead ends and no third option. So:
+ *
+ *  - a `tel:` link, using the phoneHref that has existed in config since
+ *    the beginning and was rendered nowhere on this page;
+ *  - a callback form, collapsed behind a disclosure so it costs no
+ *    attention until someone wants it.
+ *
+ * The ordering is the whole point. WhatsApp is the primary button, the
+ * phone and email sit beside it as ghosts, and the form is closed by
+ * default. Nobody who would have tapped WhatsApp is slowed down.
+ *
+ * Every contact detail comes from config/site.js. A `wa.me` or `tel:`
+ * URL written by hand in this file would fail npm run check:brand
+ * outright: on an earlier build the phone number lived in eight files,
+ * and cloning the repo while missing one occurrence ships the previous
+ * client's number.
  */
-import { WhatsappLogo } from '@phosphor-icons/react';
-import { waLink, contact, emailHref } from '@/config/site';
+import { useState } from 'react';
+import { WhatsappLogo, Phone } from '@phosphor-icons/react';
+import { waLink, contact, emailHref, phoneHref } from '@/config/site';
 import Reveal from '@/components/Reveal';
 import { useBusiness } from './BusinessContext';
+import ClLeadForm from './ClLeadForm';
+import { track } from '@/lib/analytics';
 
 export default function ClContact() {
     const { displayName, named, type } = useBusiness();
+    const [showForm, setShowForm] = useState(false);
 
     const message = named
         ? `Hello, I run ${displayName}, a ${type.noun}. I would like to talk about a website.`
@@ -50,13 +69,45 @@ export default function ClContact() {
                             href={waLink(message)}
                             className="nv-btn nv-btn--primary"
                             rel="noreferrer noopener"
+                            onClick={() => track('whatsapp_clicked', { source: 'talk' })}
                         >
                             <WhatsappLogo size={20} weight="fill" />
                             Message us on WhatsApp
                         </a>
+                        <a href={phoneHref} className="nv-btn nv-btn--ghost">
+                            <Phone size={20} weight="fill" />
+                            {contact.phoneDisplay}
+                        </a>
                         <a href={emailHref} className="nv-btn nv-btn--ghost">
                             {contact.email}
                         </a>
+                    </div>
+
+                    {/* Closed by default. A real button rather than a
+                        <details>, because the panel needs to be announced
+                        and because <details> styling is still uneven
+                        across browsers at this border weight. */}
+                    <div className="cl-contact__callback">
+                        {showForm ? (
+                            <div className="cl-contact__form">
+                                <ClLeadForm
+                                    variant="talk"
+                                    source="talk"
+                                    businessName={named ? displayName : ''}
+                                    sector={named ? (type.label || type.id) : ''}
+                                    submitLabel="Ask us to call back"
+                                    doneMessage="Got it. We will call you back."
+                                />
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                className="cl-contact__toggle"
+                                onClick={() => setShowForm(true)}
+                            >
+                                Prefer we call you back?
+                            </button>
+                        )}
                     </div>
                 </Reveal>
             </div>

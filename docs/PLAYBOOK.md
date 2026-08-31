@@ -527,3 +527,105 @@ single source of contact data with the tier-1 guard, no em dashes, tokens
 never raw values, the hover guard, the hover-versus-active specificity rule,
 48px touch targets, `touch-action: manipulation`, and the launch checklist in
 section 10.
+
+## Known contrast failures, preview themes only
+
+`npm run check:contrast` currently reports three failures. All three are
+pre-existing, none is on the default Pearl White theme or on Harbour, and
+all three sit in the lab's preview-only palettes. Recorded here rather
+than left as a red tick nobody can explain.
+
+| Theme | Selector | Measured | Cause |
+|---|---|---|---|
+| Alabaster | `cl-search__title` | 3.11:1 | `--nv-lav-deep` mixes the accent toward ink. Alabaster's green accent lands short of 4.5:1 on paper. |
+| Midnight Obsidian | `cl-aurora` | 1.06:1 | Partly a measurement artifact, partly real. |
+| Vantablack Acid | `cl-aurora` | 1:1 | As above. |
+
+`cl-aurora` is the gradient-filled word in the hero: it sets
+`color: transparent` and clips a gradient to the text, so the checker
+reads the computed colour as transparent and scores 1:1. The pixels a
+visitor actually sees are the gradient, so the score overstates the
+problem. It does not eliminate it: on Vantablack the accent is `#d4ff00`
+on a `#000000` ground, which is genuinely marginal at the thin end of
+the gradient.
+
+Neither is a Phase 2 regression and neither affects the theme the site
+actually ships in. Fixing them properly means either giving the aurora a
+per-theme solid fallback that the checker can read, or teaching the
+checker to sample painted pixels for clipped-gradient text.
+
+### The guard itself was broken
+
+Worth recording separately, because it is the more useful lesson. This
+script targeted `.nv-preview__grid > div:first-child .nv-swatch`, from
+when the lab was called the preview. The markup was renamed to
+`.cl-lab__*` and the selector was never updated, so `names` came back
+empty, the loop ran zero times, and it printed
+`clean. 0 themes, every text pair at or above AA` and exited 0.
+
+Behind that green tick were fifteen genuine failures, including an
+entire footer rendering at 1:1 on two themes: the panel is
+`background: var(--nv-ink)` while its text was `var(--nv-on-accent)`, and
+on Alabaster both resolve to `#09090b`, on Midnight Obsidian both to
+`#fafafa`. Identical text on identical background.
+
+Two rules follow:
+
+1. **A guard that can find nothing must fail, not pass.** The script now
+   exits non-zero if the swatch selector matches no elements.
+2. **Run it.** It was excluded from `verify` because it needs a live
+   server, and the cost of that exclusion was years of drift. `npm run
+   verify:full` now builds, starts the server, runs the audit and shuts
+   down. That is the gate before a deploy.
+
+### Geometry is checked by a guard, not by eye
+
+`npm run check:demo-align` renders all 24 demos at 320/390/768/1440 and
+fails on four things: children of a shell that do not share a left edge,
+an h2 and its lede that start at different x, cells on one visual line
+whose baselines differ, and anything escaping its parent horizontally. It
+needs the production server, like `check:contrast`, so it is not inside
+`verify`.
+
+Three measurement traps, all of which produced false results before they
+produced true ones. They are worth knowing because they apply to any
+layout check, not just this one:
+
+- **Comparing element tops finds nothing.** Two cells at different type
+  sizes correctly have different tops and the same baseline.
+- **Comparing element bottoms is wrong for a flex container** (it reports
+  its flex baseline) and for a cell with a second block beneath the
+  figure. Read the baseline from a `Range` over the cell's own first text
+  line instead, wherever in its subtree that line sits.
+- **`scrollWidth` is inflated by a `::before` used to grow a tap area**,
+  which this codebase does in four places. Measure overflow against the
+  parent's painted content box.
+
+Between them those three mistakes produced 213 findings on a corpus that
+had about six real ones. A guard that cries wolf gets switched off.
+
+### align-items: center is almost always the bug
+
+Three separate defects in this corpus were the same mistake: a row set to
+`align-items: center` where one cell is a padded control (a 44px stepper,
+a chip with padding) and the others are plain text. Centring floats the
+text off the line it belongs on. The menu row put the price 35px below
+the item it priced.
+
+Use `start` or `baseline` on any row mixing text with controls, and let
+the control carry a negative margin if its optical centre needs to sit on
+the text baseline.
+
+### Text over a photograph needs a measured scrim, not a text-shadow
+
+A shadow makes white text *look* survivable without making it measurable.
+The five fullbleed heroes measured 1.00 to 2.30:1 against the actual
+painted pixels behind them, with shadows already applied.
+
+Measure the backdrop with the text hidden, or you measure the glyphs and
+get 1.00:1 for white on white. Then tune the scrim against **both** things
+that matter: three ramps were measured for worst-case text contrast and
+for how much of the photograph survived, and the one that shipped is the
+lightest that still clears AA. On a restaurant page the food is the
+product, and a scrim that guarantees 15:1 by turning it black has
+solved the wrong problem.

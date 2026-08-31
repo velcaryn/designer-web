@@ -7,12 +7,22 @@
  * spelled out, and each exposes a CSS variable that the pairing entries in
  * that file refer to by name.
  *
- * THIS FILE IS SCAFFOLDING AND MUST BE DELETED.
- * Twelve families is a lot of font to ship, and it is only acceptable because
- * the lab exists to be looked at once and then removed. When a pairing is
- * chosen, its two families move into app/fonts.js and this file goes with the
- * rest of the lab. Leaving it in place would mean every visitor downloads ten
- * typefaces nobody chose.
+ * THIS FILE WAS SCAFFOLDING. IT IS NOW LOAD-BEARING, AND HERE IS WHY.
+ * The header used to say this file must be deleted once a pairing was
+ * chosen. That was right while the lab was the only consumer. It is no
+ * longer true: the sixteen demo sites under /demo-site each pick two
+ * families from this list, so the declarations have a second, permanent
+ * reason to exist.
+ *
+ * The cost is smaller than the old header feared. Every family here is
+ * declared `preload: false`, so next/font emits the @font-face rules but
+ * no <link rel=preload>. A page downloads only the faces it actually
+ * paints: the home page pulls the two in app/fonts.js, and a demo pulls
+ * the two its own theme names. The other sixteen families cost a few
+ * hundred bytes of CSS and no font requests at all.
+ *
+ * What would break the arrangement is adding preload back, or referencing
+ * a family from a component that renders on every route.
  *
  * Weights are kept tight for the same reason: display faces get the two
  * weights the headings actually use, body faces get four. Loading every
@@ -23,8 +33,6 @@ import {
     Outfit,
     Plus_Jakarta_Sans,
     Space_Grotesk,
-    Inter,
-    Fraunces,
     Archivo,
     Work_Sans,
     Lexend,
@@ -76,14 +84,20 @@ export const jakarta = Plus_Jakarta_Sans({
 export const grotesk = Space_Grotesk({
     subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700'], variable: '--f-grotesk',
 });
-export const inter = Inter({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-inter',
-});
-/* Fraunces is variable-weight with an optical-size axis, and the range is
-   what gives the headings their character, so no weight list is pinned. */
-export const fraunces = Fraunces({
-    subsets: ['latin'], display: 'swap', preload: false, variable: '--f-fraunces',
-});
+/* INTER AND FRAUNCES ARE NOT DECLARED HERE. THEY ARE ALIASED.
+
+   They used to be, and because app/fonts.js declares the same two
+   families for the main site, next/font emitted each font file TWICE:
+   once as the preloaded copy (the `.p.` filename) that fonts.js asks for,
+   and once as a plain copy that this file's @font-face referenced. Both
+   URLs are byte-identical and both were downloaded, on every page.
+   Measured on a demo route: 83KB of the 215KB font payload was the same
+   two files fetched a second time.
+
+   Aliasing instead means the demos and the theme preview point at the
+   copy that is already preloaded. One download, and --f-inter and
+   --f-fraunces keep working everywhere they are used, including
+   config/themes.js. */
 export const archivo = Archivo({
     subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700', '800'], variable: '--f-archivo',
 });
@@ -141,7 +155,9 @@ export const instrument = Instrument_Serif({
 });
 
 export const labFontVariables = [
-    outfit, jakarta, grotesk, inter, fraunces, archivo,
+    outfit, jakarta, grotesk, archivo,
     workSans, lexend, sourceSans, bodoni, jost,
     geist, geistMono, bricolage, figtree, dmSerif, poppins, instrument,
 ].map((f) => f.variable).join(' ');
+
+

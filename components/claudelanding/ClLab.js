@@ -39,6 +39,14 @@ function apply(themeId, fontId) {
     if (!root) return;
 
     const theme = THEMES.find((t) => t.id === themeId) || THEMES[0];
+    /* Marks the page as dark so the header can swap to the white logo.
+       The mark is an <img>, which is a separate document and cannot
+       inherit currentColor, so a black glyph vanished entirely on
+       Midnight Obsidian and Vantablack Acid. A data attribute rather
+       than a JS swap of the src, so the CSS owns it and any dark theme
+       added later gets the behaviour for free. */
+    root.dataset.dark = theme.dark ? 'true' : '';
+
     Object.entries(theme.tokens).forEach(([key, value]) => {
         const prop = key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
         root.style.setProperty(`--t-${prop}`, value);
@@ -55,6 +63,7 @@ function apply(themeId, fontId) {
 function clear() {
     const root = document.querySelector('.nv-root');
     if (!root) return;
+    delete root.dataset.dark;
     const props = [
         'ink', 'paper', 'accent', 'support', 'soft', 'on-accent', 'fill', 'on-fill',
     ];

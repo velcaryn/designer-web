@@ -121,6 +121,21 @@
     --nv-font-display: var(--nv-font-fraunces), "Fraunces", Georgia, serif;
     --nv-font-text: var(--nv-font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
 
+    /* INTER AND FRAUNCES, UNDER THE NAME THE LAB AND THE DEMOS USE.
+
+       app/lab-fonts.js used to declare these two families a second time,
+       for config/themes.js and for the demo sites. next/font has no way
+       to know it is the same font, so it emitted each file twice: the
+       preloaded copy fonts.js asks for, and a plain copy the lab's
+       @font-face pointed at. Byte-identical, both downloaded, on every
+       page. Measured on a demo route: 83KB of a 215KB font payload.
+
+       Aliasing here costs nothing and means one download. This lands on
+       .nv-root, which is the <body>, where the next/font variables
+       actually resolve: putting it on :root would give an empty value. */
+    --f-inter: var(--nv-font-inter);
+    --f-fraunces: var(--nv-font-fraunces);
+
     /* ── THEME LAYER ───────────────────────────────────────────────────
        Five values decide the whole palette. Everything below derives from
        them, which is why swapping a theme is five lines rather than fifty,
@@ -475,14 +490,24 @@ img, svg { display: block; max-width: 100%; }
     padding-inline: 0.12em;
     /* Descenders need the extra leading and the reserve below, or the `y` in
        "audience" clips against the display line-height. */
-    line-height: 1.08;
-    padding-bottom: 0.06em;
+    line-height: 1.16;
+    padding-bottom: 0.30em;
+    /* AN UNDERLINE THAT CLEARS THE DESCENDERS.
+       Two earlier versions were wrong in opposite directions. The first
+       ran 0.14em to 0.46em, which on a display face puts the band
+       through the lower half of the letterforms: a strikethrough, not
+       emphasis. The second dropped it to 0.02em-0.16em, which sat below
+       the baseline but straight through the tail of the `y` in "you".
+       Fraunces descends about 0.21em below the baseline at this weight,
+       so the band now starts below that. Verified by cropping the
+       rendered word and looking at it, which is the only way to catch
+       this: no computed value tells you a glyph is being cut. */
     background-image: linear-gradient(
         to top,
-        transparent 0.14em,
-        var(--nv-lav) 0.14em,
-        var(--nv-lav) 0.46em,
-        transparent 0.46em
+        transparent 0.0em,
+        var(--nv-lav) 0.0em,
+        var(--nv-lav) 0.08em,
+        transparent 0.08em
     );
 }
 
@@ -621,4 +646,99 @@ img, svg { display: block; max-width: 100%; }
         transition-duration: 0.001ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/* ==========================================================================
+   CONSENT BANNER
+   Lives in globals rather than claudelanding.css because it renders in
+   the root layout, on every route including the legal pages.
+   Tokens only: the one 3px stroke, the one zero-blur pop, one of the two
+   allowed radii. --nv-z-drawer, because it must clear the dock.
+   ========================================================================== */
+
+.cl-consent {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    z-index: var(--nv-z-drawer);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    width: calc(100% - 32px);
+    max-width: 660px;
+    padding: 20px 22px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+}
+
+.cl-consent__text {
+    flex: 1 1 280px;
+    min-width: 0;
+}
+
+.nv-root .cl-consent__title {
+    margin: 0 0 4px;
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-body);
+    font-weight: 700;
+    color: var(--nv-ink);
+}
+
+.nv-root .cl-consent__body {
+    margin: 0;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    line-height: 1.5;
+    /* A real token, never opacity: 45% of anything is roughly 1.9:1. */
+    color: var(--nv-ink-soft);
+}
+
+.cl-consent__link {
+    color: var(--nv-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    /* Vertical padding enlarges the tap target from the bare text box;
+       the matching negative margin keeps the line box its original
+       height so the sentence does not reflow. */
+    display: inline-block;
+    padding: 8px 0;
+    margin: -8px 0;
+}
+
+.cl-consent__actions {
+    display: flex;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+/* Both buttons the same size. A decline styled smaller or quieter than
+   the accept is a dark pattern whatever the copy says. */
+.cl-consent__btn {
+    min-height: 48px;
+    flex: 1 1 auto;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+/* On a phone the actions take the full width and sit below the text,
+   rather than squeezing two 48px buttons beside a paragraph. */
+@media (max-width: 560px) {
+    .cl-consent {
+        gap: 14px;
+        padding: 18px;
+    }
+
+    .cl-consent__actions {
+        flex: 1 1 100%;
+    }
+}
+
+/* The dock sits at the bottom on the home page. Lifting the banner
+   clear of it means neither covers the other while a choice is pending. */
+@media (max-width: 900px) {
+    .cl-consent { bottom: 96px; }
 }

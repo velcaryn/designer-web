@@ -104,22 +104,46 @@ try {
 }
 await new Promise((r) => setTimeout(r, 3000));
 
-const COLOUR_GRID = '.nv-preview__grid > div:first-child .nv-swatch';
+/* The lab's colour swatches.
+ *
+ * THIS SELECTOR WENT STALE ONCE AND THE GUARD SAID NOTHING.
+ *
+ * It used to be `.nv-preview__grid > div:first-child .nv-swatch`, from
+ * back when the lab was called the preview. The lab markup was renamed
+ * to `.cl-lab__*` and this was not updated, so `names` came back empty,
+ * the loop below ran zero times, and the script printed
+ * "clean. 0 themes, every text pair at or above AA" and exited 0.
+ *
+ * A guard that passes because it found nothing is worse than no guard:
+ * it is a green tick standing in for a check that is not happening. So
+ * the count is asserted below rather than trusted, and this script now
+ * fails loudly if the selector ever stops matching again.
+ */
+const COLOUR_GRID = '.cl-lab__options--colour .cl-lab__swatch';
+const SWATCH_NAME = '.cl-lab__swatchName';
 
 const names = await page.evaluate(
-    (sel) => [...document.querySelectorAll(sel)]
-        .map((b) => b.querySelector('.nv-swatch__name')?.textContent.trim())
+    ([sel, nameSel]) => [...document.querySelectorAll(sel)]
+        .map((b) => b.querySelector(nameSel)?.textContent.trim())
         .filter(Boolean),
-    COLOUR_GRID,
+    [COLOUR_GRID, SWATCH_NAME],
 );
+
+if (names.length === 0) {
+    console.log('check:contrast - found no theme swatches to click.');
+    console.log(`The selector "${COLOUR_GRID}" matched nothing on ${URL}.`);
+    console.log('If the lab markup changed, update COLOUR_GRID in this file.');
+    await browser.close();
+    process.exit(1);
+}
 
 let total = 0;
 for (const name of names) {
-    await page.evaluate(([n, sel]) => {
+    await page.evaluate(([n, sel, nameSel]) => {
         const el = [...document.querySelectorAll(sel)]
-            .find((b) => b.querySelector('.nv-swatch__name')?.textContent.trim() === n);
+            .find((b) => b.querySelector(nameSel)?.textContent.trim() === n);
         if (el) el.click();
-    }, [name, COLOUR_GRID]);
+    }, [name, COLOUR_GRID, SWATCH_NAME]);
     await new Promise((r) => setTimeout(r, 350));
     const fails = await page.evaluate(AUDIT);
     total += fails.length;

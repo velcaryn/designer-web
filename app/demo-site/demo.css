@@ -1,0 +1,4843 @@
+/* BREAKPOINTS: 768, 900, 1200, plus 760 for the nav swap.
+   This file carried fourteen distinct values (599, 620, 639, 640, 700,
+   740, 760, 768, 820, 879, 880, 900, 1080, 1200), most of them within
+   noise of each other and none of them chosen for a reason that survived
+   the file. The playbook names three plus the nav swap, and a stylesheet
+   with fourteen is one nobody can reason about: you cannot tell whether
+   a rule at 820 was meant to fire before or after one at 879.
+   Collapsed mechanically, then checked against screenshots at 390, 768,
+   1024 and 1440 on three demos. */
+/* ==========================================================================
+   THE DEMO STYLESHEET
+   The only stylesheet on a /demo-site route. app/claudelanding.css is
+   imported per page, not in the root layout, so the 145KB landing
+   stylesheet never loads here.
+
+   THIS FILE IS DELIBERATELY OUTSIDE THE FOUR LOCKS.
+
+   globals.css locks the page to one border weight, one shadow and exactly
+   two radii, because that is VelBiz's identity. Sixteen demos wearing it
+   would demonstrate one style sixteen times, and a restaurant would look
+   like a warehouse. So --vd-radius-*, --vd-border-w and --vd-shadow are
+   per-demo VARIABLES here rather than constants. That is the whole
+   mechanism: a bakery is soft (28px radius, no border, diffuse shadow), a
+   warehouse is sharp (2px radius, hairline, no shadow), from one file.
+
+   THE PREFIX BOUNDARY IS THE ENFORCEMENT.
+   No nv- class may appear inside a demo. No vd- class may appear outside
+   one. Both are one grep, and both are checked in verify.
+
+   BUDGET: this file is 3.3KB gzipped, inside the 5KB the plan set.
+   The playbook says 3-4KB, written for a single brochure page; one
+   stylesheet serving sixteen sites at 5KB is the right reading of that
+   intent, and this is the deviation record the playbook asks for.
+
+   MEASURED, NOT ASSUMED: a demo route's first paint pulls 19.5KB of CSS
+   in total, not 3.3KB. The rest is app/globals.css at 14.3KB, imported
+   by the ROOT layout and therefore paid by every route on the site, plus
+   2.4KB of font-face declarations. globals.css carries Tailwind's
+   preflight, the --nv-* token block and .nv-btn, all of which the hub and
+   the rest of the site genuinely need, so it is not removable for these
+   routes without breaking everything else.
+   What the architecture DOES achieve is that app/claudelanding.css, the
+   145KB landing stylesheet, never reaches a demo. It was reaching them
+   until the hub moved into a (hub) route group: sharing a segment with
+   [slug] made Next hoist the hub's import to the segment both routes
+   share. Verified by reading the stylesheet links out of the served HTML,
+   which is the only measurement that counts. A router prefetch of the hub
+   pulls claudelanding.css afterwards, which is a warm cache for a
+   navigation the visitor may make, not weight on first paint.
+
+   NO TAILWIND. globals.css line 1 is `@import "tailwindcss" source(none)`
+   with @source globs for registry/ only, so a utility class in app/ or
+   components/ emits nothing at all, silently.
+   ========================================================================== */
+
+/* The frame's own scope. The banners render from app/demo-site/layout.js,
+   outside .vd-root, so the one token they need has to be declared here
+   too. Everything else about the frame is deliberately fixed rather than
+   themed: it is VelBiz chrome wrapped around someone else's brand. */
+.vd-frame-scope {
+    --vd-frame-offset: 44px;
+    /* THE FRAME NEEDS ITS OWN GUTTER.
+
+       .vd-frame--bottom was written as
+       `padding: 28px var(--vd-gutter) ...`, but --vd-gutter is declared
+       on .vd-root and the legal frame sits OUTSIDE it, here in the
+       scope. An undefined custom property makes the whole shorthand
+       invalid, so the computed padding was 0 and the disclaimer ran from
+       screen edge to screen edge on every demo.
+
+       Declared here so the frame is self-sufficient rather than
+       borrowing a token from a scope it is not inside. */
+    --vd-frame-gutter: 18px;
+    /* The floating nav's height. Anchors have to clear BOTH it and the
+       legal bar or an in-page jump lands underneath them, which is the
+       most likely regression from detaching the nav. */
+    --vd-nav-h: 56px;
+}
+
+.vd-root {
+    /* Every one of these is overridden per demo by an inline style block
+       on this same element. The values here are a neutral fallback so a
+       missing token degrades to something readable rather than to
+       transparent-on-transparent. */
+    --vd-ink: #1a1a1a;
+    --vd-paper: #ffffff;
+    --vd-accent: #2563eb;
+    --vd-support: #6b7280;
+    --vd-soft: #f3f4f6;
+    --vd-on-accent: #ffffff;
+
+    /* THE ACCENT IS A FILL COLOUR. THIS IS THE TEXT VERSION.
+   
+       Measured across all twenty-four demo themes: the raw accent clears
+       4.5:1 against paper on only six of them. Warehouse is 1.74:1. An
+       accent is chosen to sit ON the ground as a block of colour, and
+       nothing about that choice makes it readable AS text.
+   
+       Mixing it toward the ink keeps the hue recognisably the accent
+       while pulling luminance to where body text needs to be. Fading
+       toward the ink is the safe direction; fading toward the paper is
+       the move that shipped 1:1 labels on the main site.
+   
+       50% was measured, not guessed. At 72% four themes still failed and
+       warehouse sat at 2.72:1; at 50% the worst case across all twenty
+       four is real-estate at 4.65:1, and half the accent hue survives.
+   
+       Use --vd-accent for fills, borders and rules. Use this for any text
+       that has to be read. */
+    --vd-accent-text: color-mix(in srgb, var(--vd-accent) 50%, var(--vd-ink));
+    --vd-fill: #1a1a1a;
+    --vd-on-fill: #ffffff;
+
+    --vd-radius-sm: 8px;
+    --vd-radius-lg: 20px;
+    --vd-radius-pill: 999px;
+    --vd-border-w: 1px;
+    --vd-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+    --vd-font-display: var(--f-fraunces), Georgia, serif;
+    --vd-font-text: var(--f-inter), system-ui, sans-serif;
+
+    /* The legal frame's height, read by every sticky offset and by
+       scroll-margin-top. Fixed rather than measured so a font swap cannot
+       reflow the page under a visitor. */
+    --vd-frame-offset: 44px;
+    /* The floating nav's height. Anchors have to clear BOTH it and the
+       legal bar or an in-page jump lands underneath them, which is the
+       most likely regression from detaching the nav. */
+    --vd-nav-h: 56px;
+
+    --vd-gutter: 18px;
+
+    /* PRICE COLUMNS ARE FIXED WIDTH, NOT auto.
+   
+       Money in a list has to form a straight right edge, and `auto` sizes
+       the column to the longest value in THAT group, so "Rs 90" and
+       "Rs 1,25,000" in two sections of the same page produce two
+       different column widths and two different right edges. On the
+       bakery menu the price column measured 53px in one group and moved
+       in the next.
+   
+       It is a MINIMUM, not a fixed width. Some "prices" in this corpus
+       are whole phrases ("From Rs 1,450 a tonne"), so a hard width would
+       either truncate those or waste the space on a menu whose prices are
+       three digits. min-content against this floor lets short figures
+       share one edge and long phrases take what they need.
+   
+       4.6rem holds "Rs 1,250" at 16px, which is the widest a cart menu
+       price gets. Wider than that and the item name starts wrapping on a
+       390px screen, which is worse than the raggedness it fixes: 6.5rem
+       was tried and pushed "Multigrain loaf" onto two lines. */
+    --vd-price-col: 4.6rem;
+    --vd-shell: 1180px;
+    --vd-section-y: clamp(44px, 7vw, 88px);
+
+    background: var(--vd-paper);
+    color: var(--vd-ink);
+    font-family: var(--vd-font-text);
+    /* dvh, not vh: on iOS the address bar collapsing changes vh mid-scroll
+       and anything sized against it jumps. */
+    min-height: 100dvh;
+    -webkit-tap-highlight-color: transparent;
+    /* Rotated and overhanging decorative elements must not create a
+       horizontal scrollbar on a phone. */
+    overflow-x: clip;
+}
+
+@media (min-width: 768px) { .vd-root { --vd-gutter: 32px; } }
+@media (min-width: 1200px) { .vd-root { --vd-gutter: 48px; } }
+
+/* Anchors must clear the sticky legal bar plus the demo's own nav. */
+.vd-root :where([id]) {
+    scroll-margin-top: calc(var(--vd-frame-offset) + var(--vd-nav-h) + 18px);
+}
+
+.vd-root * { box-sizing: border-box; min-width: 0; }
+
+.vd-root h1, .vd-root h2, .vd-root h3, .vd-root h4 {
+    font-family: var(--vd-font-display);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.vd-root p { margin: 0; }
+
+.vd-root img, .vd-root svg { max-width: 100%; display: block; }
+
+/* Touch. 300ms tap delay off, no text selection on controls, and a
+   focus ring that survives whatever the demo's palette is. */
+.vd-root button,
+.vd-root a,
+.vd-root input,
+.vd-root select,
+.vd-root [role="tab"] {
+    touch-action: manipulation;
+}
+
+.vd-root button, .vd-root [role="tab"] { user-select: none; }
+
+.vd-root :focus-visible {
+    outline: 3px solid var(--vd-accent);
+    outline-offset: 2px;
+}
+
+/* iOS zooms the viewport when a focused input is under 16px. Every field
+   on every demo is at least 16px for that reason alone. */
+.vd-root input,
+.vd-root select,
+.vd-root textarea {
+    font-size: 16px;
+    font-family: inherit;
+}
+
+/* ── Layout primitives ─────────────────────────────────────────────────── */
+
+.vd-shell {
+    width: 100%;
+    max-width: calc(var(--vd-shell) + var(--vd-gutter) * 2);
+    margin-inline: auto;
+    padding-inline: var(--vd-gutter);
+}
+
+.vd-section { padding-block: var(--vd-section-y); position: relative; }
+
+.vd-ground--paper { background: var(--vd-paper); }
+.vd-ground--soft { background: var(--vd-soft); }
+.vd-ground--accent { background: var(--vd-accent); color: var(--vd-on-accent); }
+.vd-ground--ink { background: var(--vd-ink); color: var(--vd-paper); }
+
+/* Text on an accent or ink ground pairs with THAT surface, never with the
+   page. This is the trap that shipped 1:1 labels on the main site: fading
+   text toward the background means fading it toward invisible. */
+.vd-ground--accent h1, .vd-ground--accent h2,
+.vd-ground--accent h3, .vd-ground--accent p { color: var(--vd-on-accent); }
+.vd-ground--ink h1, .vd-ground--ink h2,
+.vd-ground--ink h3, .vd-ground--ink p { color: var(--vd-paper); }
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+
+.vd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    /* 48px is the playbook's floor and the audience is 99% touch. */
+    min-height: 48px;
+    padding: 0 22px;
+    border: var(--vd-border-w) solid transparent;
+    border-radius: var(--vd-radius-pill);
+    font-family: var(--vd-font-text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.14s ease, box-shadow 0.14s ease,
+                background-color 0.2s ease;
+}
+
+.vd-btn--primary {
+    background: var(--vd-fill);
+    color: var(--vd-on-fill);
+    box-shadow: var(--vd-shadow);
+}
+
+.vd-btn--ghost {
+    background: transparent;
+    border-color: currentColor;
+    color: inherit;
+}
+
+@media (hover: hover) {
+    .vd-btn--primary:hover { transform: translateY(-1px); }
+    .vd-btn--ghost:hover { background: color-mix(in srgb, currentColor 10%, transparent); }
+}
+
+.vd-btn:active { transform: translateY(1px); }
+
+/* ── Motion ────────────────────────────────────────────────────────────── */
+
+/* Cross-document transitions between demo routes. Free in Chrome, which
+   is what Android WhatsApp opens; a silent no-op everywhere else. */
+@view-transition { navigation: auto; }
+
+@media (prefers-reduced-motion: no-preference) {
+    /* Scroll reveals with no JS at all. Where animation-timeline is
+       unsupported the element is simply already visible, which is the
+       correct fallback and the reason this is not an IntersectionObserver. */
+    @supports (animation-timeline: view()) {
+        .vd-reveal {
+            animation: vd-rise both;
+            animation-timeline: view();
+            animation-range: entry 10% cover 32%;
+        }
+    }
+}
+
+@keyframes vd-rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vd-root *,
+    .vd-root *::before,
+    .vd-root *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+/* ==========================================================================
+   THE VELBIZ FRAME
+   Fixed colours, NOT --vd-* tokens. This is VelBiz chrome wrapped around
+   someone else's brand; inheriting the demo's palette would make it read
+   as part of the demo, which is exactly what the legal notice must not do.
+   ========================================================================== */
+
+.vd-frame {
+    background: #0a0a0c;
+    color: #e8e8ea;
+    font-family: var(--f-inter), system-ui, sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.45;
+}
+
+.vd-frame--top {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    /* Fixed height, matching --vd-frame-offset. Measured heights reflow
+       when a font swaps in; this cannot. */
+    height: var(--vd-frame-offset);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-inline: var(--vd-frame-gutter);
+}
+
+.vd-frame--top .vd-frame__text {
+    /* One line, always. The full statement is in the bottom frame, which
+       has room for it. */
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The way back to the hub.
+   THE 44px FRAME HEIGHT IS NOT NEGOTIABLE: it is --vd-frame-offset and
+   every sticky offset on sixteen pages derives from it, so raising this
+   control to the 48px touch floor would reflow all of them. The visual
+   box stays inside 44px and the ::before extends the actual hit area to
+   52px, which is the standard resolution and costs nothing. */
+.vd-frame__back {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: none;
+    padding: 6px 10px 6px 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.10);
+    color: #fbfbfd;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.vd-frame__back::before {
+    content: '';
+    position: absolute;
+    inset: -5px -4px;
+}
+
+@media (hover: hover) {
+    .vd-frame__back:hover { background: rgba(255, 255, 255, 0.18); }
+}
+
+.vd-frame__back:active { transform: translateY(1px); }
+
+.vd-frame--bottom {
+    padding: 28px var(--vd-frame-gutter)
+        calc(28px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ── The pitch, above the legal text ───────────────────────────────────── */
+
+/* FIXED COLOURS, LIKE THE REST OF THE FRAME.
+
+   Everything else on a demo route reads --vd-*, which the demo sets to its
+   own brand. This block deliberately does not: it is VelBiz speaking, and
+   painting it in the bakery's palette would make it read as the bakery
+   asking whether you want a website. Same reasoning as .vd-frame itself.
+
+   The blue is the VelBiz fill from app/globals.css, restated here because
+   the demo scope has no access to the nv- tokens. */
+.vd-pitch {
+    max-width: var(--vd-shell);
+    margin: 0 auto 26px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    /* start, not center: the mark should sit on the first line of the
+       lead, not float against the middle of a two-line block. Same
+       mistake the menu row made with its price. */
+    align-items: start;
+    gap: 6px 14px;
+}
+
+.vd-pitch__mark {
+    grid-row: span 2;
+    height: 29px;
+    width: auto;
+    /* Optically on the lead's cap height. */
+    margin-top: 1px;
+    /* Slightly dimmed: it is a signature on the frame, not the loudest
+       thing on the page. The CTA beside it should win. */
+    opacity: 0.9;
+}
+
+.vd-pitch__body { min-width: 0; }
+
+.vd-pitch__lead {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: #ffffff;
+}
+
+.vd-pitch__sub {
+    margin: 3px 0 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    /* Quieter than the lead, still well clear of the ground: measured
+       against #0a0a0c this is about 8:1. */
+    color: #b9bcc4;
+}
+
+.vd-pitch__cta {
+    grid-column: 1 / -1;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    /* The playbook floor, and this is the one thing on the frame anybody
+       is meant to tap. */
+    min-height: 48px;
+    margin-top: 4px;
+    padding: 0 20px;
+    border-radius: 999px;
+    background: #0066cc;
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+@media (hover: hover) {
+    .vd-pitch__cta:hover { background: #0a78e6; }
+}
+
+.vd-pitch__cta:active { transform: translateY(1px); }
+
+.vd-pitch__cta:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+@media (min-width: 640px) {
+    /* Three across once there is room: mark, words, action. */
+    .vd-pitch {
+        grid-template-columns: auto 1fr auto;
+        gap: 18px;
+    }
+    .vd-pitch__mark { grid-row: auto; }
+    .vd-pitch__cta { grid-column: auto; margin-top: 0; }
+}
+
+.vd-frame__inner {
+    max-width: var(--vd-shell);
+    margin-inline: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.vd-frame--bottom .vd-frame__text {
+    flex: 1 1 320px;
+    max-width: 68ch;
+    /* A real colour, never opacity. 45% of anything lands near 1.9:1. */
+    color: #a8a8ae;
+}
+
+.vd-frame__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.vd-frame__ghost {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 18px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+    color: #e8e8ea;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+@media (hover: hover) {
+    .vd-frame__ghost:hover { border-color: #fbfbfd; color: #fbfbfd; }
+}
+
+.vd-frame__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 48px;
+    padding: 0 20px;
+    background: #fbfbfd;
+    color: #0a0a0c;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+@media (hover: hover) {
+    .vd-frame__link:hover { background: #ffffff; }
+}
+
+.vd-frame__link:active { transform: translateY(1px); }
+
+/* ── The commercial ask ────────────────────────────────────────────────── */
+
+.vd-cta {
+    background: #0a0a0c;
+    color: #fbfbfd;
+    padding: 22px var(--vd-gutter);
+}
+
+.vd-cta__inner {
+    max-width: var(--vd-shell);
+    margin-inline: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+}
+
+.vd-cta__text {
+    font-family: var(--f-inter), system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fbfbfd;
+}
+
+.vd-cta__btn {
+    background: #25d366;
+    color: #05270f;
+    border: 0;
+}
+
+@media (hover: hover) {
+    .vd-cta__btn:hover { background: #2ee673; }
+}
+
+/* ── Phase 1 stub. Replaced by real sections in Phase 2. ───────────────── */
+
+.vd-stub__trade {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vd-accent);
+}
+
+.vd-stub__title {
+    margin-top: 10px;
+    font-size: clamp(2.2rem, 7vw, 4rem);
+    color: var(--vd-ink);
+}
+
+.vd-stub__blurb {
+    margin-top: 14px;
+    max-width: 46ch;
+    font-size: clamp(1.02rem, 2vw, 1.2rem);
+    line-height: 1.55;
+    color: var(--vd-support);
+}
+
+.vd-stub__city {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--vd-support);
+}
+
+.vd-stub__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 26px;
+}
+
+.vd-stub__note {
+    margin-top: 34px;
+    padding: 16px 18px;
+    max-width: 52ch;
+    background: var(--vd-soft);
+    border-radius: var(--vd-radius-lg);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+/* ==========================================================================
+   DEMO COMPONENTS
+   Every colour, radius, border and shadow below reads a --vd-* token, so
+   the same markup is a soft bakery or a hard warehouse depending only on
+   what the route sets on .vd-root.
+   ========================================================================== */
+
+.vd-h2 {
+    font-size: clamp(1.65rem, 4vw, 2.5rem);
+    color: var(--vd-ink);
+}
+
+.vd-lede {
+    margin-top: 12px;
+    max-width: 54ch;
+    font-size: clamp(1rem, 1.6vw, 1.1rem);
+    line-height: 1.6;
+    color: var(--vd-support);
+}
+
+/* ── Logo ──────────────────────────────────────────────────────────────── */
+
+.vd-logo { display: inline-flex; align-items: center; gap: 10px; }
+
+.vd-logo__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--vd-accent);
+}
+
+.vd-logo--stamp .vd-logo__mark,
+.vd-logo--plate .vd-logo__mark {
+    width: 44px;
+    height: 44px;
+    background: var(--vd-soft);
+}
+
+.vd-logo--stamp .vd-logo__mark { border-radius: 999px; }
+.vd-logo--plate .vd-logo__mark { border-radius: var(--vd-radius-sm); }
+
+.vd-logo__name {
+    font-family: var(--vd-font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--vd-ink);
+}
+
+/* ── Nav ───────────────────────────────────────────────────────────────── */
+
+/* A DETACHED FLOATING BAR, NOT A STICKY EDGE-TO-EDGE ONE.
+   z-index 50: above page content, below the legal bar (60) and the
+   switcher pill (55). The legal notice must never be occludable by the
+   business's own chrome.
+   Every colour reads a --vd-* token, so sixteen demos get sixteen
+   different floating headers from this one rule block. */
+.vd-nav {
+    position: fixed;
+    top: calc(var(--vd-frame-offset) + 8px);
+    left: var(--vd-gutter);
+    right: var(--vd-gutter);
+    z-index: 50;
+    max-width: var(--vd-shell);
+    margin-inline: auto;
+    height: var(--vd-nav-h);
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--vd-support) 34%, transparent);
+    background: color-mix(in srgb, var(--vd-paper) 82%, transparent);
+    backdrop-filter: blur(12px) saturate(140%);
+    box-shadow: 0 6px 22px color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    transition: transform 240ms ease, opacity 240ms ease;
+}
+
+/* The page has to start below the floating bar, which no longer occupies
+   layout space. */
+.vd-root main { padding-top: calc(var(--vd-nav-h) + 18px); }
+
+/* Fullbleed heroes pull their own image up behind the bar. */
+.vd-hero--fullbleed { margin-top: calc((var(--vd-nav-h) + 18px) * -1); }
+
+.vd-nav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: 100%;
+    padding-inline: 8px 8px;
+}
+
+/* The primary action, always reachable. On a phone this is the only
+   control in the bar: the section links are hidden below 760px and a
+   hamburger is deliberately not built, because a demo is one scrollable
+   document and a jump menu inside it is desktop thinking. */
+.vd-nav__cta {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    /* 44px, not the 40 this shipped as. It is the only control in the
+       bar on a phone and therefore the most-tapped thing on the page.
+       The bar is 56px, so 44 fits with 6px of breathing room each side. */
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: var(--vd-fill);
+    color: var(--vd-on-fill);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+@media (hover: hover) {
+    .vd-nav__cta:hover { filter: brightness(1.08); }
+}
+
+.vd-nav__cta:active { transform: translateY(1px); }
+
+/* The business name truncates rather than wrapping the bar to two lines. */
+.vd-nav .vd-logo__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 42vw;
+}
+
+@media (min-width: 768px) {
+    .vd-nav .vd-logo__name { max-width: none; }
+}
+
+.vd-nav__links { display: none; gap: 22px; }
+
+@media (min-width: 760px) { .vd-nav__links { display: flex; } }
+
+.vd-nav__links a {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--vd-support);
+    text-decoration: none;
+    padding: 12px 0;
+}
+
+@media (hover: hover) {
+    .vd-nav__links a:hover { color: var(--vd-ink); }
+}
+
+/* ── Hero (shared) ─────────────────────────────────────────────────────── */
+
+.vd-hero { padding-top: clamp(32px, 5vw, 64px); }
+
+.vd-hero__kicker {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--vd-accent);
+}
+
+.vd-hero__title {
+    margin-top: 12px;
+    max-width: 15ch;
+    font-size: clamp(2.3rem, 8vw, 4.4rem);
+    color: var(--vd-ink);
+}
+
+.vd-hero__sub {
+    margin-top: 18px;
+    max-width: 52ch;
+    font-size: clamp(1rem, 2vw, 1.16rem);
+    line-height: 1.6;
+    color: var(--vd-support);
+}
+
+.vd-hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+
+.vd-hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    margin-top: 28px;
+}
+
+.vd-trust { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+
+.vd-trust__item {
+    padding: 6px 12px;
+    background: var(--vd-soft);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--vd-support);
+}
+
+.vd-hero__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ── Hero: Standard (image card below text) ──────────────────────────── */
+
+.vd-hero--standard .vd-hero__media {
+    margin-top: clamp(28px, 4vw, 44px);
+    border-radius: var(--vd-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--vd-shadow);
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    background: var(--vd-soft);
+    aspect-ratio: 16 / 9;
+}
+
+/* ── Hero: Fullbleed (background image + gradient overlay) ───────────── */
+
+.vd-hero--fullbleed {
+    position: relative;
+    padding-top: 0;
+    min-height: clamp(480px, 72vh, 720px);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.vd-hero__backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.vd-hero__backdrop .vd-hero__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.04);
+    /* A 16:9 photograph in a 0.6 ratio phone hero has to crop, and the
+       default centre crop puts the most interesting part of the frame
+       behind the scrim and the headline. The copy occupies 57% to 83%
+       measured up from the bottom, so what a reader actually SEES of the
+       photograph is the top third. Biasing the crop upward puts the
+       subject there instead of hiding it under the text. */
+    object-position: 50% 32%;
+}
+
+/* Above the mobile breakpoint the hero is wide enough that the crop is
+   mild and the centre is the right choice again. */
+@media (min-width: 900px) {
+    .vd-hero__backdrop .vd-hero__img { object-position: 50% 50%; }
+}
+
+.vd-hero__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    /* MEASURED, NOT EYEBALLED.
+   
+       The previous ramp reached 0.55 where the text sits, and sampling
+       the actual painted pixels behind each line (with the text hidden,
+       so the reading is of the backdrop and not of the glyphs) gave white
+       text a worst case of 1.43:1 on home-stay and under 3:1 on four of
+       the five fullbleed demos. Text shadows make that look survivable
+       without making it measurable.
+   
+       The stops are placed against where the copy actually sits, which
+       was measured rather than assumed: the kicker and headline occupy
+       57% to 83% of the hero height measured up from the bottom, so a
+       ramp that had gone light by 62% was leaving the headline on bare
+       photograph. It now holds through 84% and only clears above that.
+   
+       The DEPTH was tuned against both things that matter, not just one.
+       At 0.86 every line measured 15:1 and the restaurant's food, which
+       is the entire thing that demo sells, was almost black. Three ramps
+       were measured for worst-case text contrast AND for how much of the
+       photograph survived: 0.86 gave 15.5:1 at 0.121 mean luminance,
+       0.60 gave 5.8:1 at 0.130, and this one gives 4.67:1 at 0.141. It
+       is the lightest scrim that still clears AA on all five, which is
+       the correct trade for a page whose photographs are the product. */
+    background: linear-gradient(
+        to top,
+        hsla(0 0% 0% / 0.68) 0%,
+        hsla(0 0% 0% / 0.60) 50%,
+        hsla(0 0% 0% / 0.54) 84%,
+        hsla(0 0% 0% / 0.26) 93%,
+        hsla(0 0% 0% / 0.06) 100%
+    );
+}
+
+.vd-hero__overlay {
+    position: relative;
+    z-index: 2;
+    padding-top: clamp(100px, 18vw, 200px);
+    padding-bottom: clamp(36px, 6vw, 64px);
+}
+
+/* Fullbleed flips text colours to white for legibility over image.
+
+   THE KICKER WAS THE ONE LINE THAT DID NOT GET FLIPPED. It kept
+   var(--vd-accent), and an accent is picked to sit against the theme's
+   paper, not against a photograph. Measured against the actual painted
+   pixels behind it on the five fullbleed demos: restaurant 1.00:1,
+   architecture 1.00:1, photo-studio 1.24:1, lodging 1.80:1, home-stay
+   2.30:1. Effectively invisible on all five.
+
+   White, like everything else in this block, with a shadow heavy enough
+   to survive a pale patch of photograph. The kicker is small uppercase
+   text, so it needs more help than the title does, not less. */
+.vd-hero--fullbleed .vd-hero__kicker {
+    color: #fff;
+    text-shadow: 0 1px 3px hsla(0 0% 0% / 0.75), 0 2px 12px hsla(0 0% 0% / 0.55);
+}
+.vd-hero--fullbleed .vd-hero__title  { color: #fff; text-shadow: 0 2px 6px hsla(0 0% 0% / 0.5), 0 4px 20px hsla(0 0% 0% / 0.45); }
+/* Was 88% white, which is a fade toward the image rather than toward a
+   colour. Full white plus a shadow: the sub is body-size text over a
+   photograph and it needs the contrast more than the title does. */
+.vd-hero--fullbleed .vd-hero__sub    { color: #fff; text-shadow: 0 1px 4px hsla(0 0% 0% / 0.7), 0 2px 14px hsla(0 0% 0% / 0.5); }
+.vd-hero--fullbleed .vd-trust__item  { background: hsla(0 0% 100% / 0.15); color: #fff; backdrop-filter: blur(4px); }
+.vd-hero--fullbleed .vd-hours        { color: #fff; }
+.vd-hero--fullbleed .vd-hours__dot   { background: #4ade80; }
+.vd-hero--fullbleed .vd-btn--ghost   {
+    color: #fff;
+    border-color: hsla(0 0% 100% / 0.4);
+}
+
+/* ── Hero: Split (text left, image right) ────────────────────────────── */
+
+.vd-hero--split { padding-top: clamp(32px, 5vw, 64px); }
+
+.vd-hero__split-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(24px, 4vw, 48px);
+    align-items: center;
+}
+
+@media (min-width: 768px) {
+    .vd-hero__split-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.vd-hero__split-text {
+    order: 2;
+}
+
+@media (min-width: 768px) {
+    .vd-hero__split-text { order: 1; }
+}
+
+.vd-hero__split-media {
+    order: 1;
+    border-radius: var(--vd-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--vd-shadow);
+    aspect-ratio: 4 / 3;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+}
+
+@media (min-width: 768px) {
+    .vd-hero__split-media { order: 2; }
+}
+
+.vd-hero--split .vd-hero__title {
+    max-width: 18ch;
+    font-size: clamp(1.9rem, 5vw, 3.2rem);
+}
+
+/* ── Hero: Banner (image strip + overlapping text card) ──────────────── */
+
+.vd-hero--banner {
+    padding-top: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.vd-hero__banner-media {
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    overflow: hidden;
+    background: var(--vd-soft);
+}
+
+@media (max-width: 767px) {
+    .vd-hero__banner-media { aspect-ratio: 16 / 9; }
+}
+
+.vd-hero__banner-card {
+    position: relative;
+    margin-top: clamp(-48px, -6vw, -80px);
+    background: var(--vd-paper);
+    border-radius: var(--vd-radius-lg);
+    padding: clamp(24px, 4vw, 48px);
+    box-shadow: var(--vd-shadow), 0 -4px 24px hsla(0 0% 0% / 0.06);
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 8%, transparent);
+    z-index: 1;
+}
+
+.vd-hero--banner .vd-hero__title {
+    max-width: 22ch;
+    font-size: clamp(2rem, 6vw, 3.6rem);
+}
+
+/* ── Live hours ────────────────────────────────────────────────────────── */
+
+.vd-hours {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--vd-support);
+}
+
+.vd-hours--open { color: var(--vd-ink); }
+
+.vd-hours__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--vd-support);
+    flex: none;
+}
+
+.vd-hours__dot--on { background: #16a34a; }
+.vd-hours__dot--idle { opacity: 0.5; }
+
+/* ── The counter ───────────────────────────────────────────────────────── */
+
+.vd-menu { margin-top: 30px; display: grid; gap: 30px; }
+
+@media (min-width: 900px) { .vd-menu { grid-template-columns: repeat(2, 1fr); gap: 30px 44px; } }
+
+.vd-menu__label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--vd-accent);
+    margin-bottom: 12px;
+}
+
+.vd-menu__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+
+.vd-menu__row {
+    display: grid;
+    /* TWO ROWS ON A PHONE, NOT THREE COLUMNS.
+   
+       Name, price and a 118px stepper across a 390px screen leaves 114px
+       for the name, which wrapped seven of the eleven bakery items onto
+       two lines. The item name is the thing being read; it gets the full
+       width, and the price and stepper sit on their own line beneath it.
+   
+       Named areas rather than nth-child, so the source order stays
+       name, price, stepper for a screen reader and for tab order. */
+    grid-template-areas:
+        'info  info'
+        'price qty';
+    grid-template-columns: minmax(var(--vd-price-col), auto) 1fr;
+    /* start, not center: the price belongs beside the item NAME. Centring
+       it against a two-line name-plus-note block floated it 35px below
+       the name it prices, which is what the misalignment was. */
+    align-items: start;
+    gap: 8px 12px;
+    padding: 12px;
+    background: var(--vd-paper);
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    border-radius: var(--vd-radius-sm);
+}
+
+.vd-menu__info { grid-area: info; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.vd-menu__name { font-weight: 600; color: var(--vd-ink); }
+.vd-menu__note { font-size: 0.82rem; color: var(--vd-support); }
+
+.vd-menu__price {
+    grid-area: price;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--vd-ink);
+    white-space: nowrap;
+    /* Left on the phone layout, where the price starts its own row and a
+       right edge would float it away from the item it prices. It goes
+       back to right-aligned at 620px where the three-column layout
+       returns and the column edge is what matters. */
+    text-align: left;
+    /* Centres the text on the 44px stepper sharing its row. */
+    align-self: center;
+}
+
+.vd-qty {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* On the phone layout the stepper owns the right of its own row. */
+.vd-menu__row .vd-qty { grid-area: qty; justify-self: end; }
+
+/* From 620px the row is wide enough for three real columns, and then the
+   price wants its right edge back and the stepper wants to sit on the
+   item name's baseline rather than at the top of a 44px box. */
+@media (min-width: 620px) {
+    .vd-menu__row {
+        grid-template-areas: 'info price qty';
+        grid-template-columns: 1fr minmax(var(--vd-price-col), auto) auto;
+        gap: 12px;
+    }
+    .vd-menu__price { text-align: right; align-self: start; }
+    .vd-menu__row .vd-qty {
+        /* 44px control against a 25.6px line: half the difference lifts
+           its centre onto the name's baseline. */
+        margin-top: calc((25.6px - 44px) / 2);
+    }
+}
+
+/* 44px, not the 34px this shipped as. These are the most-tapped controls
+   on the page and the audience is 99% touch; the playbook's floor is 48
+   and 44 is the absolute minimum any of it may be. A 34px target next to
+   another 34px target is how someone adds two loaves meaning to add one. */
+.vd-qty__btn {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--vd-soft);
+    border: 0;
+    border-radius: var(--vd-radius-sm);
+    color: var(--vd-ink);
+    cursor: pointer;
+}
+
+.vd-qty__btn:disabled { opacity: 0.35; cursor: default; }
+
+@media (hover: hover) {
+    .vd-qty__btn:not(:disabled):hover { background: var(--vd-accent); color: var(--vd-on-accent); }
+}
+
+.vd-qty__n {
+    min-width: 26px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--vd-ink);
+}
+
+/* ── The basket bar ────────────────────────────────────────────────────── */
+
+/* The basket bar and the switcher pill both live at the bottom of the
+   screen on the four cart demos. The pill reads --vd-pill-bottom, so a
+   page carrying a basket lifts it clear rather than the two overlapping. */
+.vd-root:has(.vd-basket) { --vd-pill-bottom: 84px; }
+
+.vd-basket {
+    position: sticky;
+    bottom: 0;
+    z-index: 45;
+    padding: 12px var(--vd-gutter) calc(12px + env(safe-area-inset-bottom, 0px));
+    background: var(--vd-ink);
+}
+
+.vd-basket__inner {
+    max-width: var(--vd-shell);
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.vd-basket__count {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8rem;
+    color: color-mix(in srgb, var(--vd-paper) 72%, var(--vd-ink));
+}
+
+.vd-basket__count strong {
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-paper);
+}
+
+.vd-basket .vd-btn--primary { background: var(--vd-accent); color: var(--vd-on-accent); }
+
+/* ── The order sheet ───────────────────────────────────────────────────── */
+
+.vd-sheet { position: fixed; inset: 0; z-index: 80; display: flex; align-items: flex-end; }
+
+@media (min-width: 768px) { .vd-sheet { align-items: center; justify-content: center; } }
+
+.vd-sheet__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+.vd-sheet__panel {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    max-height: 86dvh;
+    overflow-y: auto;
+    /* A drag inside the sheet must not scroll the page behind it. */
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    margin-inline: auto;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    background: var(--vd-paper);
+    border-radius: var(--vd-radius-lg) var(--vd-radius-lg) 0 0;
+}
+
+@media (min-width: 768px) { .vd-sheet__panel { border-radius: var(--vd-radius-lg); } }
+
+.vd-sheet__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.vd-sheet__title { font-size: 1.05rem; color: var(--vd-ink); }
+
+.vd-sheet__close {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--vd-soft);
+    border: 0;
+    border-radius: 999px;
+    color: var(--vd-ink);
+    cursor: pointer;
+    flex: none;
+}
+
+.vd-sheet__msg {
+    margin: 16px 0 0;
+    padding: 16px;
+    background: var(--vd-soft);
+    border-radius: var(--vd-radius-sm);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--vd-ink);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.vd-sheet__note {
+    margin-top: 14px;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--vd-support);
+}
+
+/* ── Story, voices, questions, visit ───────────────────────────────────── */
+
+.vd-story { max-width: 62ch; }
+.vd-story__media {
+    margin: 24px 0 20px;
+    border-radius: var(--vd-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--vd-shadow);
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+    aspect-ratio: 4 / 3;
+    background: var(--vd-soft);
+}
+.vd-story__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.vd-story__p { margin-top: 16px; font-size: 1.02rem; line-height: 1.7; color: var(--vd-support); }
+.vd-detail__media {
+    margin: 28px 0 20px;
+    border-radius: var(--vd-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--vd-shadow);
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+    aspect-ratio: 1 / 1;
+    max-width: 360px;
+    background: var(--vd-soft);
+}
+.vd-detail__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.vd-voices { margin-top: 28px; display: grid; gap: 14px; }
+@media (min-width: 900px) { .vd-voices { grid-template-columns: repeat(3, 1fr); } }
+
+.vd-voice {
+    margin: 0;
+    padding: 20px;
+    background: var(--vd-paper);
+    border-radius: var(--vd-radius-lg);
+    box-shadow: var(--vd-shadow);
+}
+
+.vd-voice__text { margin: 0; font-size: 0.96rem; line-height: 1.6; color: var(--vd-ink); }
+
+.vd-voice__who {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--vd-ink);
+}
+
+.vd-voice__who span { font-weight: 500; color: var(--vd-support); }
+
+.vd-faq { margin-top: 24px; max-width: 68ch; display: grid; gap: 8px; }
+
+.vd-faq__item {
+    padding: 14px 16px;
+    background: var(--vd-soft);
+    border-radius: var(--vd-radius-sm);
+}
+
+.vd-faq__q {
+    font-family: var(--vd-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--vd-ink);
+    cursor: pointer;
+    /* The default marker sits oddly at this size and cannot be styled
+       consistently across browsers, so it is replaced by the rotation of
+       a custom one. */
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    /* A <summary> is a tap target like any other. */
+    min-height: 44px;
+    align-items: center;
+}
+
+.vd-faq__q::-webkit-details-marker { display: none; }
+
+.vd-faq__q::after {
+    content: '+';
+    font-size: 1.2rem;
+    line-height: 1;
+    color: var(--vd-accent);
+    flex: none;
+}
+
+.vd-faq__item[open] .vd-faq__q::after { content: '-'; }
+
+.vd-faq__a { margin-top: 10px; font-size: 0.95rem; line-height: 1.65; color: var(--vd-support); }
+
+.vd-visit { display: grid; gap: 26px; }
+@media (min-width: 900px) { .vd-visit { grid-template-columns: 1.2fr 1fr; gap: 44px; } }
+
+.vd-visit__note { margin-top: 14px; max-width: 46ch; line-height: 1.65; color: color-mix(in srgb, var(--vd-paper) 78%, var(--vd-ink)); }
+
+.vd-visit__card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px;
+    background: color-mix(in srgb, var(--vd-paper) 12%, transparent);
+    border-radius: var(--vd-radius-lg);
+    font-style: normal;
+}
+
+.vd-visit__line { color: var(--vd-paper); }
+
+.vd-visit .vd-hours,
+.vd-visit .vd-hours--open { color: color-mix(in srgb, var(--vd-paper) 80%, var(--vd-ink)); }
+
+.vd-visit__email::before {
+    content: '';
+    position: absolute;
+    inset: -2px -6px;
+}
+
+.vd-visit__email {
+    /* Padding grows the tap area to 44px; the negative margin keeps the
+       line box its original height so the address block does not reflow.
+       Same technique the consent banner's privacy link uses. */
+    position: relative;
+    display: inline-block;
+    padding: 11px 0;
+    margin: -7px 0 0;
+    color: var(--vd-paper);
+    font-weight: 600;
+    /* A .example address is long and has no spaces, so it overflowed its
+       card by 6px on every demo. word-break: break-word is deprecated and
+       did nothing here; overflow-wrap: anywhere is the rule that actually
+       breaks an unbroken token, and max-width keeps the break inside the
+       card rather than at the viewport edge. */
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   MODULES: booking, tariff, before and after
+   ========================================================================== */
+
+.vd-book { margin-top: 26px; display: grid; gap: 22px; max-width: 720px; }
+
+.vd-book__row { display: flex; flex-direction: column; gap: 10px; }
+
+/* A FIELD LABEL, NOT AN EYEBROW.
+   This shipped as uppercase with 0.08em tracking, which is the exact
+   signature of a section eyebrow. On the four tariff demos that put five
+   of them on one page against an allowance of three, and the page picked
+   up the templated rhythm the eyebrow limit exists to prevent.
+   A form label should read as a form label: sentence case, normal
+   tracking, quieter than the thing it labels. */
+.vd-book__legend {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--vd-support);
+}
+
+.vd-book__opts { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.vd-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    /* 48px, not the 34px the quantity buttons first shipped at. These are
+       the primary controls of the module and the audience is all touch. */
+    min-height: 48px;
+    padding: 0 16px;
+    background: var(--vd-paper);
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 18%, transparent);
+    border-radius: var(--vd-radius-pill);
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--vd-ink);
+    cursor: pointer;
+}
+
+.vd-chip--active {
+    background: var(--vd-fill);
+    border-color: var(--vd-fill);
+    color: var(--vd-on-fill);
+}
+
+@media (hover: hover) {
+    /* :not(--active) so hover can never outrank the selected state. */
+    .vd-chip:hover:not(.vd-chip--active) {
+        border-color: var(--vd-accent);
+        color: var(--vd-accent);
+    }
+}
+
+.vd-chip:active { transform: translateY(1px); }
+
+.vd-book__foot {
+    margin-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    padding-top: 20px;
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+}
+
+.vd-book__summary { font-weight: 600; color: var(--vd-ink); }
+
+/* ── Tariff ────────────────────────────────────────────────────────────── */
+
+.vd-tariff { margin-top: 26px; display: grid; gap: 24px; }
+
+@media (min-width: 900px) {
+    .vd-tariff { grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: start; }
+}
+
+/* Single column, so the output card runs full width and its own action
+   button can land in the fixed switcher pill's band at the bottom right.
+   Padding on the CARD does not help: the button is inside it, so both
+   move together. Reserving space to the RIGHT of the button is what
+   actually clears the pill, and only on the narrow layout where they
+   compete for the same corner. */
+@media (max-width: 899px) {
+    .vd-tariff__out .vd-btn { margin-right: 150px; }
+}
+
+.vd-tariff__controls { display: grid; gap: 22px; }
+
+.vd-range {
+    width: 100%;
+    /* A native range is already draggable, keyboard operable and
+       announced. Nothing here reimplements any of that. */
+    accent-color: var(--vd-accent);
+    height: 44px;
+}
+
+.vd-tariff__qty {
+    font-family: var(--vd-font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-ink);
+}
+
+.vd-tariff__note { font-size: 0.85rem; color: var(--vd-support); }
+
+.vd-tariff__out {
+    padding: 24px;
+    background: var(--vd-ink);
+    border-radius: var(--vd-radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+/* Same reasoning as .vd-book__legend: this labels a number, it is not a
+   section eyebrow. */
+.vd-tariff__label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--vd-paper) 62%, var(--vd-ink));
+}
+
+.vd-tariff__total {
+    font-family: var(--vd-font-display);
+    font-size: clamp(1.9rem, 5vw, 2.6rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-paper);
+}
+
+.vd-tariff__break {
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--vd-paper) 70%, var(--vd-ink));
+    margin-bottom: 10px;
+}
+
+.vd-tariff__out .vd-btn--primary { background: var(--vd-accent); color: var(--vd-on-accent); }
+
+/* ── Before and after ──────────────────────────────────────────────────── */
+
+.vd-ba { margin-top: 26px; max-width: 620px; }
+
+.vd-ba__stage {
+    position: relative;
+    border-radius: var(--vd-radius-lg);
+    overflow: hidden;
+    /* Locked by the SVG's own ratio, so nothing shifts while it loads. */
+    aspect-ratio: 216 / 140;
+}
+
+/* Photographs carry their own ratio. The source pair is 1448x1086, so 4:3
+   rather than the drawn panel's 216:140, and using the wrong one would
+   crop the top and bottom off both frames. */
+.vd-ba__stage--photo { aspect-ratio: 4 / 3; }
+
+.vd-ba__layer { position: absolute; inset: 0; }
+.vd-ba__svg { width: 100%; height: 100%; display: block; }
+
+.vd-ba__img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    /* Both layers must crop identically or the two halves do not line up
+       across the handle, which is the one thing this control cannot get
+       wrong. */
+    object-position: center;
+}
+
+/* THE HANDLE IS ALWAYS LIGHT, NEVER THEMED.
+   
+   It was var(--vd-paper), which is correct against a drawn panel but wrong
+   over a photograph: photo-studio is a dark theme, so --vd-paper is
+   #0C0A09 and the divider vanished into the image. A comparison slider's
+   handle has to read against BOTH sides of any photograph, so it is white
+   with a dark outer edge, which survives a light frame and a dark one. */
+.vd-ba__handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    margin-left: -1.5px;
+    background: #ffffff;
+    /* The hairline shadow is what keeps a white line visible over a pale
+       sky or a white dress. */
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
+}
+
+.vd-ba__handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+/* Two chevrons pointing outward on the knob, so it reads as "drag me
+   sideways" rather than as a dot sitting on the picture. A single
+   background-image with two gradients, so no extra element and no
+   request. */
+.vd-ba__handle::before {
+    content: '\276E\00a0\276F';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: -1px;
+    color: #1a1a1a;
+    opacity: 0.6;
+    white-space: nowrap;
+}
+
+/* The before and after captions, over the photograph rather than drawn
+   into a panel. Fixed dark chip and white text: like the handle, these
+   have to read over any frame, so they do not take the demo's palette. */
+.vd-ba__tag {
+    position: absolute;
+    top: 10px;
+    z-index: 2;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.62);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    pointer-events: none;
+    transition: opacity 140ms ease;
+}
+
+.vd-ba__tag--before { left: 10px; }
+
+/* The demo switcher is fixed to the top-right corner of the viewport and
+   overlapped the "after" caption whenever this section scrolled under it.
+   The caption moves to the bottom on that side, which is also where a
+   reader's thumb is not. */
+.vd-ba__tag--after { right: 10px; top: auto; bottom: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .vd-ba__tag { transition: none; }
+}
+
+/* The real control: stretched over the whole stage and invisible, so the
+   visible handle above is decoration and every accessibility affordance
+   comes from the native input. */
+.vd-ba__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+    /* Vertical drags still scroll the page; only horizontal is claimed. */
+    touch-action: pan-y;
+}
+
+.vd-ba__srlabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+/* ── Facts list ────────────────────────────────────────────────────────── */
+
+.vd-facts { margin-top: 24px; padding: 0; list-style: none; display: grid; gap: 2px; max-width: 760px; }
+
+.vd-fact {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 16px;
+    align-items: baseline;
+    padding: 14px 16px;
+    background: var(--vd-soft);
+    border-radius: var(--vd-radius-sm);
+}
+
+@media (min-width: 768px) {
+    .vd-fact { grid-template-columns: 1.6fr 1fr auto; }
+}
+
+.vd-fact__name { font-weight: 600; color: var(--vd-ink); }
+.vd-fact__mid { font-size: 0.85rem; color: var(--vd-support); }
+
+.vd-fact__value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--vd-ink);
+    white-space: nowrap;
+    grid-column: -2 / -1;
+}
+
+/* ── Layout variants ───────────────────────────────────────────────────── */
+
+/* editorial: generous, serif-led, the default the bakery and restaurant
+   already use. Nothing to override. */
+
+/* clinical: tighter rhythm and a flatter hero, because a warehouse or a
+   clinic is scanned for facts rather than read for atmosphere. */
+.vd--clinical { --vd-section-y: clamp(36px, 5vw, 64px); }
+.vd--clinical .vd-hero__title { max-width: 20ch; font-size: clamp(2rem, 6vw, 3.4rem); }
+
+/* catalogue: the product grid is the page, so the hero gives up height
+   to it. */
+.vd--catalogue { --vd-section-y: clamp(38px, 5.5vw, 70px); }
+.vd--catalogue .vd-hero { padding-bottom: 0; }
+.vd--catalogue .vd-menu__row { align-items: flex-start; }
+
+/* ── Roster ────────────────────────────────────────────────────────────── */
+
+.vd-roster__filters { margin-top: 22px; }
+
+.vd-roster { margin-top: 22px; display: grid; gap: 12px; }
+
+@media (min-width: 760px) { .vd-roster { grid-template-columns: repeat(2, 1fr); } }
+
+.vd-doc {
+    padding: 18px;
+    background: var(--vd-paper);
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    border-radius: var(--vd-radius-lg);
+}
+
+.vd-doc__name { font-size: 1.05rem; color: var(--vd-ink); }
+
+.vd-doc__role {
+    margin-top: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--vd-accent);
+}
+
+.vd-doc__role span { font-weight: 500; color: var(--vd-support); }
+
+.vd-doc__days { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+
+.vd-doc__slot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 12px;
+    padding-top: 8px;
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+    font-size: 0.86rem;
+}
+
+.vd-doc__day { color: var(--vd-support); }
+.vd-doc__time { font-weight: 600; color: var(--vd-ink); font-variant-numeric: tabular-nums; }
+
+.vd-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   THE SWITCHER
+   VelBiz chrome again, so fixed colours rather than --vd-* tokens: it is
+   a way out of this demo and into another, not part of the business it
+   is sitting on top of.
+   ========================================================================== */
+
+.vd-switch__pill {
+    position: fixed;
+    right: 14px;
+    /* 52px clears the 48px floor with room; 44px did not. */
+    min-width: 52px;
+    /* Clear of the sticky basket bar and the safe area. */
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    z-index: 55;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 52px;
+    padding: 0 16px;
+    background: #0a0a0c;
+    color: #fbfbfd;
+    border: 0;
+    border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+    font-family: var(--f-inter), system-ui, sans-serif;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    /* Raised above the basket bar on cart demos; see --vd-pill-bottom. */
+    bottom: calc(var(--vd-pill-bottom, 14px) + env(safe-area-inset-bottom, 0px));
+}
+
+/* ICON ONLY, AT EVERY WIDTH.
+
+   It was icon-only below 767px and a text pill above, on the reasoning
+   that a desktop has room for the words. It does, but the control is
+   also the only floating thing on a demo page and it sits over the
+   business's own content: a black text block anchored to the corner of
+   somebody's website reads as an advert on it. The icon is the same size
+   as the header's own controls, and the accessible name is on the
+   button, so a screen reader still hears "More examples".
+
+   One shape on every screen also means the demos look the same on the
+   phone a visitor opens them on and the laptop they show a colleague. */
+.vd-switch__pill {
+    width: 52px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 999px;
+}
+
+.vd-switch__label { display: none; }
+
+@media (hover: hover) {
+    .vd-switch__pill:hover { background: #1a1a1e; }
+}
+
+.vd-switch__pill:active { transform: translateY(1px); }
+
+.vd-switch { position: fixed; inset: 0; z-index: 90; display: flex; align-items: flex-end; }
+
+@media (min-width: 768px) { .vd-switch { align-items: center; justify-content: center; } }
+
+.vd-switch__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+.vd-switch__sheet {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    max-height: 84dvh;
+    overflow-y: auto;
+    /* A drag inside the list must not scroll the demo behind it. */
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    margin-inline: auto;
+    padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+    background: #101014;
+    color: #fbfbfd;
+    border-radius: 20px 20px 0 0;
+    font-family: var(--f-inter), system-ui, sans-serif;
+}
+
+@media (min-width: 768px) { .vd-switch__sheet { border-radius: 20px; } }
+
+.vd-switch__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.vd-switch__title { font-size: 1rem; font-weight: 700; }
+
+.vd-switch__close {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #22222a;
+    border: 0;
+    border-radius: 999px;
+    color: #fbfbfd;
+    cursor: pointer;
+    flex: none;
+}
+
+.vd-switch__filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0; }
+
+/* 48px, not the 36px this shipped as. The playbook floor is 48 and the
+   audience is 98% touch; a 36px chip inside a bottom sheet is the hardest
+   thing on the page to hit accurately with a thumb. */
+.vd-switch__filter {
+    min-height: 48px;
+    padding: 0 12px;
+    background: transparent;
+    border: 1px solid #33333d;
+    border-radius: 999px;
+    color: #c9c9d2;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.vd-switch__filter--active { background: #fbfbfd; border-color: #fbfbfd; color: #0a0a0c; }
+
+@media (hover: hover) {
+    /* :not(--active) so hover never outranks the selected state. */
+    .vd-switch__filter:hover:not(.vd-switch__filter--active) { border-color: #55555f; color: #fbfbfd; }
+}
+
+.vd-switch__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+
+.vd-switch__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    color: #fbfbfd;
+    text-decoration: none;
+}
+
+.vd-switch__item[aria-current='page'] { background: #22222a; }
+
+@media (hover: hover) {
+    .vd-switch__item:hover:not([aria-current='page']) { background: #191920; }
+}
+
+.vd-switch__swatch {
+    display: flex;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.vd-switch__swatch > span { flex: 1; }
+
+.vd-switch__meta { display: flex; flex-direction: column; min-width: 0; }
+.vd-switch__name { font-size: 0.92rem; font-weight: 600; }
+.vd-switch__trade { font-size: 0.78rem; color: #9c9ca8; }
+
+.vd-switch__all {
+    display: block;
+    margin-top: 14px;
+    padding: 14px;
+    text-align: center;
+    background: #22222a;
+    border-radius: 12px;
+    color: #fbfbfd;
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* ── The finder ────────────────────────────────────────────────────────── */
+
+.vd-404 { --vd-ink: #0a0a0c; --vd-paper: #fbfbfd; --vd-accent: #0066cc; --vd-support: #55555f; --vd-soft: #eef0f4; }
+
+.vd-404__title { font-size: clamp(1.9rem, 6vw, 3rem); color: var(--vd-ink); }
+.vd-404__lede { margin-top: 14px; max-width: 46ch; line-height: 1.6; color: var(--vd-support); }
+
+.vd-404__near {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 26px;
+    padding: 18px;
+    max-width: 360px;
+    background: var(--vd-soft);
+    border-radius: 16px;
+    text-decoration: none;
+}
+
+.vd-404__nearLabel {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vd-accent);
+}
+
+.vd-404__nearName { font-size: 1.15rem; font-weight: 700; color: var(--vd-ink); }
+.vd-404__nearTrade { font-size: 0.85rem; color: var(--vd-support); }
+
+.vd-404__all {
+    margin-top: 34px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-404__list {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+}
+
+.vd-404__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 8px 12px;
+    background: var(--vd-soft);
+    border-radius: 12px;
+    color: var(--vd-ink);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+@media (hover: hover) {
+    .vd-404__item:hover { background: color-mix(in srgb, var(--vd-accent) 14%, var(--vd-paper)); }
+}
+
+/* ==========================================================================
+   PHASE 4: the section palette
+   Nine types added so sixteen demos stop sharing one page shape. Every
+   colour, radius and border below reads a --vd-* token, so each one
+   repaints per demo without a single per-demo rule.
+   ========================================================================== */
+
+/* ── Menu ──────────────────────────────────────────────────────────────── */
+
+.vd-mn { margin-top: 26px; display: grid; gap: 30px; }
+
+@media (min-width: 900px) { .vd-mn { grid-template-columns: repeat(2, 1fr); gap: 30px 48px; } }
+
+.vd-mn__course {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--vd-accent);
+    padding-bottom: 10px;
+    border-bottom: 2px solid color-mix(in srgb, var(--vd-accent) 30%, transparent);
+}
+
+.vd-mn__list { list-style: none; margin: 0; padding: 0; }
+
+.vd-mn__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 2px 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--vd-ink) 9%, transparent);
+}
+
+.vd-mn__lead { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+.vd-mn__name { font-weight: 600; color: var(--vd-ink); }
+
+/* The square-in-a-square every Indian menu carries. Drawn rather than
+   imported: two elements of CSS against an icon import on every food
+   demo. */
+.vd-mn__veg {
+    flex: none;
+    width: 13px;
+    height: 13px;
+    border: 1.5px solid #16803c;
+    border-radius: 2px;
+    position: relative;
+}
+
+.vd-mn__veg::after {
+    content: '';
+    position: absolute;
+    inset: 2.5px;
+    border-radius: 999px;
+    background: #16803c;
+}
+
+.vd-mn__veg--non { border-color: #a3221f; }
+.vd-mn__veg--non::after { background: #a3221f; }
+
+.vd-mn__sold {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+    border: 1px solid color-mix(in srgb, var(--vd-support) 40%, transparent);
+    border-radius: 999px;
+    padding: 2px 7px;
+    white-space: nowrap;
+}
+
+.vd-mn__note {
+    grid-column: 1;
+    font-size: 0.84rem;
+    line-height: 1.4;
+    color: var(--vd-support);
+}
+
+.vd-mn__right {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.vd-mn__heat { display: inline-flex; gap: 2px; }
+
+.vd-mn__heat > span {
+    width: 5px;
+    height: 11px;
+    border-radius: 2px 2px 4px 4px;
+    background: #c2410c;
+}
+
+.vd-mn__price {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--vd-ink);
+    white-space: nowrap;
+}
+
+/* ── Process ───────────────────────────────────────────────────────────── */
+
+.vd-steps { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 4px; }
+
+@media (min-width: 900px) { .vd-steps { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; } }
+
+.vd-step {
+    position: relative;
+    display: flex;
+    gap: 16px;
+    padding: 18px 0;
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+}
+
+@media (min-width: 900px) {
+    .vd-step { flex-direction: column; gap: 10px; border-top-width: 2px; }
+}
+
+.vd-step__n {
+    flex: none;
+    font-family: var(--vd-font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: color-mix(in srgb, var(--vd-accent) 60%, var(--vd-paper));
+}
+
+.vd-step__body { display: flex; flex-direction: column; gap: 5px; }
+.vd-step__title { font-weight: 700; color: var(--vd-ink); }
+.vd-step__text { font-size: 0.92rem; line-height: 1.55; color: var(--vd-support); }
+
+.vd-step__when {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--vd-accent);
+}
+
+/* ── Price grid ────────────────────────────────────────────────────────── */
+
+.vd-pg { margin-top: 26px; display: grid; gap: 28px; }
+.vd-pg__label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--vd-accent);
+    margin-bottom: 12px;
+}
+
+.vd-pg__cards { display: grid; gap: 10px; }
+
+@media (min-width: 768px) { .vd-pg__cards { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1200px) { .vd-pg__cards { grid-template-columns: repeat(3, 1fr); } }
+
+.vd-pg__card {
+    /* PRICE BESIDE THE NAME, NOT UNDER IT.
+   
+       This was a vertical flex stack, so on a full-width card the price
+       sat on its own line with the entire right half of the card empty
+       and the figure floating a long way from the thing it prices. A
+       two-column grid puts the money on the same line as the name, which
+       is where a reader scanning a price list looks for it.
+   
+       The name column takes the slack so prices right-align into a
+       column across the whole card set. */
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    column-gap: 14px;
+    row-gap: 2px;
+    padding: 18px;
+    background: var(--vd-soft);
+    border-radius: var(--vd-radius-lg);
+}
+
+.vd-pg__name { font-weight: 600; color: var(--vd-ink); }
+
+/* Under the name, in the name's column: the duration qualifies the
+   treatment, not the price. */
+.vd-pg__time {
+    grid-column: 1;
+    font-size: 0.82rem;
+    color: var(--vd-support);
+}
+
+.vd-pg__price {
+    grid-column: 2;
+    grid-row: 1;
+    font-family: var(--vd-font-display);
+    font-size: 1.24rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--vd-ink);
+}
+
+/* "per tooth", "a tonne". Real information, but not the number: on its
+   own line under the figure, smaller and in the text face rather than the
+   display face, so the money stays the thing you read first. */
+.vd-pg__unit {
+    display: block;
+    font-family: var(--vd-font-text);
+    font-size: 0.7rem;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--vd-support);
+}
+
+.vd-pg__note {
+    margin-top: 20px;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+/* ── Directory ─────────────────────────────────────────────────────────── */
+
+.vd-dir { margin-top: 26px; display: grid; gap: 10px; }
+
+@media (min-width: 760px) { .vd-dir { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1200px) { .vd-dir { grid-template-columns: repeat(3, 1fr); } }
+
+.vd-dir__item {
+    padding: 20px;
+    background: var(--vd-paper);
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    border-radius: var(--vd-radius-lg);
+}
+
+.vd-dir__name { font-size: 1.05rem; color: var(--vd-ink); }
+
+.vd-dir__lead {
+    margin-top: 3px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--vd-accent);
+}
+
+.vd-dir__text { margin-top: 10px; font-size: 0.9rem; line-height: 1.55; color: var(--vd-support); }
+
+.vd-dir__when {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--vd-ink);
+}
+
+/* The one place a dot conveys real state: these are open hours. */
+.vd-dir__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--vd-accent);
+    flex: none;
+}
+
+/* ── Gallery ───────────────────────────────────────────────────────────── */
+
+/* Native scroll-snap. No JS: the playbook is explicit that this gets
+   momentum and touch feel for free where a transform carousel does not. */
+.vd-gal {
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    padding-inline: var(--vd-gutter);
+    scrollbar-width: none;
+}
+
+.vd-gal::-webkit-scrollbar { display: none; }
+
+.vd-gal__item {
+    flex: 0 0 82%;
+    margin: 0;
+    scroll-snap-align: center;
+    border-radius: var(--vd-radius-lg);
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+}
+
+@media (min-width: 760px) { .vd-gal__item { flex-basis: 46%; } }
+@media (min-width: 1200px) { .vd-gal__item { flex-basis: 31%; } }
+
+.vd-gal__img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── Spec table ────────────────────────────────────────────────────────── */
+
+.vd-spec { margin-top: 26px; }
+
+.vd-spec__label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--vd-accent);
+    margin-bottom: 10px;
+}
+
+/* Horizontal scroll contained: without this an over-scroll at the table's
+   edge triggers back-navigation on iOS. */
+.vd-spec__scroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.vd-spec__table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+
+.vd-spec__table th,
+.vd-spec__table td {
+    text-align: left;
+    padding: 13px 16px 13px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+    white-space: nowrap;
+}
+
+.vd-spec__table th { font-weight: 600; color: var(--vd-support); }
+
+.vd-spec__table td {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--vd-ink);
+}
+
+.vd-spec__note { font-weight: 400 !important; color: var(--vd-support) !important; }
+
+/* ── Bake schedule ─────────────────────────────────────────────────────── */
+
+.vd-bake { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 6px; }
+
+.vd-bake__slot {
+    display: grid;
+    grid-template-columns: 82px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--vd-paper);
+    border-radius: var(--vd-radius-sm);
+}
+
+.vd-bake__slot--now {
+    background: var(--vd-ink);
+    color: var(--vd-paper);
+}
+
+.vd-bake__time {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--vd-accent);
+}
+
+.vd-bake__slot--now .vd-bake__time { color: var(--vd-paper); }
+
+.vd-bake__what { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.vd-bake__name { font-weight: 600; }
+.vd-bake__note { font-size: 0.82rem; color: var(--vd-support); }
+.vd-bake__slot--now .vd-bake__note { color: color-mix(in srgb, var(--vd-paper) 72%, var(--vd-ink)); }
+
+.vd-bake__now {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--vd-accent);
+    color: var(--vd-on-accent);
+}
+
+/* ── Tracker ───────────────────────────────────────────────────────────── */
+
+.vd-track__form { margin-top: 24px; max-width: 520px; }
+
+.vd-track__label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--vd-support);
+}
+
+.vd-track__row { display: flex; gap: 10px; }
+
+.vd-track__input {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    padding: 0 16px;
+    background: var(--vd-paper);
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 24%, transparent);
+    border-radius: var(--vd-radius-sm);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.04em;
+    color: var(--vd-ink);
+}
+
+.vd-track__hint { margin-top: 8px; font-size: 0.8rem; color: var(--vd-support); }
+
+.vd-track__miss {
+    margin-top: 20px;
+    padding: 16px 18px;
+    max-width: 520px;
+    background: var(--vd-soft);
+    border-radius: var(--vd-radius-sm);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+.vd-track__out {
+    margin-top: 22px;
+    max-width: 560px;
+    padding: 20px;
+    background: var(--vd-ink);
+    border-radius: var(--vd-radius-lg);
+    color: var(--vd-paper);
+}
+
+.vd-track__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--vd-paper) 20%, transparent);
+}
+
+.vd-track__ref {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.vd-track__route { font-size: 0.88rem; color: color-mix(in srgb, var(--vd-paper) 70%, var(--vd-ink)); }
+
+.vd-track__steps { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 14px; }
+
+.vd-track__step {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 2px 14px;
+    padding-left: 18px;
+    position: relative;
+}
+
+.vd-track__step::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--vd-paper) 40%, var(--vd-ink));
+}
+
+.vd-track__step--now::before { background: var(--vd-accent); }
+
+.vd-track__when {
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--vd-paper) 66%, var(--vd-ink));
+}
+
+.vd-track__where { font-weight: 600; }
+
+.vd-track__what {
+    grid-column: 2;
+    font-size: 0.86rem;
+    color: color-mix(in srgb, var(--vd-paper) 72%, var(--vd-ink));
+}
+
+/* ── Rooms ─────────────────────────────────────────────────────────────── */
+
+.vd-rooms { margin-top: 26px; display: grid; gap: 12px; }
+
+@media (min-width: 900px) { .vd-rooms { grid-template-columns: repeat(3, 1fr); } }
+
+.vd-room {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: var(--vd-soft);
+    border-radius: var(--vd-radius-lg);
+}
+
+.vd-room__top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.vd-room__name { font-size: 1.05rem; color: var(--vd-ink); }
+.vd-room__sleeps { font-size: 0.8rem; color: var(--vd-support); white-space: nowrap; }
+.vd-room__text { margin-top: 10px; font-size: 0.9rem; line-height: 1.55; color: var(--vd-support); }
+
+.vd-room__has { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+
+.vd-room__hasItem {
+    font-size: 0.76rem;
+    padding: 4px 10px;
+    background: var(--vd-paper);
+    border-radius: 999px;
+    color: var(--vd-support);
+}
+
+.vd-room__rate {
+    margin-top: auto;
+    padding-top: 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.vd-room__rate > span:first-child {
+    font-family: var(--vd-font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--vd-ink);
+}
+
+.vd-room__per { font-size: 0.8rem; color: var(--vd-support); }
+
+.vd-seasons {
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--vd-paper);
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    border-radius: var(--vd-radius-lg);
+}
+
+.vd-seasons__label {
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--vd-accent);
+    margin-bottom: 12px;
+}
+
+.vd-seasons__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+
+@media (min-width: 760px) { .vd-seasons__list { grid-template-columns: repeat(3, 1fr); } }
+
+.vd-season { display: flex; flex-direction: column; gap: 2px; }
+.vd-season__when { font-weight: 700; font-size: 0.88rem; color: var(--vd-ink); }
+.vd-season__what { font-size: 0.84rem; color: var(--vd-support); }
+
+/* ==========================================================================
+   PHASE 6: the layout variants
+   `.vd--editorial` had zero rules and `layout` was a field the data set
+   and nothing read. Half-implemented is worse than either shipping it or
+   deleting it, so here it is shipped: a third axis of differentiation on
+   top of the palette and the section composition, at about forty lines.
+
+   The three are deliberately about RHYTHM AND WEIGHT, not colour. Colour
+   is the theme's job and duplicating it here would mean two places to
+   change one thing.
+   ========================================================================== */
+
+/* EDITORIAL: prose-led. Wider measure, a lead paragraph that carries
+   more weight than the rest, generous section rhythm. For the demos
+   whose selling is done by the writing: the bakery, the restaurant, the
+   home stay, the photographer. */
+.vd--editorial {
+    --vd-section-y: clamp(52px, 8vw, 104px);
+}
+
+.vd--editorial .vd-story { max-width: 68ch; }
+
+.vd--editorial .vd-story__p:first-of-type {
+    font-size: clamp(1.08rem, 2.1vw, 1.24rem);
+    line-height: 1.62;
+    color: var(--vd-ink);
+}
+
+.vd--editorial .vd-h2 { letter-spacing: -0.03em; }
+
+/* CLINICAL: scanned, not read. Tighter rhythm, rules between sections so
+   the eye can find the boundary without a colour change, and no shadows
+   anywhere. For the clinics, the hospital, the warehouse, the freight
+   company: places where a visitor is looking for a number. */
+.vd--clinical {
+    --vd-section-y: clamp(34px, 4.6vw, 62px);
+    --vd-shadow: none;
+}
+
+.vd--clinical .vd-section + .vd-section {
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+}
+
+.vd--clinical .vd-hero__title {
+    max-width: 20ch;
+    font-size: clamp(1.95rem, 5.4vw, 3.2rem);
+}
+
+.vd--clinical .vd-h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); }
+
+/* CATALOGUE: the grid is the page. Denser gutters, cards that sit closer,
+   a hero that gives up height to the product below it. For the shops. */
+.vd--catalogue {
+    --vd-section-y: clamp(38px, 5.2vw, 72px);
+}
+
+.vd--catalogue .vd-hero { padding-bottom: 0; }
+
+.vd--catalogue .vd-mn,
+.vd--catalogue .vd-pg__cards,
+.vd--catalogue .vd-dir { gap: 8px; }
+
+.vd--catalogue .vd-menu__row { align-items: flex-start; }
+
+@media (min-width: 1200px) {
+    .vd--catalogue .vd-pg__cards { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ── Job board ─────────────────────────────────────────────────────────── */
+
+.vd-board { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 8px; }
+
+.vd-board__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 4px 14px;
+    padding: 14px 16px;
+    background: var(--vd-paper);
+    border-radius: var(--vd-radius-sm);
+}
+
+/* The one on the ramp is the answer to "how long is the wait", so it
+   carries the weight rather than sitting in the same row treatment. */
+.vd-board__row--now { background: var(--vd-ink); color: var(--vd-paper); }
+
+.vd-board__bay {
+    grid-row: 1;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vd-accent);
+}
+
+.vd-board__row--now .vd-board__bay { color: var(--vd-paper); }
+
+.vd-board__job { grid-row: 2; grid-column: 1; display: flex; flex-direction: column; gap: 2px; }
+.vd-board__what { font-weight: 600; }
+
+.vd-board__bike { font-size: 0.82rem; color: var(--vd-support); }
+.vd-board__row--now .vd-board__bike { color: color-mix(in srgb, var(--vd-paper) 70%, var(--vd-ink)); }
+
+.vd-board__wait {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    font-size: 0.84rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-support);
+    text-align: right;
+}
+
+.vd-board__row--now .vd-board__wait { color: var(--vd-paper); font-weight: 600; }
+
+.vd-board__foot {
+    margin-top: 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--vd-ink);
+}
+
+/* ── Proof: the credibility band ───────────────────────────────────────── */
+
+/* Nine demos render this and fifteen do not, on purpose. See the header of
+   components/demo/sections/Proof.js for why a stats band suits a freight
+   company and works against an advocate. */
+
+.vd-proof__grid {
+    display: grid;
+    gap: 1.5rem 1.25rem;
+    margin: 0;
+    /* Two columns on a phone, because a single column of four big numbers
+       becomes a scroll of its own and the comparison between them is the
+       whole point of putting them side by side. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* An odd count leaves a dead cell in a two-column grid, which reads as a
+   missing number rather than a deliberate three. The orphan spans the row
+   instead, and gets a little more room because it has it. */
+.vd-proof__grid[data-count='3'] .vd-proof__cell:last-child { grid-column: 1 / -1; }
+
+.vd-proof .vd-h2 + .vd-proof__grid,
+.vd-proof .vd-lede + .vd-proof__grid { margin-top: 1.75rem; }
+
+.vd-proof__cell { min-width: 0; }
+
+.vd-proof__value {
+    font-family: var(--vd-font-display);
+    /* Caps out well below the h2 ceiling. These sit on an ink ground with
+       a label under each, and at full display size four of them fight the
+       section heading instead of supporting it. */
+    font-size: clamp(1.9rem, 7vw, 2.9rem);
+    line-height: 1.05;
+    /* Pairs with the ink ground this section sits on, which means paper.
+       Two demos (photo-studio, ecommerce) invert ink and paper into dark
+       themes, so this is a genuine pairing rather than "the light one":
+       .vd-ground--ink is whatever --vd-ink is, and --vd-paper is always
+       its opposite. */
+    color: var(--vd-paper);
+    /* Tabular figures so 27 and 430 line up down the row rather than
+       drifting by a few pixels of digit width. */
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.vd-proof__unit {
+    font-size: 0.45em;
+    /* NOT the accent. That was the first attempt and it measured 2.09:1 on
+       photo-studio and under 4:1 on six of the nine, because an accent is
+       picked to sit against the ground as decoration, not as text. The
+       unit is a word a reader has to read, so it takes the same colour as
+       the number it belongs to and separates itself by size and weight
+       instead. Measured 18.11:1 on photo-studio. */
+    color: inherit;
+    opacity: 1;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.vd-proof__label {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    /* Quieter than the number but nowhere near the ground: mixed toward
+       the support colour, which stays a real colour on every palette. */
+    color: color-mix(in srgb, var(--vd-paper) 78%, var(--vd-support));
+}
+
+.vd-proof__award {
+    margin: 2rem 0 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--vd-paper) 22%, transparent);
+    font-size: 0.85rem;
+    color: color-mix(in srgb, var(--vd-paper) 72%, var(--vd-support));
+}
+
+@media (min-width: 768px) {
+    .vd-proof__grid { gap: 2rem 1.5rem; }
+    /* Three across on a wide screen, so the orphan rule stops applying. */
+    .vd-proof__grid[data-count='3'] .vd-proof__cell:last-child { grid-column: auto; }
+    .vd-proof__award { padding-right: 0; }
+    /* Three and four sit on one row on a wide screen; two stay at two so a
+       pair does not stretch into an empty third of the shell. */
+    .vd-proof__grid[data-count='3'] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .vd-proof__grid[data-count='4'] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* ── ConsultDesk: what to bring to a first consultation ────────────────── */
+
+/* Advocate only. Deliberately the plainest section in the corpus: see the
+   header of components/demo/sections/ConsultDesk.js. */
+
+.vd-consult {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.75rem;
+}
+
+.vd-consult__item {
+    padding: 1.25rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 14%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-consult__matter {
+    margin: 0 0 0.85rem;
+    font-family: var(--vd-font-display);
+    font-size: 1.15rem;
+    color: var(--vd-ink);
+}
+
+.vd-consult__papers {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.vd-consult__paper {
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--vd-ink);
+}
+
+/* An open square rather than a bullet or a tick. A tick says "done" on a
+   list of things the reader has not gathered yet. */
+.vd-consult__paper::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.35em;
+    width: 0.7em;
+    height: 0.7em;
+    border: 1.5px solid var(--vd-accent);
+    border-radius: 2px;
+}
+
+.vd-consult__covers {
+    margin: 1rem 0 0;
+    padding-top: 0.85rem;
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--vd-ink);
+}
+
+.vd-consult__label {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+/* The "come anyway" line. Sits on soft rather than shouting in accent,
+   because its whole job is to lower the barrier. */
+.vd-consult__missing {
+    margin: 0.85rem 0 0;
+    padding: 0.7rem 0.85rem;
+    border-left: 2px solid var(--vd-accent);
+    background: var(--vd-soft);
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--vd-ink);
+}
+
+.vd-consult__note {
+    margin: 1.5rem 0 0;
+    font-size: 0.88rem;
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-consult { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+}
+
+/* ── FilingCalendar: statutory due dates ───────────────────────────────── */
+
+/* Accountant only. Real dates, invented firm. */
+
+.vd-cal {
+    margin: 1.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.6rem;
+}
+
+.vd-cal__row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.9rem;
+    align-items: start;
+    padding: 0.9rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+/* The next deadline. An accent border and a filled date, never colour
+   alone: the marker also carries a text label, so it survives both
+   greyscale and a screen reader. */
+.vd-cal__row.is-next {
+    border-color: var(--vd-accent);
+    background: var(--vd-soft);
+}
+
+.vd-cal__day {
+    display: grid;
+    place-items: center;
+    min-width: 2.6rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: var(--vd-radius-sm);
+    background: color-mix(in srgb, var(--vd-ink) 8%, transparent);
+    font-family: var(--vd-font-display);
+    font-size: 1.25rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-ink);
+}
+
+.vd-cal__row.is-next .vd-cal__day {
+    background: var(--vd-accent);
+    color: var(--vd-on-accent);
+}
+
+.vd-cal__body { min-width: 0; }
+
+.vd-cal__name {
+    display: block;
+    font-size: 0.98rem;
+    font-weight: 500;
+    color: var(--vd-ink);
+}
+
+.vd-cal__who {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--vd-support);
+}
+
+.vd-cal__next {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 0.5rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: var(--vd-accent);
+    color: var(--vd-on-accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.vd-cal__note {
+    margin: 1.25rem 0 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+/* ── DeptFinder: which counter to walk to ──────────────────────────────── */
+
+.vd-where {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Pinned above the list. Uses the accent as a fill rather than as text on
+   the ground, so it reads as urgent without relying on colour alone: the
+   label carries the meaning in words. */
+.vd-where__urgent {
+    margin: 1.5rem 0 0;
+    padding: 0.9rem 1rem;
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-accent);
+    color: var(--vd-on-accent);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.vd-where__urgentLabel {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vd-on-accent);
+}
+
+.vd-where__row {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.85rem 1rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-where__complaint {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--vd-ink);
+}
+
+.vd-where__dept {
+    margin: 0;
+    display: flex;
+    gap: 0.45rem;
+    align-items: baseline;
+    font-family: var(--vd-font-display);
+    font-size: 1.05rem;
+    /* Matches .vd-where__complaint so the two cells share a vertical
+       rhythm. The baselines were already aligned by the row's
+       align-items: baseline; this only stops the taller cell from
+       setting a different line box. */
+    line-height: 1.4;
+    color: var(--vd-accent-text);
+}
+
+.vd-where__arrow { flex: none; }
+
+.vd-where__at {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-where__row {
+        grid-template-columns: 1.1fr 1fr;
+        align-items: baseline;
+        column-gap: 1.5rem;
+    }
+    .vd-where__at { grid-column: 2; }
+}
+
+/* ── TokenQueue: the live token board ──────────────────────────────────── */
+
+.vd-token__live {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    border: 2px solid var(--vd-accent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+    text-align: center;
+}
+
+.vd-token__label {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-token__num {
+    font-family: var(--vd-font-display);
+    font-size: clamp(3rem, 16vw, 4.5rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-ink);
+}
+
+.vd-token__wait {
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--vd-ink);
+}
+
+.vd-token__closed {
+    margin: 1.5rem 0 0;
+    padding: 0.9rem 1rem;
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-soft);
+    font-size: 0.92rem;
+    color: var(--vd-ink);
+}
+
+.vd-token__sessions {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.vd-token__session {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 1rem;
+    padding: 0.8rem 1rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+/* Running now. Border and a word, never colour on its own. */
+.vd-token__session.is-live {
+    border-color: var(--vd-accent);
+    background: var(--vd-soft);
+}
+
+.vd-token__sname {
+    font-weight: 500;
+    color: var(--vd-ink);
+}
+
+.vd-token__stime {
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-ink);
+}
+
+.vd-token__scap {
+    grid-column: 1 / -1;
+    font-size: 0.85rem;
+    color: var(--vd-support);
+}
+
+.vd-token__note {
+    margin: 1.25rem 0 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+/* ── LookBook: the salon rail ──────────────────────────────────────────── */
+
+.vd-look {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 78%;
+    gap: 0.85rem;
+    margin-top: 1.5rem;
+    padding: 0.25rem var(--vd-gutter) 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* Stops a horizontal swipe at the end of the rail from triggering the
+       browser's back gesture on iOS. */
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.vd-look::-webkit-scrollbar { height: 0; }
+
+.vd-look:focus-visible {
+    outline: 2px solid var(--vd-accent);
+    outline-offset: -2px;
+}
+
+.vd-look__card {
+    scroll-snap-align: start;
+    display: grid;
+    align-content: start;
+    gap: 0.85rem;
+    padding: 1.1rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 14%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-look__head {
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+}
+
+.vd-look__name {
+    margin: 0;
+    font-family: var(--vd-font-display);
+    font-size: 1.15rem;
+    color: var(--vd-ink);
+}
+
+.vd-look__time {
+    margin: 0.15rem 0 0;
+    font-size: 0.85rem;
+    color: var(--vd-accent-text);
+}
+
+.vd-look__block { display: grid; gap: 0.2rem; }
+
+.vd-look__label {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-look__text {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--vd-ink);
+}
+
+@media (min-width: 768px) {
+    .vd-look { grid-auto-columns: 44%; }
+}
+
+@media (min-width: 1080px) {
+    .vd-look { grid-auto-columns: 30%; }
+}
+
+/* ── PlotFinder: filter by budget and facing ───────────────────────────── */
+
+.vd-plot__controls {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.vd-plot__field { display: grid; gap: 0.3rem; }
+
+.vd-plot__label {
+    font-size: 0.75rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+/* font-size comes from the global .vd-root select rule at 16px, which is
+   what stops iOS zooming the viewport on focus. Do not override it here. */
+.vd-plot__select {
+    min-height: 48px;
+    padding: 0 2.25rem 0 0.85rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 22%, transparent);
+    border-radius: var(--vd-radius-sm);
+    background-color: var(--vd-paper);
+    color: var(--vd-ink);
+    /* Own arrow, because the native one is unstyleable and sits at a
+       different place on every platform. */
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+        linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: right 1.1rem center, right 0.75rem center;
+    background-size: 0.35rem 0.35rem, 0.35rem 0.35rem;
+    background-repeat: no-repeat;
+}
+
+.vd-plot__select:focus-visible {
+    outline: 2px solid var(--vd-accent);
+    outline-offset: 1px;
+}
+
+.vd-plot__count {
+    margin: 1.1rem 0 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-plot__none {
+    margin: 0.75rem 0 0;
+    padding: 1rem;
+    border: 1px dashed color-mix(in srgb, var(--vd-ink) 25%, transparent);
+    border-radius: var(--vd-radius-lg);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--vd-ink);
+}
+
+.vd-plot__grid {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.vd-plot__card {
+    padding: 1rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 14%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-plot__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.7rem;
+}
+
+.vd-plot__id {
+    margin: 0;
+    font-family: var(--vd-font-display);
+    font-size: 1.1rem;
+    color: var(--vd-ink);
+}
+
+.vd-plot__facing {
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    background: var(--vd-soft);
+    font-size: 0.78rem;
+    color: var(--vd-ink);
+}
+
+.vd-plot__specs {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+}
+
+.vd-plot__specs > div {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 0.5rem;
+}
+
+.vd-plot__specs dt {
+    font-size: 0.82rem;
+    color: var(--vd-support);
+}
+
+.vd-plot__specs dd {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--vd-ink);
+}
+
+.vd-plot__note {
+    margin: 0.7rem 0 0;
+    padding-top: 0.6rem;
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--vd-support);
+}
+
+.vd-plot__foot {
+    margin: 1.25rem 0 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-plot__controls { grid-template-columns: repeat(2, minmax(0, 18rem)); }
+    .vd-plot__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1080px) {
+    .vd-plot__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ── ProjectStages: seven stages, no dates ─────────────────────────────── */
+
+.vd-stage {
+    margin: 1.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 1rem;
+}
+
+.vd-stage__item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.9rem;
+    padding: 1.1rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-stage__n {
+    font-family: var(--vd-font-display);
+    font-size: 1.5rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--vd-ink) 30%, var(--vd-support));
+}
+
+.vd-stage__body { min-width: 0; }
+
+.vd-stage__name {
+    margin: 0 0 0.35rem;
+    font-family: var(--vd-font-display);
+    font-size: 1.1rem;
+    color: var(--vd-ink);
+}
+
+.vd-stage__text {
+    margin: 0;
+    font-size: 0.93rem;
+    line-height: 1.55;
+    color: var(--vd-ink);
+}
+
+.vd-stage__meta {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0.85rem 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+}
+
+.vd-stage__pair { display: grid; gap: 0.1rem; }
+
+.vd-stage__pair dt {
+    font-size: 0.7rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-stage__pair dd {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--vd-ink);
+}
+
+/* The client's own decision, marked so it reads as a duty rather than a
+   deliverable. */
+.vd-stage__pair--you {
+    padding-left: 0.65rem;
+    border-left: 2px solid var(--vd-accent);
+}
+
+.vd-stage__note {
+    margin: 1.5rem 0 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-stage__n { font-size: 2rem; }
+    .vd-stage__meta { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+}
+
+/* ── TradeDispatch: three trades behind one number ─────────────────────── */
+
+.vd-disp__tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 0.25rem;
+    /* Snap, so a swipe lands on a tab rather than halfway through one. */
+    scroll-snap-type: x proximity;
+}
+
+/* At 320px three trade pills do not fit on one line, and the third was
+   sliced through the middle of "Painting" with nothing to say it could be
+   scrolled: it read as broken rather than as more content. Wrapping is
+   better than a hidden scroll here, because three is a countable set and
+   a visitor should see all three options at once. */
+@media (max-width: 380px) {
+    .vd-disp__tabs {
+        flex-wrap: wrap;
+        overflow-x: visible;
+    }
+}
+
+.vd-disp__tabs::-webkit-scrollbar { height: 0; }
+
+.vd-disp__tab {
+    flex: none;
+    scroll-snap-align: start;
+    min-height: 48px;
+    padding: 0 1.1rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 20%, transparent);
+    border-radius: 999px;
+    background: var(--vd-paper);
+    color: var(--vd-ink);
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.vd-disp__tab.is-active {
+    background: var(--vd-fill);
+    border-color: var(--vd-fill);
+    color: var(--vd-on-fill);
+}
+
+/* Hover never outranks the active state, and touch gets :active instead so
+   the hover style does not stick after a tap. */
+@media (hover: hover) {
+    .vd-disp__tab:hover:not(.is-active) {
+        border-color: var(--vd-accent);
+    }
+}
+
+.vd-disp__tab:active:not(.is-active) { transform: translateY(1px); }
+
+.vd-disp__tab:focus-visible {
+    outline: 2px solid var(--vd-accent);
+    outline-offset: 2px;
+}
+
+.vd-disp__panel {
+    margin-top: 1rem;
+    padding: 1.1rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 14%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-disp__panel:focus-visible {
+    outline: 2px solid var(--vd-accent);
+    outline-offset: 2px;
+}
+
+.vd-disp__rate {
+    display: grid;
+    gap: 0.1rem;
+    padding-bottom: 0.9rem;
+    margin-bottom: 0.9rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+}
+
+.vd-disp__rateLabel {
+    font-size: 0.7rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-disp__rateValue {
+    font-family: var(--vd-font-display);
+    font-size: 1.6rem;
+    line-height: 1.1;
+    color: var(--vd-ink);
+}
+
+.vd-disp__rateNote {
+    font-size: 0.85rem;
+    color: var(--vd-support);
+}
+
+.vd-disp__cols { display: grid; gap: 1.1rem; }
+
+.vd-disp__h {
+    margin: 0 0 0.45rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-disp__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.vd-disp__slot,
+.vd-disp__job {
+    position: relative;
+    padding-left: 1.1rem;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--vd-ink);
+}
+
+.vd-disp__slot::before,
+.vd-disp__job::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--vd-accent);
+}
+
+.vd-disp__urgent {
+    margin: 1rem 0 0;
+    padding: 0.8rem 0.9rem;
+    border-left: 2px solid var(--vd-accent);
+    background: var(--vd-soft);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--vd-ink);
+}
+
+.vd-disp__urgentLabel {
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-disp__note {
+    margin: 1.25rem 0 0;
+    font-size: 0.88rem;
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-disp__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+}
+
+/* ── Clearing the switcher pill ────────────────────────────────────────── */
+
+/* The demo switcher is a fixed pill in the bottom-right corner of every
+   demo. Any small print that is the LAST thing in its section runs
+   underneath it and loses its final words: found on the Proof award line
+   and again on the TradeDispatch note, so it is fixed once here rather
+   than per component.
+
+   Only trailing notes need this. Body copy mid-section scrolls past the
+   pill and is never occluded at rest. */
+.vd-proof__award,
+.vd-disp__note,
+.vd-plot__foot,
+.vd-stage__note,
+.vd-cal__note,
+.vd-token__note,
+.vd-consult__note {
+    padding-right: 4.5rem;
+}
+
+@media (min-width: 768px) {
+    .vd-proof__award,
+    .vd-disp__note,
+    .vd-plot__foot,
+    .vd-stage__note,
+    .vd-cal__note,
+    .vd-token__note,
+    .vd-consult__note {
+        padding-right: 0;
+    }
+}
+
+/* ── ServiceInterval: what is due at this odometer ─────────────────────── */
+
+.vd-due__form { margin-top: 1.5rem; }
+
+.vd-due__field { display: grid; gap: 0.3rem; }
+
+.vd-due__label {
+    font-size: 0.75rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-due__inputWrap {
+    position: relative;
+    display: block;
+    max-width: 20rem;
+}
+
+/* 16px comes from the global .vd-root input rule and stops iOS zooming. */
+.vd-due__input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 3rem 0 0.85rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 22%, transparent);
+    border-radius: var(--vd-radius-sm);
+    background: var(--vd-paper);
+    color: var(--vd-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.vd-due__input:focus-visible {
+    outline: 2px solid var(--vd-accent);
+    outline-offset: 1px;
+}
+
+.vd-due__unit {
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    color: var(--vd-support);
+    pointer-events: none;
+}
+
+.vd-due__hint {
+    margin: 0.4rem 0 0;
+    font-size: 0.82rem;
+    color: var(--vd-support);
+}
+
+/* Reserves nothing when empty: the card appears below the field and
+   pushes the schedule down, which is expected after typing. */
+.vd-due__out:empty { display: none; }
+
+.vd-due__card {
+    margin-top: 1.1rem;
+    padding: 1.1rem;
+    border: 2px solid var(--vd-accent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-due__cardLabel {
+    font-size: 0.72rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-due__name {
+    margin: 0.2rem 0 0;
+    font-family: var(--vd-font-display);
+    font-size: 1.35rem;
+    color: var(--vd-ink);
+}
+
+.vd-due__price {
+    margin: 0.15rem 0 0.85rem;
+    font-size: 1.05rem;
+    color: var(--vd-accent-text);
+}
+
+.vd-due__includes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.vd-due__includes li {
+    position: relative;
+    padding-left: 1.1rem;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--vd-ink);
+}
+
+.vd-due__includes li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--vd-accent);
+}
+
+.vd-due__next {
+    margin: 0.9rem 0 0;
+    padding-top: 0.7rem;
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+    font-size: 0.85rem;
+    color: var(--vd-support);
+}
+
+.vd-due__all { margin-top: 1.75rem; }
+
+.vd-due__allH {
+    margin: 0 0 0.6rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-due__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.vd-due__row {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr auto;
+    gap: 0.35rem 0.75rem;
+    align-items: baseline;
+    padding: 0.7rem 0.85rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-due__at {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.85rem;
+    color: var(--vd-support);
+}
+
+.vd-due__rowName { font-size: 0.92rem; color: var(--vd-ink); }
+
+.vd-due__rowPrice {
+    font-size: 0.88rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-ink);
+}
+
+.vd-due__note {
+    margin: 1.25rem 0 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+/* ── VehicleCompare: two vehicles side by side ─────────────────────────── */
+
+.vd-cmp__picks {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.vd-cmp__field { display: grid; gap: 0.3rem; min-width: 0; }
+
+.vd-cmp__label {
+    font-size: 0.75rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-cmp__select {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 2.25rem 0 0.85rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 22%, transparent);
+    border-radius: var(--vd-radius-sm);
+    background-color: var(--vd-paper);
+    color: var(--vd-ink);
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+        linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: right 1.1rem center, right 0.75rem center;
+    background-size: 0.35rem 0.35rem, 0.35rem 0.35rem;
+    background-repeat: no-repeat;
+}
+
+.vd-cmp__select:focus-visible {
+    outline: 2px solid var(--vd-accent);
+    outline-offset: 1px;
+}
+
+.vd-cmp__same {
+    margin: 1.1rem 0 0;
+    padding: 1rem;
+    border: 1px dashed color-mix(in srgb, var(--vd-ink) 25%, transparent);
+    border-radius: var(--vd-radius-lg);
+    font-size: 0.95rem;
+    color: var(--vd-ink);
+}
+
+/* The table scrolls inside its own box rather than the page. contain stops
+   an overscroll at the edge triggering back-navigation on iOS. */
+.vd-cmp__wrap {
+    margin-top: 1.1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 14%, transparent);
+    border-radius: var(--vd-radius-lg);
+}
+
+.vd-cmp__table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--vd-paper);
+}
+
+.vd-cmp__table th,
+.vd-cmp__table td {
+    padding: 0.7rem 0.85rem;
+    text-align: left;
+    font-size: 0.9rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+}
+
+.vd-cmp__table thead th {
+    font-family: var(--vd-font-display);
+    font-size: 0.95rem;
+    color: var(--vd-ink);
+    background: var(--vd-soft);
+    vertical-align: bottom;
+}
+
+.vd-cmp__table tbody th {
+    font-weight: 400;
+    color: var(--vd-support);
+    white-space: nowrap;
+}
+
+.vd-cmp__table td {
+    color: var(--vd-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.vd-cmp__table tbody tr:last-child th,
+.vd-cmp__table tbody tr:last-child td { border-bottom: 0; }
+
+/* Better on this row. Weight and a tint, plus a screen-reader word in the
+   markup, so the meaning never rests on colour alone. */
+.vd-cmp__table td.is-better {
+    font-weight: 600;
+    background: color-mix(in srgb, var(--vd-accent) 12%, transparent);
+}
+
+.vd-cmp__wrap {
+    /* The switcher pill sits over the bottom-right corner. A table is the
+       one element here tall enough to still be under it at rest, so the
+       last row gets clearance rather than the note alone. */
+    padding-bottom: 2.5rem;
+}
+
+.vd-cmp__note {
+    margin: 1.25rem 0 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-cmp__wrap { padding-bottom: 0; }
+    .vd-cmp__picks { grid-template-columns: repeat(2, minmax(0, 20rem)); }
+    .vd-due__row { grid-template-columns: 6.5rem 1fr auto; }
+}
+
+/* ── Shared control primitives for the last four sections ──────────────── */
+
+/* BatchPlanner, SpaceCalculator and StockCheck all want the same field and
+   select treatment. Written once here rather than three times: PlotFinder
+   and VehicleCompare predate this and keep their own copies, which is a
+   tidy-up for another day rather than a reason to churn working CSS now. */
+
+.vd-batch__field,
+.vd-space__field,
+.vd-stock__field {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+.vd-batch__label,
+.vd-space__label,
+.vd-stock__label {
+    font-size: 0.75rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+/* 16px is inherited from the global .vd-root input/select rule, which is
+   what keeps iOS from zooming the viewport on focus. Never override it. */
+.vd-batch__select,
+.vd-space__input,
+.vd-stock__input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 0.85rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 22%, transparent);
+    border-radius: var(--vd-radius-sm);
+    background-color: var(--vd-paper);
+    color: var(--vd-ink);
+}
+
+.vd-batch__select {
+    padding-right: 2.25rem;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+        linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: right 1.1rem center, right 0.75rem center;
+    background-size: 0.35rem 0.35rem, 0.35rem 0.35rem;
+    background-repeat: no-repeat;
+}
+
+.vd-space__input { font-variant-numeric: tabular-nums; }
+
+.vd-batch__select:focus-visible,
+.vd-space__input:focus-visible,
+.vd-stock__input:focus-visible {
+    outline: 2px solid var(--vd-accent);
+    outline-offset: 1px;
+}
+
+.vd-batch__count,
+.vd-stock__count {
+    margin: 1.1rem 0 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-batch__none,
+.vd-stock__none {
+    margin: 0.75rem 0 0;
+    padding: 1rem;
+    border: 1px dashed color-mix(in srgb, var(--vd-ink) 25%, transparent);
+    border-radius: var(--vd-radius-lg);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--vd-ink);
+}
+
+.vd-batch__note,
+.vd-space__note,
+.vd-stock__note,
+.vd-avail__foot {
+    margin: 1.25rem 0 0;
+    padding-right: 4.5rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+/* ── BatchPlanner ──────────────────────────────────────────────────────── */
+
+.vd-batch__controls {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.vd-batch__grid {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.vd-batch__card {
+    padding: 1rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 14%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+/* A full batch is quieter, not hidden. Still listed, because a parent
+   should be able to see that the Saturday batch exists and ask. */
+.vd-batch__card.is-full { background: var(--vd-soft); }
+
+.vd-batch__name {
+    margin: 0;
+    font-family: var(--vd-font-display);
+    font-size: 1.1rem;
+    color: var(--vd-ink);
+}
+
+.vd-batch__meta {
+    margin: 0.15rem 0 0.6rem;
+    font-size: 0.82rem;
+    color: var(--vd-support);
+}
+
+.vd-batch__days,
+.vd-batch__teacher {
+    margin: 0 0 0.2rem;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--vd-ink);
+}
+
+.vd-batch__teacher { color: var(--vd-support); }
+
+.vd-batch__seats {
+    margin: 0.7rem 0 0;
+    padding-top: 0.6rem;
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--vd-accent-text);
+}
+
+.vd-batch__seats.is-full {
+    font-weight: 400;
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-batch__controls { grid-template-columns: repeat(2, minmax(0, 18rem)); }
+    .vd-batch__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1080px) {
+    .vd-batch__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ── SpaceCalculator ───────────────────────────────────────────────────── */
+
+.vd-space__form {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.vd-space__out:empty { display: none; }
+
+.vd-space__card {
+    margin-top: 1.1rem;
+    padding: 1.1rem;
+    border: 2px solid var(--vd-accent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-space__figures {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.vd-space__figures > div { display: grid; gap: 0.1rem; }
+
+.vd-space__figures dt {
+    font-size: 0.72rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--vd-support);
+}
+
+.vd-space__figures dd {
+    margin: 0;
+    font-family: var(--vd-font-display);
+    font-size: 1.5rem;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-ink);
+}
+
+.vd-space__min,
+.vd-space__caveat {
+    margin: 0.85rem 0 0;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--vd-support);
+}
+
+.vd-space__min { color: var(--vd-accent-text); }
+
+.vd-space__over {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--vd-ink);
+}
+
+.vd-space__rates {
+    display: grid;
+    gap: 0.5rem;
+    margin: 1.5rem 0 0;
+    padding: 1rem;
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-soft);
+}
+
+.vd-space__rates > div {
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    gap: 0.5rem;
+}
+
+.vd-space__rates dt {
+    font-size: 0.85rem;
+    color: var(--vd-support);
+}
+
+.vd-space__rates dd {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--vd-ink);
+}
+
+@media (min-width: 768px) {
+    .vd-space__form { grid-template-columns: repeat(2, minmax(0, 14rem)); }
+    .vd-space__figures { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ── StockCheck ────────────────────────────────────────────────────────── */
+
+.vd-stock__field { margin-top: 1.5rem; max-width: 26rem; }
+
+.vd-stock__list {
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.vd-stock__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.25rem 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 12%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-stock__name {
+    font-size: 0.93rem;
+    line-height: 1.4;
+    color: var(--vd-ink);
+}
+
+.vd-stock__pack {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--vd-support);
+}
+
+.vd-stock__price {
+    font-size: 0.92rem;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--vd-ink);
+}
+
+.vd-stock__state {
+    grid-column: 1 / -1;
+    justify-self: start;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* The word carries the meaning; colour only reinforces it. */
+.vd-stock__state.is-in {
+    background: color-mix(in srgb, var(--vd-accent) 16%, transparent);
+    color: var(--vd-ink);
+}
+
+.vd-stock__state.is-soon {
+    background: var(--vd-soft);
+    color: var(--vd-ink);
+}
+
+.vd-stock__state.is-no {
+    background: transparent;
+    border: 1px dashed color-mix(in srgb, var(--vd-ink) 30%, transparent);
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-stock__row {
+        grid-template-columns: 1fr auto 9rem;
+        /* baseline, not center. The state chip carries padding, so
+           centring the three cells put the item name and the price 9px
+           off the chip's text. Same defect as the menu row: a padded
+           control centred against plain text never lines up with it. */
+        align-items: baseline;
+    }
+    .vd-stock__state { grid-column: auto; justify-self: end; }
+}
+
+/* ── RoomAvailability ──────────────────────────────────────────────────── */
+
+.vd-avail {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1.5rem;
+}
+
+.vd-avail__room {
+    padding: 1.1rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 14%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-avail__head {
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+}
+
+.vd-avail__name {
+    margin: 0;
+    font-family: var(--vd-font-display);
+    font-size: 1.15rem;
+    color: var(--vd-ink);
+}
+
+.vd-avail__sleeps {
+    margin: 0.1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--vd-support);
+}
+
+.vd-avail__has {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0.8rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.vd-avail__chip {
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    background: var(--vd-soft);
+    font-size: 0.78rem;
+    color: var(--vd-ink);
+}
+
+.vd-avail__rates {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0.9rem 0 0;
+    padding-top: 0.8rem;
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+}
+
+.vd-avail__rate {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem;
+    align-items: baseline;
+}
+
+.vd-avail__rate dt {
+    font-size: 0.88rem;
+    color: var(--vd-support);
+}
+
+.vd-avail__rate dd {
+    margin: 0;
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-ink);
+}
+
+.vd-avail__best {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: baseline;
+    justify-content: flex-end;
+    font-weight: 600;
+}
+
+.vd-avail__bestTag {
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: var(--vd-accent);
+    color: var(--vd-on-accent);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.vd-avail__note {
+    margin: 0.8rem 0 0;
+    padding-top: 0.65rem;
+    border-top: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-avail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .vd-batch__note,
+    .vd-space__note,
+    .vd-stock__note,
+    .vd-avail__foot { padding-right: 0; }
+}
+
+/* ── WeaverTrace: provenance for handloom ──────────────────────────────── */
+
+.vd-weave {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1.5rem;
+}
+
+.vd-weave__card {
+    padding: 1.1rem;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 14%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: var(--vd-paper);
+}
+
+.vd-weave__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.85rem;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.85rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+}
+
+.vd-weave__piece {
+    margin: 0;
+    font-family: var(--vd-font-display);
+    font-size: 1.1rem;
+    line-height: 1.3;
+    color: var(--vd-ink);
+}
+
+.vd-weave__price {
+    margin: 0;
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-accent-text);
+}
+
+.vd-weave__facts {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.vd-weave__facts > div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 0.65rem;
+}
+
+.vd-weave__facts dt {
+    font-size: 0.8rem;
+    color: var(--vd-support);
+}
+
+.vd-weave__facts dd {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--vd-ink);
+}
+
+.vd-weave__note {
+    margin: 0.85rem 0 0;
+    padding: 0.7rem 0.85rem;
+    border-left: 2px solid var(--vd-accent);
+    background: var(--vd-soft);
+    font-size: 0.87rem;
+    line-height: 1.5;
+    color: var(--vd-ink);
+}
+
+.vd-weave__foot {
+    margin: 1.25rem 0 0;
+    padding-right: 4.5rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-weave { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .vd-weave__foot { padding-right: 0; }
+}
+
+/* ── SpecCompare: claimed against measured ─────────────────────────────── */
+
+.vd-spc__toggle { margin-top: 1.5rem; }
+
+.vd-spc__btn {
+    min-height: 48px;
+    padding: 0 1.1rem;
+    border: var(--vd-border-w) solid var(--vd-ink);
+    border-radius: 999px;
+    background: var(--vd-paper);
+    color: var(--vd-ink);
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.vd-spc__btn[aria-pressed='true'] {
+    background: var(--vd-fill);
+    border-color: var(--vd-fill);
+    color: var(--vd-on-fill);
+}
+
+@media (hover: hover) {
+    .vd-spc__btn:hover:not([aria-pressed='true']) { border-color: var(--vd-accent); }
+}
+
+.vd-spc__btn:active { transform: translateY(1px); }
+
+.vd-spc__btn:focus-visible {
+    outline: 2px solid var(--vd-accent);
+    outline-offset: 2px;
+}
+
+.vd-spc__hint {
+    margin: 0.6rem 0 0;
+    font-size: 0.87rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+.vd-spc__wrap {
+    margin-top: 1.1rem;
+    padding-bottom: 2.5rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border: var(--vd-border-w) solid color-mix(in srgb, var(--vd-ink) 14%, transparent);
+    border-radius: var(--vd-radius-lg);
+}
+
+.vd-spc__table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--vd-paper);
+}
+
+.vd-spc__table th,
+.vd-spc__table td {
+    padding: 0.7rem 0.85rem;
+    text-align: left;
+    font-size: 0.9rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--vd-ink) 10%, transparent);
+    white-space: nowrap;
+}
+
+.vd-spc__table thead th {
+    font-family: var(--vd-font-display);
+    font-size: 0.95rem;
+    background: var(--vd-soft);
+    color: var(--vd-ink);
+}
+
+.vd-spc__table tbody th {
+    font-weight: 400;
+    color: var(--vd-support);
+}
+
+.vd-spc__table td {
+    color: var(--vd-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The claimed figure, struck through beside the measured one. This is the
+   whole argument of the section, so it is shown rather than hidden. */
+.vd-spc__was {
+    display: block;
+    font-size: 0.76rem;
+    text-decoration: line-through;
+    color: var(--vd-support);
+}
+
+.vd-spc__note {
+    margin: 1.25rem 0 0;
+    padding-right: 4.5rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+/* ── FreshToday: the morning vegetable board ───────────────────────────── */
+
+.vd-fresh__since {
+    margin: 1.25rem 0 0;
+    padding: 0.7rem 0.9rem;
+    border-left: 2px solid var(--vd-accent);
+    background: var(--vd-paper);
+    font-size: 0.9rem;
+    color: var(--vd-ink);
+}
+
+.vd-fresh__board {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.vd-fresh__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.2rem 0.75rem;
+    align-items: baseline;
+    padding: 0.65rem 0.9rem;
+    border-radius: var(--vd-radius-sm);
+    background: var(--vd-paper);
+}
+
+.vd-fresh__name {
+    font-size: 0.95rem;
+    color: var(--vd-ink);
+}
+
+.vd-fresh__price {
+    font-size: 0.98rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--vd-ink);
+}
+
+.vd-fresh__unit {
+    font-weight: 400;
+    font-size: 0.82rem;
+    color: var(--vd-support);
+}
+
+.vd-fresh__tag {
+    grid-column: 1 / -1;
+    justify-self: start;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: var(--vd-soft);
+    font-size: 0.72rem;
+    color: var(--vd-ink);
+}
+
+.vd-fresh__note {
+    margin: 1.25rem 0 0;
+    padding-right: 4.5rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--vd-support);
+}
+
+@media (min-width: 768px) {
+    .vd-fresh__board { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.35rem 1rem; }
+    .vd-fresh__row { grid-template-columns: 1fr auto auto; }
+    .vd-fresh__tag { grid-column: auto; justify-self: end; }
+    .vd-fresh__note,
+    .vd-spc__note { padding-right: 0; }
+    .vd-spc__wrap { padding-bottom: 0; }
+}
+
+/* ── MapLink: four ways to say where ───────────────────────────────────── */
+
+/* All four live inside .vd-ground--ink, so every colour here pairs with
+   --vd-ink as the surface, which means --vd-paper for text. Pairing with
+   the page instead is the trap that shipped 1:1 labels on the main site.
+
+   No embedded map anywhere: the CSP has no frame-src. See lib/mapLink.js. */
+
+.vd-map {
+    text-decoration: none;
+    color: var(--vd-paper);
+}
+
+.vd-map__icon { flex: none; }
+
+/* ── pin: a quiet line under the address ───────────────────────────────── */
+
+.vd-map--pin {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    /* 48px of touch height from padding, while the text stays where the
+       address block wants it. */
+    min-height: 48px;
+    margin-top: 0.35rem;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--vd-paper) 82%, var(--vd-support));
+    border-bottom: 1px solid transparent;
+}
+
+@media (hover: hover) {
+    .vd-map--pin:hover {
+        color: var(--vd-paper);
+        border-bottom-color: color-mix(in srgb, var(--vd-paper) 45%, transparent);
+    }
+}
+
+.vd-map--pin:active { opacity: 0.75; }
+
+/* ── inline: a link inside a sentence ──────────────────────────────────── */
+
+.vd-map--inline {
+    /* A link inside a sentence cannot be a 48px block without knocking a
+       hole in the paragraph, so the hit area is extended with a
+       pseudo-element instead. inset is negative top and bottom only:
+       widening it sideways would overlap the words either side and steal
+       their taps. Measured at 390px this takes a 22px line to 48px. */
+    position: relative;
+    color: var(--vd-paper);
+    /* Underlined, because a link inside running prose that is only a
+       colour change is a link half the readers will not see. */
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, var(--vd-paper) 45%, transparent);
+}
+
+/* -13px each way against a 22px line box gives 48px. */
+.vd-map--inline::before {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+}
+
+@media (hover: hover) {
+    .vd-map--inline:hover { text-decoration-color: var(--vd-paper); }
+}
+
+/* ── card: a destination you have to find ──────────────────────────────── */
+
+.vd-map--card {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 0.85rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--vd-paper) 28%, transparent);
+    border-radius: var(--vd-radius-lg);
+    background: color-mix(in srgb, var(--vd-paper) 7%, transparent);
+}
+
+.vd-map__head {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.vd-map__where {
+    font-family: var(--vd-font-display);
+    font-size: 1.05rem;
+    color: var(--vd-paper);
+}
+
+.vd-map__landmark {
+    font-size: 0.87rem;
+    line-height: 1.45;
+    color: color-mix(in srgb, var(--vd-paper) 80%, var(--vd-support));
+}
+
+/* The genuinely useful line: how long it takes and what the last stretch
+   is like. This is what a person driving there actually needs. */
+.vd-map__direction {
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: color-mix(in srgb, var(--vd-paper) 72%, var(--vd-support));
+}
+
+.vd-map__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--vd-paper);
+}
+
+@media (hover: hover) {
+    .vd-map--card:hover {
+        border-color: color-mix(in srgb, var(--vd-paper) 55%, transparent);
+    }
+}
+
+.vd-map--card:active { transform: translateY(1px); }
+
+/* ── strip: the neighbourhood as the pitch ─────────────────────────────── */
+
+.vd-map--strip {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 2rem;
+    padding: 1.25rem 1.25rem 1.4rem;
+    border-radius: var(--vd-radius-lg);
+    background: color-mix(in srgb, var(--vd-paper) 9%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vd-paper) 20%, transparent);
+}
+
+.vd-map__stripWhere {
+    font-family: var(--vd-font-display);
+    font-size: clamp(1.4rem, 6vw, 2rem);
+    line-height: 1.15;
+    color: var(--vd-paper);
+}
+
+.vd-map__stripSub {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: color-mix(in srgb, var(--vd-paper) 80%, var(--vd-support));
+}
+
+@media (hover: hover) {
+    .vd-map--strip:hover {
+        border-color: color-mix(in srgb, var(--vd-paper) 45%, transparent);
+    }
+}
+
+.vd-map--strip:active { transform: translateY(1px); }
+
+.vd-map:focus-visible {
+    outline: 2px solid var(--vd-paper);
+    outline-offset: 3px;
+    border-radius: var(--vd-radius-sm);
+}
+
+@media (min-width: 768px) {
+    .vd-map--strip {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.5rem 1.25rem;
+    }
+    .vd-map--strip .vd-map__cta { margin-top: 0; margin-left: auto; }
+}

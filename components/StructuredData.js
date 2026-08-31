@@ -23,7 +23,7 @@
  * priceRange, because we have no real ones and fabricating them in
  * markup a crawler reads is worse than fabricating them in prose.
  */
-import { brand, contact, phoneHref } from '@/config/site';
+import { brand, contact, phoneHref, faqs, services } from '@/config/site';
 
 export default function StructuredData() {
     const site = `https://${brand.domain}`;
@@ -50,7 +50,42 @@ export default function StructuredData() {
                     addressRegion: 'Tamil Nadu',
                     addressCountry: 'IN',
                 },
-                areaServed: { '@type': 'Country', name: 'India' },
+                /* NARROWED FROM 'India', DELIBERATELY.
+                   Telling Google we serve a country of 1.4 billion is
+                   telling it nothing, and it is the opposite of the
+                   actual strategy: the realistic first fifty clients are
+                   within a couple of hundred kilometres and arrive
+                   through Maps and word of mouth. Naming the districts
+                   is what makes a local pack result possible at all.
+                   The wider state stays on the list because we do take
+                   work from Chennai and Coimbatore; it is last because
+                   the order is read as priority. */
+                areaServed: [
+                    { '@type': 'City', name: 'Tirunelveli' },
+                    { '@type': 'City', name: 'Nagercoil' },
+                    { '@type': 'City', name: 'Thoothukudi' },
+                    { '@type': 'City', name: 'Tenkasi' },
+                    { '@type': 'City', name: 'Madurai' },
+                    { '@type': 'State', name: 'Tamil Nadu' },
+                ],
+                /* Coordinates for the district centre. A LocalBusiness
+                   without geo is a business Maps cannot place. */
+                geo: {
+                    '@type': 'GeoCoordinates',
+                    latitude: 8.7139,
+                    longitude: 77.7567,
+                },
+                openingHoursSpecification: [
+                    {
+                        '@type': 'OpeningHoursSpecification',
+                        dayOfWeek: [
+                            'Monday', 'Tuesday', 'Wednesday',
+                            'Thursday', 'Friday', 'Saturday',
+                        ],
+                        opens: '09:30',
+                        closes: '19:00',
+                    },
+                ],
                 sameAs: [contact.instagram],
                 knowsAbout: [
                     'Web design',
@@ -72,11 +107,56 @@ export default function StructuredData() {
                 '@type': 'Service',
                 '@id': `${site}/#service`,
                 name: 'Website design and build',
-                serviceType: 'Web design and development',
+                /* A comma-separated list is how Google reads multiple
+                   service types on one node. Ecommerce is named here
+                   because the FAQ now says we build it: structured data
+                   that claims less than the visible page is a wasted
+                   signal, and one that claims more is a liability. */
+                serviceType: 'Web design and development, Ecommerce development, SEO',
                 provider: { '@id': `${site}/#organization` },
-                areaServed: { '@type': 'Country', name: 'India' },
+                areaServed: [
+                    { '@type': 'City', name: 'Tirunelveli' },
+                    { '@type': 'State', name: 'Tamil Nadu' },
+                ],
                 description:
-                    'Websites designed and built for small businesses, taken live, and kept found in search.',
+                    'Websites and online shops designed and built for small businesses, taken live, and kept found in search.',
+            },
+            /* One node per service page, so a crawler can tell the three
+               apart rather than seeing one blurred offering. Each points
+               back at the organisation by @id and names the same area the
+               organisation serves. */
+            ...services.map((svc) => ({
+                '@type': 'Service',
+                '@id': `${site}/services/${svc.slug}#service`,
+                name: svc.title,
+                serviceType: svc.title,
+                description: svc.seo,
+                url: `${site}/services/${svc.slug}`,
+                provider: { '@id': `${site}/#organization` },
+                areaServed: [
+                    { '@type': 'City', name: 'Tirunelveli' },
+                    { '@type': 'State', name: 'Tamil Nadu' },
+                ],
+            })),
+            {
+                /* FAQPage, built from the SAME array ClFaq renders.
+                   Never type these answers twice. On an earlier build the
+                   rendered FAQ and the JSON-LD were written separately,
+                   drifted apart, and Google was served answers that were
+                   no longer anywhere on the page. Structured data that
+                   does not match the visible page is a manual-action
+                   risk, not just an untidiness. */
+                '@type': 'FAQPage',
+                '@id': `${site}/#faq`,
+                isPartOf: { '@id': `${site}/#website` },
+                mainEntity: faqs.map((item) => ({
+                    '@type': 'Question',
+                    name: item.q,
+                    acceptedAnswer: {
+                        '@type': 'Answer',
+                        text: item.a,
+                    },
+                })),
             },
         ],
     };

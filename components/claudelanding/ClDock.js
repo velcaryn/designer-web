@@ -72,6 +72,35 @@ const ITEMS = [
     { id: 'talk', label: 'Contact', Icon: ChatCircle },
 ];
 
+/* WHICH DOCK ITEM OWNS WHICH SECTION.
+
+   The dock has six items and the page has eleven sections, so five of
+   them belonged to no item. The observer watched only its own six and
+   set the highlight to null whenever none was in view, which was honest
+   but looked broken: measured down the page, 8 of 17 scroll positions
+   had nothing lit at all, and the highlight blinked off and on as you
+   scrolled. A dock that keeps losing its selection reads as a glitch
+   rather than as precision.
+
+   Every section is now owned by the item a reader would say they were
+   in. `start` and `what` sit between the hero and the process section
+   and belong to Home and How it works respectively; `who`, `invest` and
+   `faq` all sit between Work and Contact, and they are the things you
+   read on the way to getting in touch, so Contact owns them. */
+const SECTION_OWNER = {
+    top: 'top',
+    start: 'top',
+    grow: 'grow',
+    what: 'grow',
+    tech: 'tech',
+    lab: 'lab',
+    work: 'work',
+    who: 'work',
+    invest: 'talk',
+    faq: 'talk',
+    talk: 'talk',
+};
+
 /* Peaks at 1.7x directly under the pointer, back to 1x by 130px away. Big
    enough that the hovered icon is unambiguously the focal point of the bar,
    the effect the "a little bigger" request asks for; still capped rather
@@ -135,28 +164,112 @@ function DockItem({ id, label, Icon, isActive, reduceMotion, dockRef }) {
 
 export default function ClDock() {
     const [active, setActive] = useState('top');
+    const [hidden, setHidden] = useState(false);
     const dockRef = useRef(null);
     const reduceMotion = useReducedMotionPref();
     const { secondsLeft, isDefault, themeName, reset } = useLabStatus();
 
+    /* Hide while scrolling DOWN, come back on scroll up or on a pause.
+     *
+     * The dock is fixed, so it sits over whatever is at the bottom of the
+     * viewport. Every section used to reserve 100px of bottom padding for
+     * it, which across eleven sections was about 1000px of dead space on
+     * a page already running to nineteen viewports on a phone.
+     *
+     * Getting out of the way is cheaper than being permanently allowed
+     * for. Scrolling down means the visitor is reading ahead and not
+     * navigating; scrolling up, or stopping, means they might be.
+     *
+     * The 240ms idle timer is what makes it feel right rather than
+     * twitchy: without it the dock flickers back on every momentum
+     * wobble at the end of a flick scroll.
+     *
+     * Never hides when the page is barely scrolled, so it is visible at
+     * rest at the top, and never on desktop, where the two-column
+     * layouts do not put content under it. */
     useEffect(() => {
-        const nodes = ITEMS.map((i) => document.getElementById(i.id)).filter(Boolean);
-        if (nodes.length === 0) return undefined;
-        const io = new IntersectionObserver(
-            (entries) => {
-                const visible = entries
-                    .filter((e) => e.isIntersecting)
-                    .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-                if (visible) setActive(visible.target.id);
-            },
-            { rootMargin: '-35% 0px -45% 0px', threshold: [0, 0.25, 0.5] },
-        );
-        nodes.forEach((n) => io.observe(n));
-        return () => io.disconnect();
+        if (typeof window === 'undefined') return undefined;
+        if (window.matchMedia('(min-width: 900px)').matches) return undefined;
+
+        let last = window.scrollY;
+        let idle;
+
+        function onScroll() {
+            const y = window.scrollY;
+            const down = y > last && y > 240;
+            last = y;
+            setHidden(down);
+
+            window.clearTimeout(idle);
+            idle = window.setTimeout(() => setHidden(false), 240);
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+            window.clearTimeout(idle);
+        };
+    }, []);
+
+    useEffect(() => {
+        /* WHY THIS IS NOT AN IntersectionObserver ANY MORE.
+
+           It was, with rootMargin '-35% 0px -45% 0px', which leaves a
+           20% band across the middle of the viewport. An observer only
+           fires when an edge CROSSES that band, so a section taller than
+           20vh can fill it completely without either of its edges
+           entering, and the callback simply never runs. Measured: 11 of
+           17 checkpoints down the page had nothing lit, and the
+           highlight blinked off and on while scrolling. That is the
+           glitch.
+
+           Reading positions directly cannot miss: at any scroll offset
+           exactly one section contains the reference line, because the
+           sections tile the page. One rAF-throttled scroll listener,
+           which is cheaper than it sounds and runs only while the page
+           is actually moving. */
+        const ids = Object.keys(SECTION_OWNER);
+
+        let frame = 0;
+        const read = () => {
+            frame = 0;
+            /* A line 40% down the viewport: low enough that a section
+               counts as "current" once its top is comfortably on screen,
+               high enough that it does not switch early on a tall one. */
+            const line = window.innerHeight * 0.4;
+            let owner = SECTION_OWNER[ids[0]];
+            for (const id of ids) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+                const r = el.getBoundingClientRect();
+                /* The last section whose top is above the line wins,
+                   which is the one the reader is standing in. */
+                if (r.top <= line) owner = SECTION_OWNER[id] ?? owner;
+            }
+            setActive(owner);
+        };
+
+        const onScroll = () => {
+            if (frame) return;
+            frame = requestAnimationFrame(read);
+        };
+
+        read();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+        return () => {
+            if (frame) cancelAnimationFrame(frame);
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', onScroll);
+        };
     }, []);
 
     return (
-        <nav className="cl-dock" aria-label="Page sections" ref={dockRef}>
+        <nav
+            className={`cl-dock${hidden ? ' is-hidden' : ''}`}
+            aria-label="Page sections"
+            ref={dockRef}
+        >
             <div className="cl-dock__bar">
                 {ITEMS.map((item) => (
                     <DockItem

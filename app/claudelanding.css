@@ -223,27 +223,56 @@
    sections with a real colour or content change, not the near-200px gaps
    the original token produces on a normal laptop screen. */
 body:has(.cl-dock) .nv-section {
-    padding-block: clamp(40px, 6vw, 96px);
+    /* Was clamp(40px, 6vw, 96px), which resolved to 86px top and bottom
+       at 1440px: 172px of ground between every pair of sections, eleven
+       times over, on a page already thirteen viewports tall. The upper
+       bound comes down and the vw term with it. This is still a brand
+       site and still has air; it no longer has a whole screen of it
+       between one idea and the next. */
+    padding-block: clamp(36px, 4.2vw, 68px);
 }
 
-/* MOBILE ONLY: every section on this page gets real, permanent clearance
-   from the fixed dock at its own bottom edge, in addition to the rhythm
-   padding above. A mobile audit across six real device widths (320 to
-   430px) found the dock permanently covering live content at the natural
-   end of the hero, the bento grid, the tech section and the crowd strip,
-   not merely passing over it mid-scroll: single-column mobile layouts
-   stack every section's content into one tall column, so a section's last
-   line lands near the bottom of a phone viewport far more often than it
-   does on a wide desktop layout, where this was never observed. 100px
-   clears the dock's own measured footprint (roughly 64px bar plus its
-   16-28px offset from the edge) with margin. Desktop is deliberately
-   excluded: the two-column layouts used above 900px did not show this
-   problem, and adding the same reserve there would reintroduce the "wall
-   of dead space between sections" mistake this file's history already
-   records once. */
+/* Section heads had 64px under them at every width. That is a paragraph
+   of space between a heading and the thing it introduces. */
+.nv-root .cl-head { margin-bottom: 34px; }
+
+/* MOBILE: clearance from the fixed dock, but far less of it than before.
+ *
+ * THE HISTORY MATTERS, SO IT IS RECORDED RATHER THAN QUIETLY REVERSED.
+ *
+ * A mobile audit across six device widths found the dock permanently
+ * covering live content at the natural end of the hero, the bento grid,
+ * the tech section and the crowd strip. Single-column layouts stack
+ * everything into one tall column, so a section's last line lands near
+ * the bottom of a phone viewport far more often than on desktop. The fix
+ * was 100px of bottom padding on EVERY section.
+ *
+ * That fix was correct and too expensive. Eleven sections paying 100px
+ * each is roughly 1000px of dead space on a page that already ran to
+ * nineteen viewports, and the reserve was being paid at every section
+ * boundary to solve a problem that only occurs where content happens to
+ * end near the fold.
+ *
+ * The dock now hides itself while the visitor scrolls down and returns
+ * when they scroll up or stop (see ClDock.js), so it is not sitting over
+ * anything during the scroll that used to expose this. What remains here
+ * is a smaller reserve for the case the audit actually found: content
+ * resting under a dock that is on screen.
+ *
+ * Desktop stays excluded. The two-column layouts above 900px never
+ * showed the problem, and adding a reserve there would reintroduce the
+ * "wall of dead space between sections" mistake this file already
+ * records once. */
 @media (max-width: 899px) {
     body:has(.cl-dock) .nv-section {
-        padding-bottom: max(clamp(40px, 6vw, 96px), 100px);
+        padding-bottom: max(clamp(32px, 5vw, 72px), 48px);
+    }
+
+    /* The last section before the footer is the one place the dock
+       genuinely rests over content with nothing below it to scroll to,
+       so it keeps the full reserve. */
+    body:has(.cl-dock) main > section:last-child {
+        padding-bottom: 104px;
     }
 }
 
@@ -283,8 +312,12 @@ body:has(.cl-dock) .nv-section {
    height the way the previous single-column hero needed. */
 .cl-hero {
     position: relative;
-    padding-top: calc(14px + 64px + clamp(40px, 7vw, 88px));
-    padding-bottom: clamp(40px, 6vw, 80px);
+    /* 14px + 64px is the floating header's real clearance and is not
+       negotiable. The third term was clamp(40px, 7vw, 88px), which put
+       174px above the headline at 1440px: a quarter of the first screen
+       gone before the visitor reads a word. */
+    padding-top: calc(14px + 64px + clamp(28px, 3.4vw, 52px));
+    padding-bottom: clamp(32px, 4vw, 56px);
     overflow: hidden;
 }
 
@@ -1050,7 +1083,12 @@ body:has(.cl-dock) .nv-section {
    Growth, the three beats
    ══════════════════════════════════════════════════════════════════════ */
 
-.cl-beat { padding-block: clamp(32px, 5vw, 64px); }
+/* Was clamp(32px, 5vw, 64px), which is 128px per beat on top of the
+   section's own padding: three beats meant 384px of padding inside one
+   section, and #grow was the tallest thing on the page at both widths.
+   The beats still need separating from each other, but they do not each
+   need a section's worth of air. */
+.cl-beat { padding-block: clamp(20px, 2.6vw, 36px); }
 
 /* `align-items: start`, not `center`. The phone frame in beat three is a
    true 9:19 aspect ratio, so at its rendered width it is taller than the
@@ -1902,6 +1940,29 @@ a.cl-bento__cell:active {
     }
 }
 
+/* MOBILE: the two phones share a row and the browser frame spans beneath.
+   There was no rule here at all, so below 900px the grid fell back to one
+   column and three device mockups stacked to 1638px, which was the single
+   tallest block on the phone layout and most of why #work ran to 2019px.
+   Side by side they are smaller, but two phones at half width still read
+   as phones, and the section drops by roughly 700px. */
+@media (max-width: 899px) {
+    .cl-proof__frames {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        align-items: start;
+    }
+
+    /* The Safari frame is the wide one: give it the full row. */
+    .cl-proof__frameWrap:nth-child(2) {
+        grid-column: 1 / -1;
+        order: -1;
+    }
+
+    /* The two phones no longer need a 320px allowance each. */
+    .cl-proof__frameWrap > * { max-width: 100%; }
+}
+
 /* Round two: hover lift and a caption reveal, both transform/opacity so
    they cost nothing and are named in the reduced-motion block below. */
 .cl-proof__frameWrap {
@@ -2038,213 +2099,377 @@ a.cl-bento__cell:active {
    filled surface and is what the light text here uses. */
 .cl-foot {
     position: relative;
-    padding-top: clamp(56px, 8vw, 96px);
-    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
-    border-top: var(--nv-stroke) solid var(--nv-ink);
+    padding-top: clamp(48px, 6vw, 72px);
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid color-mix(in srgb, var(--nv-paper) 10%, transparent);
     background: var(--nv-ink);
-    color: var(--nv-on-accent);
+    color: var(--nv-paper);
     overflow: hidden;
 }
 
-/* The single soft glow from the footer-19 design, in the site's own
-   accent rather than its violet. A background gradient, never a shadow,
-   so the one-shadow lock in globals.css is untouched. */
+/* Ambient Lighting & Mesh Glows */
 .cl-foot__glow {
     position: absolute;
-    bottom: -30%;
+    top: -20%;
     left: -10%;
-    width: 60%;
-    height: 70%;
+    width: 65%;
+    height: 80%;
     background: radial-gradient(
         circle,
-        color-mix(in srgb, var(--nv-fill) 45%, transparent) 0%,
+        color-mix(in srgb, var(--nv-fill) 35%, transparent) 0%,
         transparent 70%
     );
     pointer-events: none;
 }
 
-.cl-foot__inner { position: relative; }
-
-.cl-foot__lead {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(28px, 4vw, 40px);
-    padding-bottom: clamp(48px, 8vw, 88px);
+.cl-foot__glowSecondary {
+    position: absolute;
+    bottom: -20%;
+    right: -10%;
+    width: 50%;
+    height: 65%;
+    background: radial-gradient(
+        circle,
+        color-mix(in srgb, var(--nv-fill) 22%, transparent) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
 }
 
-@media (min-width: 900px) {
-    .cl-foot__lead {
-        flex-direction: row;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: clamp(40px, 6vw, 80px);
-    }
+.cl-foot__inner {
+    position: relative;
+    z-index: 1;
 }
 
-.nv-root .cl-foot__heading {
-    max-width: 20ch;
-    font-family: var(--nv-font-display);
-    font-size: var(--nv-d2);
-    font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    color: var(--nv-on-accent);
-    margin: 0;
-}
-
-.cl-foot__leadAction {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-    flex: none;
-}
-
-.cl-foot__cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 52px;
-    padding-inline: 22px;
-    background: var(--nv-fill);
-    color: var(--nv-on-fill);
-    border-radius: var(--nv-radius-pill);
-    font-size: var(--nv-small);
-    font-weight: 700;
-    touch-action: manipulation;
-    transition: transform 0.2s var(--nv-ease);
-}
-
-.cl-foot__email {
-    font-size: var(--nv-small);
-    font-weight: 600;
-    color: var(--nv-on-accent-soft);
-}
-
-.cl-foot__mid {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(28px, 4vw, 44px);
-    padding-bottom: clamp(28px, 4vw, 44px);
-    border-bottom: 2px solid color-mix(in srgb, var(--nv-on-accent) 22%, transparent);
-}
-
-@media (min-width: 900px) {
-    .cl-foot__mid {
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: clamp(40px, 6vw, 80px);
-    }
-}
-
-.cl-foot__brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    flex: none;
-}
-
-.cl-foot__nameIcon {
-    width: 26px;
-    height: 26px;
-    flex: none;
-    /* The mark is drawn in ink, which is this panel's own background, so
-       it has to be inverted here rather than recoloured with a fill. */
-    filter: invert(1);
-}
-
-.cl-foot__name {
-    font-family: var(--nv-font-display);
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--nv-on-accent);
-}
-
-.cl-foot__cols {
+/* Main Grid Layout */
+.cl-foot__grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 28px;
-}
-
-@media (min-width: 560px) {
-    .cl-foot__cols { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    grid-template-columns: 1fr;
+    gap: clamp(36px, 5vw, 64px);
+    padding-bottom: clamp(36px, 5vw, 56px);
 }
 
 @media (min-width: 900px) {
-    .cl-foot__cols { gap: clamp(36px, 6vw, 96px); }
-}
-
-.cl-foot__colTitle {
-    font-size: var(--nv-micro);
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--nv-on-accent);
-    margin-bottom: 10px;
-}
-
-.cl-foot__colLinks {
-    display: flex;
-    flex-direction: column;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-/* Real padding and a minimum height on every link: a plain inline text
-   link measures 22-28px tall, well under the 44px touch target every
-   other control on this page uses, on the part of the page a mobile
-   visitor reaches for last. */
-.cl-foot__colLinks a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    font-size: var(--nv-small);
-    font-weight: 600;
-    color: var(--nv-on-accent-soft);
-    touch-action: manipulation;
-    word-break: break-word;
-}
-
-.cl-foot__bottom {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding-top: clamp(20px, 3vw, 30px);
-    font-size: var(--nv-micro);
-    color: var(--nv-on-accent-soft);
-}
-
-@media (min-width: 900px) {
-    .cl-foot__bottom {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        gap: 24px;
+    .cl-foot__grid {
+        grid-template-columns: 1.2fr 1fr;
+        align-items: start;
+        gap: clamp(48px, 6vw, 96px);
     }
 }
 
-.nv-root .cl-foot__copyright { margin: 0; }
+/* Left Column: Brand Card */
+.cl-foot__brandCard {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
 
-.cl-foot__socials a {
+.cl-foot__brandHeader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.cl-foot__brandIdentity {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cl-foot__logo {
+    /* Landscape after the viewBox crop, so height-sized like the header
+       mark rather than forced into a square. */
+    height: 24px;
+    width: auto;
+    flex: none;
+    /* No filter: invert(1). That was here to whiten a mark whose fill was
+       hard-coded black, and inverting a logo is a way to get the wrong
+       colour when the logo changes. The mark now renders in currentColor
+       and this is an <img>, so the colour comes from the file the footer
+       asks for: see the white variant note in public/vb-mark-light.svg. */
+}
+
+.cl-foot__brandName {
+    /* The wordmark face, matching the header lockup. */
+    font-family: var(--nv-font-wordmark), var(--nv-font-display);
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+
+    /* THE FADE.
+
+       The name reads left to right from full paper into a dimmer tone, so
+       "VelBiz" carries the weight and "Digital" or "Cloud" settles back
+       as the qualifier. One gradient across the whole string rather than
+       two spans, because the split point differs between the two names
+       and hard-coding it would break one of them.
+
+       background-clip: text needs a transparent fill to show through, so
+       the paint order matters: the colour below is the fallback for any
+       engine that does not support it, and it must stay a real colour
+       rather than transparent or the name vanishes there. */
+    color: var(--nv-paper);
+    background-image: linear-gradient(
+        100deg,
+        var(--nv-paper) 0%,
+        var(--nv-paper) 42%,
+        color-mix(in srgb, var(--nv-paper) 62%, transparent) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+/* Only make the text transparent where the clip is actually supported.
+   Without this guard an unsupporting engine paints transparent text on a
+   dark footer, which is an invisible brand name. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+    .cl-foot__brandName { color: transparent; }
+}
+
+.cl-foot__statusPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 10px;
+    border-radius: var(--nv-radius-pill);
+    background: color-mix(in srgb, var(--nv-paper) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--nv-paper) 12%, transparent);
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--nv-paper) 88%, var(--t-support) 12%);
+}
+
+.cl-foot__pulseDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.75);
+    animation: clPulse 2s infinite ease-in-out;
+}
+
+@keyframes clPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.6; }
+}
+
+.cl-foot__tagline {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--nv-paper) 70%, var(--t-support) 30%);
+    max-width: 42ch;
+    margin: 0;
+}
+
+.cl-foot__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.cl-foot__btnPrimary {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 40px;
-    font-weight: 600;
-    color: var(--nv-on-accent-soft);
+    min-height: 42px;
+    padding: 0 18px;
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
+    border-radius: var(--nv-radius-pill);
+    font-size: 0.84rem;
+    font-weight: 700;
     touch-action: manipulation;
+    transition: transform 0.2s var(--nv-ease), box-shadow 0.2s var(--nv-ease);
+}
+
+.cl-foot__btnSecondary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: var(--nv-radius-pill);
+    background: color-mix(in srgb, var(--nv-paper) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--nv-paper) 12%, transparent);
+    color: color-mix(in srgb, var(--nv-paper) 85%, var(--t-support) 15%);
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: background 0.2s var(--nv-ease), color 0.2s var(--nv-ease);
+}
+
+.cl-foot__location {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: color-mix(in srgb, var(--nv-paper) 50%, var(--t-support) 50%);
+    font-weight: 500;
+}
+
+/* Right Column: 3 Navigation Columns */
+.cl-foot__nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(20px, 3vw, 40px);
+}
+
+@media (max-width: 600px) {
+    .cl-foot__nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px 18px;
+    }
+    .cl-foot__navCol--company {
+        grid-column: span 2;
+        padding-top: 12px;
+        border-top: 1px solid color-mix(in srgb, var(--nv-paper) 8%, transparent);
+    }
+    .cl-foot__navCol--company .cl-foot__linkList {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px 18px;
+    }
+}
+
+.cl-foot__colHeading {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--nv-paper) 45%, var(--t-support) 55%);
+    margin: 0 0 12px;
+}
+
+.cl-foot__linkList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.cl-foot__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--nv-paper) 75%, var(--t-support) 25%);
+    transition: color 0.15s ease, transform 0.15s ease;
+    touch-action: manipulation;
+    white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+    .cl-foot__link {
+        font-size: 0.82rem;
+        white-space: normal;
+    }
+}
+
+.cl-foot__linkBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--nv-fill) 30%, transparent);
+    color: var(--nv-paper);
+    font-size: 0.64rem;
+    font-weight: 700;
+}
+
+/* Watermark Art Layer */
+.cl-foot__watermarkWrap {
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    pointer-events: none;
+    margin-top: 10px;
+    padding: 16px 0;
+}
+
+.cl-foot__watermark {
+    display: block;
+    /* The wordmark face, matching the lockup above it and the header.
+       This was the display serif at 900 with wide tracking, which read
+       as a different brand from the one in the lockup. */
+    font-family: var(--nv-font-wordmark), var(--nv-font-display);
+    /* "VelBiz Digital" is thirteen characters against "VELBIZ"'s six, so
+       the ceiling comes down and the tracking tightens: at 7.8rem and
+       0.16em the longer name ran past the shell on every width. 8vw
+       keeps it one line from 320px up. */
+    font-size: clamp(1.9rem, 8vw, 5.4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    text-align: center;
+    line-height: 0.9;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--nv-paper) 10%, transparent) 0%,
+        color-mix(in srgb, var(--nv-paper) 2%, transparent) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0.85;
+}
+
+/* Bottom Metadata Bar */
+.cl-foot__metaBar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 18px;
+    border-top: 1px solid color-mix(in srgb, var(--nv-paper) 8%, transparent);
+    font-size: 0.78rem;
+    color: color-mix(in srgb, var(--nv-paper) 55%, var(--t-support) 45%);
+}
+
+@media (min-width: 720px) {
+    .cl-foot__metaBar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.nv-root .cl-foot__legal {
+    margin: 0;
+    font-size: inherit;
+    color: inherit;
+}
+
+.cl-foot__metaRight {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cl-foot__socialLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--nv-paper) 75%, var(--t-support) 25%);
+    transition: color 0.15s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .cl-foot__colLinks a:hover,
-    .cl-foot__socials a:hover,
-    .cl-foot__email:hover {
-        color: var(--nv-on-accent);
+    .cl-foot__link:hover,
+    .cl-foot__socialLink:hover {
+        color: var(--nv-paper);
+        transform: translateX(2px);
     }
-
-    .cl-foot__cta:hover { transform: translateY(-2px); }
+    .cl-foot__btnSecondary:hover {
+        background: color-mix(in srgb, var(--nv-paper) 12%, transparent);
+        color: var(--nv-paper);
+    }
+    .cl-foot__btnPrimary:hover {
+        transform: translateY(-2px);
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -2934,8 +3159,27 @@ a.cl-bento__cell:active {
 .cl-topbar {
     position: fixed;
     top: 14px;
-    left: 14px;
-    right: 14px;
+    /* THE BAR SPANS EXACTLY THE HERO'S CONTENT WIDTH.
+
+       Three versions of this got it wrong in different ways. It was
+       left:14 right:14, which ran the full viewport. Then it was
+       --nv-shell minus 80, which was a guess and landed at 1240px against
+       a hero whose content is 1312px, so the bar was narrower than the
+       headline beneath it and the two edges disagreed by 36px a side.
+
+       .nv-shell is max-width:(--nv-shell + 2*--nv-gutter) with
+       --nv-gutter of internal padding, so its CONTENT box is exactly
+       --nv-shell wide and starts one gutter in. Reproducing that here
+       means the bar's outer edge sits on the headline's left edge and on
+       the setup card's right edge at every width, because it is the same
+       arithmetic rather than a number that approximates it.
+
+       Verified at 1024, 1280, 1440 and 1600: the bar and the h1 share a
+       left edge to the pixel. */
+    left: var(--nv-gutter);
+    right: var(--nv-gutter);
+    max-width: var(--nv-shell);
+    margin-inline: auto;
     z-index: var(--nv-z-nav);
     background: color-mix(in srgb, var(--nv-paper) 92%, transparent);
     backdrop-filter: saturate(1.6) blur(14px);
@@ -2947,7 +3191,18 @@ a.cl-bento__cell:active {
        with clipped corners than a genuinely rounded shape at this bar's
        height. */
     border-radius: 28px;
-    box-shadow: var(--nv-pop);
+    /* THE ONE PLACE THE POP IS NOT INK.
+
+       --nv-pop is 6px 6px 0 ink, and it is the site's shadow everywhere:
+       the EDGE lock in globals.css. This is a deliberate single
+       exception rather than a change to the lock. The bar is the only
+       element that floats over every page, on every ground, and a black
+       offset made it read as a piece of furniture sitting on the page.
+       In the brand blue it reads as part of the brand.
+
+       Still zero-blur and still 6px, so the shape of the shadow is the
+       same one the whole site uses. Only the colour changes. */
+    box-shadow: 6px 6px 0 var(--nv-fill);
 }
 
 @media (min-width: 900px) {
@@ -2958,10 +3213,31 @@ a.cl-bento__cell:active {
 }
 
 .cl-topbar__inner {
-    display: flex;
+    /* A GRID, NOT space-between.
+
+       With flex + space-between the three groups share the leftover
+       space, so the nav's x depended on how long the brand qualifier
+       was and the CTA's x depended on how many links there were.
+       Measured across four pages: the lockup ended anywhere from 251 to
+       327px and the CTA sat at either 1189 or 1253. Navigating between
+       pages, both visibly jumped.
+
+       Three tracks, only the middle one flexible: the lockup starts at
+       the same x everywhere and the end group ends at the same x
+       everywhere, whatever they contain. */
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
+    /* BREATHING ROOM INSIDE THE PILL.
+
+       This was 0, so the lockup sat 3px from the bar's left border and
+       the menu button 3px from its right: at 390px the logo looked like
+       it was touching the stroke and the hamburger was pressed against
+       the opposite edge. A 2px border plus a rounded corner needs more
+       clearance than a square box, not less, because the curve eats into
+       the corner the content is sitting in. */
+    padding-inline: 14px;
     /* A real, fixed bar height rather than one implied by padding, so
        every other measurement on the page that has to clear the header
        (scroll-margin-top, the hero's own top padding) can be stated
@@ -2983,14 +3259,25 @@ a.cl-bento__cell:active {
    other control on the page holds to, on the one link that opens the
    header on every single page. */
 .cl-topbar__brand {
+    /* min-width:0 so the lockup can shrink instead of pushing the menu
+       button off the end of the bar; the qualifier truncates first. */
+    min-width: 0;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
     min-height: 44px;
-    font-family: var(--nv-font-display);
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    /* THE WORDMARK FACE, NOT THE DISPLAY FACE.
+       "VelBiz Digital" is the brand lockup and is set in the wordmark
+       family, which stands in for Sifonn. Everything else on the page
+       stays in Fraunces and Inter: a wordmark is a piece of artwork that
+       happens to be type, not a heading. See app/fonts.js. */
+    font-family: var(--nv-font-wordmark), var(--nv-font-display);
+    font-size: 1.24rem;
+    font-weight: 800;
+    /* Poppins 800 sets wider than Fraunces at the same size, so the
+       lockup is pulled fractionally tighter to hold the same width in a
+       header that has to fit a nav beside it. */
+    letter-spacing: -0.025em;
     color: var(--nv-ink);
     text-decoration: none;
     white-space: nowrap;
@@ -2998,14 +3285,39 @@ a.cl-bento__cell:active {
     touch-action: manipulation;
 }
 
+/* The mark is landscape (876 x 483, a 1.81 ratio) after its viewBox was
+   cropped to the glyph. It was a 26px SQUARE here, which would squash it,
+   so it is sized by height and lets width follow. */
+/* TWO MARKS, ONE SHOWN.
+
+   The mark is an <img>, a separate document that inherits nothing, so a
+   black glyph vanished completely on the dark lab themes. Both files are
+   rendered and CSS picks between them, keyed off the data-dark attribute
+   ClLab sets, so any dark theme added later works with no code change. */
+.cl-topbar__brandIcon--light { display: none; }
+
+.nv-root[data-dark='true'] .cl-topbar__brandIcon--ink { display: none; }
+.nv-root[data-dark='true'] .cl-topbar__brandIcon--light { display: inline-block; }
+
 .cl-topbar__brandIcon {
-    width: 26px;
-    height: 26px;
+    height: 28px;
+    width: auto;
     flex: none;
+    /* Optical, not geometric: the mark's baseline sits above the type's
+       because of the descender dots, so it rides 1px low to line up. */
+    transform: translateY(1px);
 }
 
+/* "Digital" is set apart from "VelBiz" so the lockup reads as a name plus
+   a qualifier rather than as two words of equal weight. */
 .cl-topbar__brandMark {
-    display: none;
+    /* NEVER TRUNCATED. "EXAM..." reads worse than no qualifier at all:
+       an ellipsis in a brand lockup looks like a rendering fault rather
+       than a deliberate abbreviation. The word is short, so it is given
+       the room instead, and the gap and letter-spacing tighten on a
+       narrow phone to pay for it. */
+    flex: none;
+    white-space: nowrap;
     font-family: var(--nv-font-text);
     font-size: var(--nv-micro);
     font-weight: 800;
@@ -3014,9 +3326,24 @@ a.cl-bento__cell:active {
     color: var(--nv-ink-soft);
 }
 
-@media (min-width: 560px) {
-    .cl-topbar__brandMark { display: inline; }
+/* Below 420px the lockup, the icon and the menu button are competing for
+   about 300px. Tightening the qualifier's tracking and the lockup's gap
+   buys back roughly 20px, which is the difference between "EXAMPLES" and
+   "EXAM...". */
+@media (max-width: 420px) {
+    .cl-topbar__brand { gap: 7px; font-size: 1.12rem; }
+    .cl-topbar__brandIcon { height: 25px; }
+    .cl-topbar__brandMark { letter-spacing: 0.06em; }
 }
+
+/* THE QUALIFIER SHOWS AT EVERY WIDTH.
+
+   It was hidden below 560px, which meant a phone visitor on /cloud, the
+   demo hub or a service page saw only "VelBiz" and had no idea which
+   part of the site they were in. That word is the page's name, and it is
+   most useful precisely where there is least other context. It is small
+   and it truncates rather than wrapping, so it costs one line of nothing. */
+.cl-topbar__brandMark { display: inline; }
 
 /* The text links only ever show once there is genuinely room for brand,
    six links and a button on one line without any of them wrapping or
@@ -3027,13 +3354,23 @@ a.cl-bento__cell:active {
 .cl-topbar__links {
     display: none;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     flex-wrap: nowrap;
+    /* The middle track. Centred within it, so a three-link bar and a
+       five-link bar both sit on the bar's centre line rather than each
+       starting wherever the lockup happened to end. */
+    grid-column: 2;
+    min-width: 0;
 }
 
 @media (min-width: 1080px) {
     .cl-topbar__links { display: flex; }
 }
+
+/* Holds the third track's position even when the nav is hidden and the
+   middle track collapses. */
+.cl-topbar__end { grid-column: 3; }
 
 .cl-topbar__link {
     display: inline-flex;
@@ -3091,13 +3428,29 @@ a.cl-bento__cell:active {
     justify-content: center;
     width: 44px;
     height: 44px;
-    background: var(--nv-paper);
+    /* FILLED, not outlined. Below 1080px the text CTA is hidden and this
+       is the only way to reach contact from the header, but as a white
+       pill with a dark outline it was visually identical to the menu
+       toggle sitting beside it: two neutral circles, neither reading as
+       the thing to press. Filling it with the brand colour makes the one
+       action on a phone header unmistakable.
+       --nv-on-fill, because the surface this text sits on is now the
+       fill, not the paper. */
+    background: var(--nv-fill);
     border: 2px solid var(--nv-ink);
     border-radius: var(--nv-radius-pill);
-    color: var(--nv-ink);
+    color: var(--nv-on-fill);
     flex: none;
     touch-action: manipulation;
 }
+
+@media (hover: hover) {
+    .cl-topbar__icon:hover {
+        background: color-mix(in srgb, var(--nv-fill) 84%, var(--nv-paper) 16%);
+    }
+}
+
+.cl-topbar__icon:active { transform: translateY(1px); }
 
 .cl-topbar__burger {
     display: inline-flex;
@@ -3115,9 +3468,13 @@ a.cl-bento__cell:active {
 }
 
 @media (min-width: 1080px) {
-    /* The full link row is back, so neither the toggle nor the icon
-       shortcut has anything left to do. */
-    .cl-topbar__burger,
+    /* THE BURGER STAYS AT EVERY WIDTH.
+
+       It used to disappear at 1080px because the header carried all nine
+       links. The header now shows three, so the menu is the only route to
+       Work, Pricing, FAQ and the rest, and hiding it on a desktop would
+       strand those pages. Only the icon shortcut goes: that was a
+       narrow-screen stand-in for the link row. */
     .cl-topbar__icon { display: none; }
 }
 
@@ -3245,7 +3602,12 @@ a.cl-bento__cell:active {
     backdrop-filter: saturate(1.6) blur(14px);
     border: var(--nv-stroke) solid var(--nv-ink);
     border-radius: var(--nv-radius-pill);
-    box-shadow: var(--nv-pop-sm);
+    /* Blue, like the header and the two-item dock. This was
+       --nv-pop-sm, a 4px ink offset, so the home page's own floater was
+       the one bottom control still wearing a black shadow while every
+       other floating thing on the site had moved to the brand colour.
+       6px to match them exactly rather than 4. */
+    box-shadow: 6px 6px 0 var(--nv-fill);
 }
 
 /* Icon only, no label. `width`/`height` rather than `min-width`/
@@ -3968,4 +4330,1975 @@ a.cl-bento__cell:active {
        the contrast floor, which is the trap named in CLAUDE.md. The
        border is what goes quiet instead. */
     border-color: var(--nv-ink-soft);
+}
+
+/* ==========================================================================
+   PHASE 2: the lead form
+   Shared by the setup card (variant "setup", one field) and #talk
+   (variant "talk", three). Tokens only: the border is the one locked 3px
+   stroke, the shadow the one locked zero-blur pop, and every radius is
+   one of the two allowed values.
+   ========================================================================== */
+
+.cl-lead {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+}
+
+/* Side by side once there is room, so the single-field variant reads as
+   one action rather than a stacked form. Below this it stacks, because a
+   62px field and a 62px button side by side at 390px leaves neither
+   usable. */
+@media (min-width: 640px) {
+    .cl-lead--setup {
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 12px;
+    }
+
+    .cl-lead--setup .cl-lead__field { flex: 1 1 auto; }
+    .cl-lead--setup .cl-lead__submit { flex: 0 0 auto; }
+    /* The error is a flex item on this row too, so it has to be told to
+       take the full width below rather than squeeze in beside the field. */
+    .cl-lead--setup .cl-lead__error { flex: 1 0 100%; }
+}
+
+/* `.nv-root p` is (0,1,1) and would otherwise discard a (0,1,0) margin
+   rule here. Same trap that silently flattened .cld-hero__chips. */
+.nv-root .cl-lead__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+}
+
+.cl-lead__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    font-weight: 600;
+    color: var(--nv-ink);
+}
+
+.cl-lead__optional {
+    font-size: var(--nv-micro);
+    font-weight: 500;
+    /* A real token chosen to pass against paper. Never opacity, never a
+       mix toward the background. */
+    color: var(--nv-ink-faint);
+}
+
+.cl-lead__input {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 18px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    /* An input inherits none of these. Left off, the field renders in
+       the browser's default sans at the browser's default size. */
+    font-family: var(--nv-font-text);
+    font-size: 1rem;
+    color: var(--nv-ink);
+    transition: box-shadow 140ms ease;
+}
+
+.cl-lead__input::placeholder { color: var(--nv-ink-faint); }
+
+.cl-lead__input:focus-visible {
+    outline: none;
+    box-shadow: var(--nv-pop-sm);
+}
+
+.cl-lead__input:disabled {
+    /* Dim the surface, never the text: the value has to stay readable
+       while the request is in flight. */
+    background: var(--nv-lav-soft);
+    cursor: progress;
+}
+
+.cl-lead__submit {
+    min-height: 52px;
+    white-space: nowrap;
+}
+
+.cl-lead__submit:disabled { cursor: progress; }
+
+.cl-lead__error {
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    font-weight: 600;
+    color: var(--nv-ink);
+    /* Marked with a rule rather than colour alone, so it does not depend
+       on hue to read as an error. */
+    border-left: var(--nv-stroke) solid var(--nv-lav);
+    padding-left: 12px;
+}
+
+.cl-lead__error:focus-visible { outline: none; }
+
+.nv-root .cl-lead__done {
+    margin: 0;
+    font-family: var(--nv-font-text);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--nv-ink);
+}
+
+/* Off-screen rather than display:none, because plenty of bots skip
+   anything that is not rendered at all. */
+.cl-lead__trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* The block the setup card reveals once the visitor has committed.
+   Separated from the card's own padding by a rule, so it reads as a
+   second beat rather than more of the same form. */
+.nv-root .cl-setup__after {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin: 22px 0 0;
+    padding-top: 20px;
+    border-top: var(--nv-stroke) solid var(--nv-ink);
+}
+
+.cl-setup__ask {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.nv-root .cl-setup__askLead {
+    margin: 0;
+    max-width: 46ch;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    line-height: 1.5;
+    color: var(--nv-ink-soft);
+}
+
+/* WhatsApp stays the loud option: full width on a phone, and it sits
+   above the form rather than beside it, so the one-tap path is always
+   the first thing a thumb reaches.
+   The bottom margin is the button's own 4px pop shadow plus breathing
+   room: without it the form's first label sat directly against the
+   shadow and read as part of the button. */
+.cl-setup__wa {
+    align-self: flex-start;
+    min-height: 52px;
+    margin-bottom: 6px;
+}
+
+@media (max-width: 639px) {
+    .cl-setup__wa {
+        align-self: stretch;
+        justify-content: center;
+    }
+}
+
+.nv-root .cl-setup__thanks {
+    margin: 0;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    font-weight: 600;
+    color: var(--nv-ink);
+}
+
+/* The dock is FIXED and horizontally centred, so it floats over whatever
+   sits in the lower middle of the viewport. Once the callback form
+   opens, that is the submit button.
+   Padding on the section was the first attempt and it is not enough: it
+   changes where the section ENDS, but the button can still be in the
+   dock's band at any given scroll position, which a screenshot at the
+   top of the section showed immediately.
+   The dock is navigation for a page the visitor has stopped navigating:
+   they are filling in a form. So it gets out of the way while the form
+   is open, and comes back when it closes. `:has()` is well supported in
+   every browser this site targets, and if it ever is not, the failure
+   mode is the old behaviour rather than a broken layout. */
+body:has(.cl-contact__form) .cl-dock {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(120%);
+}
+
+/* The dock already carries a transform for centring, so the transition
+   has to name both properties it actually animates. Sits outside the
+   reduced-motion guard below because a dock that vanishes instantly is
+   fine; one that slides is the part worth suppressing. */
+.cl-dock {
+    transition: opacity 200ms ease, transform 260ms var(--nv-ease);
+}
+
+/* Scrolled out of the way rather than faded in place, so it does not
+   sit as a ghost over the content it was covering. Pointer events go
+   with it: a control you cannot see must not be tappable. */
+.cl-dock.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(150%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cl-dock { transition: opacity 1ms linear; }
+    body:has(.cl-contact__form) .cl-dock { transform: translateX(-50%); }
+}
+
+/* The callback disclosure at #talk.
+   THIS SECTION SITS ON nv-ground--lav-full, an ACCENT-FILLED surface.
+   Text here pairs with the accent, not with the page: --nv-on-accent,
+   never --nv-ink. Getting this wrong is how a label lands at 1.0:1. */
+.cl-contact__callback {
+    margin-top: 26px;
+}
+
+.cl-contact__toggle {
+    /* Reset, because a <button> inherits none of the page type. */
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 12px 0;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    font-weight: 600;
+    color: var(--nv-on-accent);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    /* 48px minimum target: the 12px padding takes a 20px line box to 44,
+       and the min-height covers the rest. */
+    min-height: 48px;
+    touch-action: manipulation;
+}
+
+@media (hover: hover) {
+    .cl-contact__toggle:hover { text-decoration-thickness: 2px; }
+}
+
+.cl-contact__toggle:active { transform: translateY(1px); }
+
+/* The form panel. It carries its own paper ground rather than sitting
+   directly on the accent: input borders and placeholder text are both
+   tuned against paper, and floating them on the accent would put every
+   field's contrast at the mercy of whichever theme the lab is previewing. */
+.cl-contact__form {
+    margin-top: 6px;
+    max-width: 560px;
+    padding: 22px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+}
+
+/* DO NOT set these to --nv-on-accent.
+   The first version of this rule did, reasoning that #talk sits on an
+   accent-filled ground so text here pairs with the accent. That is the
+   right rule applied to the wrong surface: `.nv-btn--ghost` carries
+   `background: var(--nv-paper)`, so the button is a PAPER pill sitting
+   on the accent, not accent-coloured itself. Pairing its label with the
+   accent produced near-white text on a near-white pill, and both
+   buttons rendered as empty capsules. Caught in a screenshot; no build
+   or guard would ever have seen it.
+   The surface the text sits ON is paper, so it pairs with ink. The base
+   .nv-btn--ghost already gets this right, which is why this block now
+   only needs to leave it alone. */
+.cl-contact__actions .nv-btn--ghost {
+    color: var(--nv-ink);
+}
+
+/* ==========================================================================
+   PHASE 2: the price band and the FAQ
+   ========================================================================== */
+
+.cl-invest {
+    display: grid;
+    gap: 34px;
+    /* Centre rather than start: the headline column is much taller than
+       the card, and aligning to the top left the card stranded against
+       the first line of a three-line heading. */
+    align-items: center;
+}
+
+@media (min-width: 900px) {
+    .cl-invest {
+        grid-template-columns: 1.15fr 1fr;
+        gap: 56px;
+    }
+}
+
+.cl-invest__figure {
+    /* The accent carries the number, which is the one thing on this
+       section a skimming visitor is looking for. */
+    color: var(--nv-lav-deep);
+    white-space: nowrap;
+}
+
+.cl-invest__body {
+    padding: 26px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+}
+
+.nv-root .cl-invest__label {
+    margin: 0 0 14px;
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-ink-soft);
+}
+
+/* `.nv-root ul` is (0,1,1) and silently discards a (0,1,0) rule here.
+   Same trap that flattened .cld-hero__chips. */
+.nv-root .cl-invest__factors {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cl-invest__factor {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    line-height: 1.5;
+    color: var(--nv-ink);
+}
+
+.cl-invest__factor svg {
+    flex: 0 0 auto;
+    margin-top: 3px;
+    color: var(--nv-lav-deep);
+}
+
+.nv-root .cl-invest__note {
+    margin: 18px 0 0;
+    padding-top: 16px;
+    border-top: 2px solid color-mix(in srgb, var(--nv-ink) 15%, transparent);
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    line-height: 1.5;
+    color: var(--nv-ink-soft);
+}
+
+/* The FAQ ----------------------------------------------------------------
+   Layout adapted from watermelon faq-3: centred header, one column of
+   numbered rows, plus that becomes minus, answer indented to align under
+   the question rather than the number.
+   None of its CSS is here. Upstream uses a gradient open state, a
+   blurred shadow, a 1px border and no radius, which is all four locks at
+   once. This is the same arrangement built from tokens. */
+
+.cl-faq__head {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.nv-root .cl-faq__head .nv-lede {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cl-faq {
+    /* One column on a phone, two side by side from 900px.
+
+       Wider than the old 780px because it now holds two columns, but
+       still capped: at full shell width each question would run to about
+       620px, and a one-line question in a 620px box is mostly empty box. */
+    max-width: 1060px;
+    margin: 40px auto 0;
+    display: grid;
+    gap: 10px;
+}
+
+.cl-faq__col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* A grid child defaults to min-width:auto and refuses to shrink below
+       its content, which is how a long question would push the column
+       wider than its track instead of wrapping. */
+    min-width: 0;
+}
+
+@media (min-width: 900px) {
+    .cl-faq {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        /* Wider gap between the columns than between the rows, so the two
+           read as two lists rather than as one grid of boxes. */
+        gap: 10px 24px;
+        /* start, not stretch: the columns are independent lists and the
+           shorter one should end where it ends rather than its last item
+           growing to match the other side. */
+        align-items: start;
+    }
+}
+
+.cl-faq__item {
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    overflow: hidden;
+}
+
+/* The open row lifts on the one locked zero-blur pop. Upstream fills it
+   with a gradient; a flat accent ground reads the same "this one is
+   open" without inventing a fifth surface treatment. */
+.cl-faq__item.is-open {
+    background: var(--nv-lav-soft);
+    box-shadow: var(--nv-pop-sm);
+}
+
+/* The heading exists for the document outline; the button inside it is
+   the control. Resetting the h3's own type so it does not fight it. */
+.nv-root .cl-faq__qWrap {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+.cl-faq__q {
+    appearance: none;
+    width: 100%;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: transparent;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+/* The number column. Fixed width and tabular figures so every question
+   below it starts on the same vertical line: proportional digits make
+   "01" and "10" different widths and the column visibly wobbles. */
+.cl-faq__num {
+    flex: 0 0 auto;
+    width: 26px;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    color: var(--nv-ink-faint);
+    transition: color 160ms ease;
+}
+
+.cl-faq__item.is-open .cl-faq__num {
+    color: var(--nv-lav-deep);
+}
+
+.cl-faq__qText {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-body);
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--nv-ink);
+}
+
+.cl-faq__icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--nv-radius-pill);
+    color: var(--nv-ink);
+}
+
+.cl-faq__item.is-open .cl-faq__icon {
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
+}
+
+@media (hover: hover) {
+    /* :not(.is-open) so hover never outranks the open state. */
+    .cl-faq__item:not(.is-open) .cl-faq__q:hover {
+        background: var(--nv-lav-soft);
+    }
+
+    .cl-faq__item:not(.is-open) .cl-faq__q:hover .cl-faq__num {
+        color: var(--nv-ink-soft);
+    }
+}
+
+.cl-faq__item:not(.is-open) .cl-faq__q:active {
+    background: var(--nv-lav-soft);
+}
+
+/* Indented to sit under the question text, not under the number:
+   26px column + 16px gap + 20px padding. Written as a calc from those
+   three values so changing the column does not silently misalign it. */
+.cl-faq__a {
+    padding: 0 20px 20px calc(20px + 26px + 16px);
+}
+
+.nv-root .cl-faq__a p {
+    margin: 0;
+    max-width: 62ch;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    line-height: 1.6;
+    color: var(--nv-ink);
+}
+
+/* At 480px the three-part row plus a 42px indent leaves the question
+   about eighteen characters wide. The number goes, and the answer runs
+   full width. */
+@media (max-width: 480px) {
+    .cl-faq__num { display: none; }
+    .cl-faq__q { gap: 12px; padding: 14px 16px; }
+    .cl-faq__a { padding: 0 16px 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cl-faq__num { transition: none; }
+}
+
+/* ==========================================================================
+   MOBILE DENSITY PASS
+   Measured, not guessed: at 390px the page ran to 16137px, roughly
+   nineteen viewports, and an audit of every gap over 44px found the
+   worst offenders below. Desktop is untouched, because the two-column
+   layouts there use the width instead of the height and the airier
+   rhythm is the point on a wide screen.
+   ========================================================================== */
+
+@media (max-width: 899px) {
+    /* Section heads: the gap between a heading block and the thing it
+       introduces was 64px in the lab and similar elsewhere. On a phone
+       that reads as a break in the page rather than a breath. */
+    .nv-root .cl-head { margin-bottom: 26px; }
+
+    /* Tech: 60px between the copy column and the icon sphere, plus 56px
+       above the guarantee chips, in one section. */
+    .cl-tech__split { gap: 28px; }
+    .nv-root .cl-tech__guarantees { margin-top: 24px; }
+
+    /* Lab: the control groups do not need desktop's separation when
+       they are stacked one above the other. */
+    .cl-lab__grid { gap: 26px; }
+
+    /* Growth: three beats at roughly 800px each was 2754px, the tallest
+       section on the page. The copy and the mock inside each beat sit
+       closer together, and the beats themselves stop being a viewport
+       apart. */
+    .cl-beat__grid { gap: 18px; }
+    .nv-root .cl-beat + .cl-beat { margin-top: 18px; }
+
+    /* The bento "more" link carried a 58px top margin on a 22px block. */
+    .nv-root .cl-bento__more { margin-top: 26px; }
+
+    /* The tech card grid had 28px above and below on top of the gaps
+       between the cards themselves. */
+    .nv-root .cl-tech__grid { margin-block: 18px; }
+
+    /* The setup card and the price card can both give up a little
+       internal padding without the content touching the border. */
+    .cl-invest__body { padding: 20px; }
+
+    /* Bento: 14px between cells is right on desktop where they sit in
+       three columns; in two columns on a phone the grid is taller than
+       it needs to be. */
+    .cl-bento { gap: 10px; }
+
+    /* Cloud teaser and proof: the same story, a desktop side-by-side
+       gap being paid vertically. */
+    .cl-teaser__grid { gap: 26px; }
+}
+
+/* ==========================================================================
+   MOBILE: the mockups, not the padding
+   A measurement pass found that 43% of the mobile page height is device
+   mockups, canvases and images, against 34% for all padding and margin
+   combined at every nesting level. That is why three rounds of spacing
+   cuts each returned so little: the space was never mostly whitespace.
+   These rules scale the mockups on phones only. Nothing is removed and
+   desktop is untouched, where the width is available and the mockups are
+   doing the work the section exists for.
+   ========================================================================== */
+
+@media (max-width: 899px) {
+    /* The hero was 920px on an 844px viewport: taller than the screen
+       before the visitor has read a word, so the first scroll revealed
+       more hero rather than the first idea. */
+    .cl-hero { min-height: 0; }
+    .cl-hero__bg { max-height: 78vh; }
+
+    /* The three growth mocks, at 455, 447 and 520px, are 1422px between
+       them. They are illustrations of a point the copy beside them
+       already makes, so they can be smaller without losing the point. */
+    .cl-beat__stage {
+        max-width: 280px;
+        margin-inline: auto;
+    }
+
+    /* The icon sphere is decorative and was 508px. */
+    .cl-tech__sphereCard { max-height: 380px; }
+
+    /* The Cloud teaser was 952px, the second tallest block on the page,
+       for a section whose whole job is one line and one link. */
+    .cl-teaser__grid > *:last-child {
+        max-width: 300px;
+        margin-inline: auto;
+    }
+}
+
+/* ==========================================================================
+   THE DEMO HUB  (/demo-site)
+   VelBiz's own page, so it wears the four locks: the 3px stroke, the one
+   zero-blur pop, the two radii. The sixteen pages it links to deliberately
+   wear none of that, and the contrast between this page and those is the
+   argument the whole section exists to make.
+   ========================================================================== */
+
+.cl-hub__title {
+    max-width: 20ch;
+    font-family: var(--nv-font-display);
+    /* One step down from --nv-d1. This is a catalogue heading, not the
+       home page's opening statement, and at d1 it took three lines and
+       most of the first screen. */
+    font-size: var(--nv-d2);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    color: var(--nv-ink);
+    margin: 10px 0 0;
+}
+
+.nv-root .cl-hub__lede {
+    margin: 0;
+    max-width: 46ch;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    line-height: 1.55;
+    color: var(--nv-ink-soft);
+}
+
+/* Sits on the first sector's heading row rather than in a band of its
+   own, which is what it was: a 48px field alone on a full-width strip,
+   costing about 90px of vertical space to hold one input. */
+.cl-hub__search-row {
+    display: flex;
+    justify-content: flex-start;
+    margin: 0;
+}
+
+@media (min-width: 900px) {
+    .cl-hub__search-row { justify-content: flex-end; }
+}
+
+.nv-root .cl-hub__searchWrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    flex: 0 1 300px;
+}
+
+.cl-hub__searchIcon {
+    position: absolute;
+    left: 16px;
+    color: var(--nv-ink-faint);
+    pointer-events: none;
+}
+
+.cl-hub__search {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 16px 0 42px;
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    font-family: var(--nv-font-text);
+    /* 16px minimum or iOS zooms the viewport on focus. */
+    font-size: 16px;
+    color: var(--nv-ink);
+}
+
+.cl-hub__search::placeholder { color: var(--nv-ink-faint); }
+
+/* ── Sectors ───────────────────────────────────────────────────────────── */
+
+.cl-sector { padding-block: clamp(22px, 2.6vw, 34px); }
+
+/* The first sector carries the search on its heading row. */
+.cl-sector--first { padding-top: 20px; }
+
+.cl-sector__bar {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+@media (min-width: 900px) {
+    .cl-sector__bar {
+        grid-template-columns: minmax(0, 1fr) 300px;
+        align-items: end;
+        gap: 24px;
+    }
+}
+
+.cl-sector:nth-child(even) { background: var(--nv-paper-warm); }
+
+.cl-sector__head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cl-sector__title {
+    font-family: var(--nv-font-display);
+    font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--nv-ink);
+    margin: 0;
+}
+
+.cl-sector__count {
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    font-weight: 600;
+    color: var(--nv-lav-deep);
+}
+
+.nv-root .cl-sector__lede {
+    margin: 6px 0 0;
+    max-width: 56ch;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    line-height: 1.5;
+    color: var(--nv-ink-soft);
+}
+
+/* ── Bentos ────────────────────────────────────────────────────────────── */
+
+/* ONE GRID FOR EVERY SECTOR.
+   This carried six per-sector compositions: a 7/5 pair, an 8/4 lead, a
+   5-7-7-5 flip, a mirrored lead, twins, and an austere plain. It was a
+   layout exercise rather than a catalogue, and with nineteen trades to
+   scan it made the page harder to read, not richer: the eye had to
+   re-learn the grid at every heading.
+   A card is a card. The differentiation is the mark, the palette and the
+   trade name, which is what the visitor is actually reading for. */
+.cl-bento {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+    .cl-bento { gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1200px) {
+    .cl-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* A sector with fewer cards than the grid has columns left a ragged
+   half-empty row, which is what made the two-card sectors look like a
+   mistake. `auto-fit` with a max cell width lets two cards share the row
+   properly instead of hugging the left edge. */
+@media (min-width: 768px) {
+    .cl-bento {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+}
+
+/* Industry and property stay austere: their mark plates invert to the ink
+   so the B2B trades read as the B2B pages they are. */
+.cl-bento--plain .cl-tile__art {
+    background: var(--nv-ink);
+    color: var(--nv-paper);
+}
+
+/* ── Tiles ─────────────────────────────────────────────────────────────── */
+
+.cl-tile {
+    display: flex;
+    flex-direction: column;
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.14s var(--nv-ease), box-shadow 0.14s var(--nv-ease);
+}
+
+@media (hover: hover) {
+    .cl-tile:hover { transform: translate(-2px, -2px); box-shadow: var(--nv-pop); }
+    /* The panel no longer flips to the VelBiz fill on hover: it now
+       carries the DEMO's palette, and repainting it in our blue on hover
+       threw away the one thing the tile is for. The lift and the shadow
+       are the affordance; the glyph brightening is the confirmation. */
+    .cl-tile:hover .cl-tile__glyph {
+        background: color-mix(in srgb, var(--c) 34%, transparent);
+    }
+}
+
+.cl-tile:active { transform: translate(1px, 1px); box-shadow: none; }
+
+/* THE COLOUR PANEL.
+
+   The tile carried a 42px glyph plate with a 3px swatch hanging under
+   it. It was tidy and it was unreadable in bulk: twenty-four of them
+   scanned as a spreadsheet, and the palette, which is the fastest signal
+   on the page, was doing its work in three pixels of height.
+
+   The panel is the demo's own ink, accent and paper, the same three
+   values its pages are built from, so a tile and the site it opens are
+   visibly the same object. No photography, deliberately: twenty-four
+   photographs is slower, heavier and worse at helping somebody find
+   their own trade. */
+.cl-tile__art {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* SHALLOW ON A PHONE, 5:3 FROM TABLET UP.
+
+       At 5:3 in a single column a 390px screen gives the panel 234px of
+       height, so one card filled most of the viewport and twenty-four of
+       them ran to 8700px. The panel is a colour signal, not a
+       photograph: it does not need depth to do its job, and 16:9 at one
+       column still reads as a distinct palette while halving the
+       scroll. */
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    flex: none;
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 2px solid var(--nv-ink);
+    overflow: hidden;
+    /* Ink base with the accent washing across it, and a soft paper light
+       from the top left. Three stops from the demo's own theme, so no
+       two tiles are the same and none of it is invented. */
+    background:
+        radial-gradient(120% 90% at 18% 12%,
+            color-mix(in srgb, var(--c) 34%, transparent) 0%,
+            transparent 58%),
+        linear-gradient(142deg,
+            var(--a) 0%,
+            color-mix(in srgb, var(--a) 55%, var(--b)) 58%,
+            var(--b) 100%);
+    color: var(--c);
+}
+
+/* The hero, filling the panel. The gradient underneath is the loading
+   ground and the fallback, so a tile is never an empty box. */
+.cl-tile__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Slightly knocked back so the glyph and the sector chip stay
+       legible over whatever the photograph happens to be, and so the
+       demo's own palette still tints the tile rather than being hidden
+       by it. */
+    opacity: 0.82;
+}
+
+/* THE GLYPH MOVED OFF THE MIDDLE OF THE PICTURE.
+
+   It was a 54px disc centred on the panel, which was right when the
+   panel was a gradient and the glyph was the only thing on it. With a
+   photograph underneath, a disc in the dead centre sits on the subject:
+   the baker, the dentist's chair, the couple in the wedding frame.
+
+   Top-left corner, opposite the sector chip, smaller. It is a marker
+   that the tile and the demo share a mark, not the subject of the tile. */
+.cl-tile__glyph {
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    left: 10px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    /* Dark rather than a tint of the demo's paper: it has to read over
+       whatever the photograph happens to be, and the twenty-four heroes
+       include bright kitchens and dark workshops alike. */
+    background: color-mix(in srgb, var(--a) 55%, transparent);
+    backdrop-filter: blur(4px);
+    color: #fff;
+}
+
+.cl-tile__glyph svg { width: 17px; height: 17px; }
+
+/* The sector, on the panel, in the manner of the reference: a small
+   uppercase chip in the bottom-left corner. It answers "what kind of
+   business is this" before the trade name does. */
+.cl-tile__sector {
+    position: absolute;
+    z-index: 1;
+    left: 10px;
+    bottom: 10px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--a) 62%, transparent);
+    backdrop-filter: blur(3px);
+    font-family: var(--nv-font-text);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c);
+    white-space: nowrap;
+    max-width: calc(100% - 20px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* "Professional Services" and "Automobile Services" do not fit a 175px
+   tile. The chip carries the short form on a phone; the full label is
+   still on the filter chip above the grid. */
+@media (max-width: 619px) {
+    .cl-tile__sector { font-size: 0.56rem; letter-spacing: 0.05em; padding: 3px 7px; }
+}
+
+.cl-tile__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px 14px;
+}
+
+/* Trade and city on one line, the way the reference puts the project
+   name and its year: the eye reads the pair as one label. */
+.cl-tile__row {
+    display: flex;
+    /* Wraps rather than clipping. At two columns on a 390px phone the
+       tile is about 175px wide, and "Chartered accountants" beside
+       "Tirunelveli" does not fit on one line at any size worth reading.
+       The city drops under the trade instead. */
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2px 10px;
+}
+
+.cl-tile__trade {
+    font-family: var(--nv-font-display);
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--nv-ink);
+    min-width: 0;
+    /* Long trade names break rather than overflowing their column. */
+    overflow-wrap: anywhere;
+}
+
+.cl-tile__city {
+    flex: none;
+    font-family: var(--nv-font-text);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--nv-ink-soft);
+}
+
+@media (min-width: 620px) {
+    /* Deeper panel once a tile is wide enough to carry it. */
+    .cl-tile__art { aspect-ratio: 5 / 3; }
+}
+
+@media (min-width: 768px) {
+    .cl-tile__trade { font-size: 1.1rem; }
+}
+
+.cl-tile__blurb {
+    font-family: var(--nv-font-text);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--nv-ink-soft);
+}
+
+/* The example name is the least important line on the card and the first
+   to go when there is no room for it. */
+@media (max-width: 767px) {
+    .cl-tile__name { display: none; }
+}
+
+.cl-tile__name {
+    margin-top: 4px;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-micro);
+    color: var(--nv-ink-faint);
+}
+
+.nv-root .cl-hub__empty {
+    margin: 28px 0 0;
+    font-family: var(--nv-font-text);
+    color: var(--nv-ink-soft);
+}
+
+/* ── The loader ────────────────────────────────────────────────────────── */
+
+.cl-load {
+    position: fixed;
+    inset: 0;
+    z-index: var(--nv-z-drawer);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--nv-paper);
+    animation: cl-load-in 180ms var(--nv-ease) both;
+}
+
+@keyframes cl-load-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.cl-load__inner {
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+}
+
+.cl-load__swatch {
+    display: flex;
+    height: 10px;
+    width: 120px;
+    margin: 0 auto 22px;
+    border-radius: var(--nv-radius-pill);
+    overflow: hidden;
+}
+
+.cl-load__swatch > span { flex: 1; }
+
+.nv-root .cl-load__name {
+    margin: 0 0 6px;
+    font-family: var(--nv-font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--nv-ink);
+}
+
+.nv-root .cl-load__step {
+    margin: 0 0 18px;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+}
+
+.cl-load__track {
+    height: 6px;
+    background: var(--nv-lav-soft);
+    border-radius: var(--nv-radius-pill);
+    overflow: hidden;
+}
+
+.cl-load__bar {
+    height: 100%;
+    background: var(--nv-fill);
+    border-radius: var(--nv-radius-pill);
+}
+
+.nv-root .cl-load__pct {
+    margin: 10px 0 0;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-micro);
+    font-variant-numeric: tabular-nums;
+    color: var(--nv-ink-faint);
+}
+
+/* The hub's head. Tighter than the standard section rhythm: the grid
+   below is the content, and a full-height band above it just pushed the
+   cards off the first screen. */
+/* A BAND, NOT A HERO.
+   The head was 519px tall with the headline at 58% width and the rest of
+   the row empty, which pushed the first card to 593px on a 900px screen.
+   The top padding still clears the floating header; everything else is
+   as tight as the type allows. */
+.cl-hub__head {
+    /* CLEARS THE BAR, MEASURED RATHER THAN ASSUMED.
+
+       This was 14 + 64 + 20, which assumed a 64px bar. The bar is 72px at
+       this width, so the eyebrow sat 6px under it: "24 live examples" was
+       visibly touching the floating header.
+
+       14px is the bar's top offset, 72px its height, and 28px is real
+       breathing room rather than the leftover 6. */
+    padding-block: calc(14px + 78px + 30px) 22px;
+    background: var(--nv-paper);
+    border-bottom: 2px solid var(--nv-lav-soft);
+}
+
+.cl-hub__headRow {
+    display: grid;
+    gap: 14px;
+    align-items: end;
+}
+
+@media (min-width: 900px) {
+    /* Copy left, lede right, on one row. The width that was empty is now
+       carrying the second half of the sentence. */
+    .cl-hub__headRow {
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+        gap: 48px;
+    }
+}
+
+/* ==========================================================================
+   SERVICE PAGES  (/services/<slug>)
+   VelBiz's own pages, so they wear the four locks: the 3px stroke, the
+   one zero-blur pop, the two radii.
+   ========================================================================== */
+
+.cl-svc__head {
+    padding-block: calc(14px + 64px + clamp(24px, 3vw, 44px)) clamp(28px, 3.5vw, 48px);
+}
+
+.cl-svc__title {
+    max-width: 18ch;
+    margin: 14px 0 0;
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-d1);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--nv-ink);
+}
+
+.nv-root .cl-svc__lede { margin-top: 18px; }
+
+.cl-svc__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.cl-svc__grid {
+    margin-top: 30px;
+    display: grid;
+    gap: 12px;
+    /* EIGHT ITEMS, AND ONLY COLUMN COUNTS THAT DIVIDE EIGHT.
+
+       auto-fit would give three columns in the middle of the range,
+       which leaves 3+3+2 and a half-empty last row. Every service now
+       carries eight, so the breakpoints step 1 -> 2 -> 4 and every row
+       is full at every width. Five and six were the counts that produced
+       a 4+1 and a 4+2 and made the section look unfinished. */
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 620px) {
+    .cl-svc__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1080px) {
+    .cl-svc__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.cl-svc__card {
+    padding: 22px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+}
+
+.cl-svc__tick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--nv-radius-pill);
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
+    margin-bottom: 12px;
+}
+
+.cl-svc__cardTitle {
+    font-family: var(--nv-font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--nv-ink);
+    margin: 0;
+}
+
+.nv-root .cl-svc__cardText {
+    margin-top: 8px;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    line-height: 1.6;
+    color: var(--nv-ink-soft);
+}
+
+/* The FAQ. <details> rather than a JS accordion: it works with no script
+   and these pages exist to be found cold from search. */
+.cl-svc__faq {
+    margin-top: 26px;
+    max-width: 68ch;
+    display: grid;
+    gap: 8px;
+}
+
+.cl-svc__q {
+    padding: 16px 20px;
+    background: var(--nv-lav-soft);
+    border-radius: var(--nv-radius);
+}
+
+.cl-svc__q summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 44px;
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-body);
+    font-weight: 600;
+    color: var(--nv-ink);
+    cursor: pointer;
+    list-style: none;
+    touch-action: manipulation;
+}
+
+.cl-svc__q summary::-webkit-details-marker { display: none; }
+
+.cl-svc__q summary::after {
+    content: '+';
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--nv-lav-deep);
+    flex: none;
+}
+
+.cl-svc__q[open] summary::after { content: '-'; }
+
+.nv-root .cl-svc__q p {
+    margin-top: 10px;
+    max-width: 62ch;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body);
+    line-height: 1.6;
+    color: var(--nv-ink-soft);
+}
+
+/* The closing band. Sits on an ACCENT-FILLED ground, so text here pairs
+   with the accent, never with the page. */
+.cl-svc__cta { text-align: center; }
+.cl-svc__cta .cl-h2 { color: var(--nv-on-accent); }
+
+.nv-root .cl-svc__ctaBody {
+    margin: 16px auto 26px;
+    max-width: 52ch;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body-lg);
+    line-height: 1.55;
+    color: var(--nv-on-accent);
+}
+
+.cl-svc__others {
+    margin-top: 26px;
+    display: grid;
+    gap: 12px;
+}
+
+@media (min-width: 768px) {
+    .cl-svc__others { grid-template-columns: repeat(2, 1fr); }
+}
+
+.cl-svc__other {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    text-decoration: none;
+    transition: transform 0.14s var(--nv-ease), box-shadow 0.14s var(--nv-ease);
+}
+
+@media (hover: hover) {
+    .cl-svc__other:hover { transform: translate(-2px, -2px); box-shadow: var(--nv-pop); }
+}
+
+.cl-svc__other:active { transform: translate(1px, 1px); box-shadow: none; }
+
+.cl-svc__otherTitle {
+    font-family: var(--nv-font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--nv-ink);
+}
+
+.cl-svc__otherText {
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    line-height: 1.5;
+    color: var(--nv-ink-soft);
+}
+
+.cl-svc__otherGo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    font-weight: 700;
+    color: var(--nv-lav-deep);
+}
+
+/* ── Who builds this ───────────────────────────────────────────────────── */
+
+.cl-who {
+    display: grid;
+    gap: 28px;
+    align-items: start;
+}
+
+@media (min-width: 900px) {
+    .cl-who { grid-template-columns: 1.35fr 1fr; gap: 52px; }
+}
+
+.nv-root .cl-who__body {
+    margin-top: 16px;
+    max-width: 58ch;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-body-lg);
+    line-height: 1.6;
+    color: var(--nv-ink-soft);
+}
+
+.nv-root .cl-who__facts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+}
+
+.cl-who__fact {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px;
+    background: var(--nv-lav-soft);
+    border-radius: var(--nv-radius);
+}
+
+.cl-who__fact svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--nv-lav-deep);
+}
+
+.cl-who__fact span {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    line-height: 1.5;
+    color: var(--nv-ink-soft);
+}
+
+.cl-who__fact strong {
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--nv-ink);
+}
+
+
+/* Inline email links inside sentences.
+   These sat at 20-22px, the bare height of the text box. Padding grows
+   the tap area past the 44px floor and the matching negative margin keeps
+   the line box its original height, so the sentence does not reflow.
+   The same technique as the consent banner's privacy link and the demo
+   frame's back control. */
+.nv-root .cl-legal__body a,
+.nv-root .cl-foot__email {
+    display: inline-block;
+    padding: 12px 0;
+    margin: -12px 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   THE DEMO HUB: rail and grid
+   ══════════════════════════════════════════════════════════════════════
+
+   Replaces nine sector sections, each with its own heading, lede, count
+   and bento. That worked at sixteen demos across six sectors; at
+   twenty-four across nine every composition collapsed to the same shape
+   and the page became nine near-identical bands about 3900px tall. */
+
+.cl-hub {
+    padding-block: 0 clamp(48px, 7vw, 84px);
+    background: var(--nv-paper);
+}
+
+/* ── The rail ──────────────────────────────────────────────────────── */
+
+.cl-rail {
+    position: sticky;
+    /* Clears the floating bar: 14px offset + 72px bar. Sticky rather
+       than static so switching sector never means scrolling back up a
+       long grid. */
+    top: calc(14px + 72px + 8px);
+    z-index: 20;
+    display: grid;
+    gap: 10px;
+    padding-block: 12px;
+    background: var(--nv-paper);
+    /* The grid scrolls under this, so it needs a hard edge rather than
+       letting cards appear to pass through it. */
+    box-shadow: 0 10px 12px -10px color-mix(in srgb, var(--nv-ink) 22%, transparent);
+}
+
+.cl-rail__chips {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    /* Stops the first and last chip sitting flush against the edge when
+       the row is scrolled to either end. */
+    padding-inline: 2px;
+    scrollbar-width: none;
+}
+
+.cl-rail__chips::-webkit-scrollbar { display: none; }
+
+/* NAMESPACED. `.cl-chip` already existed for the hero's trust pills, and
+   reusing it here silently restyled them: at 320px they inherited this
+   rule's padding and blew 51px past the viewport. Different component,
+   different name. */
+.cl-rail__chip {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    /* The playbook floor. These are the most-tapped controls on the
+       page and the audience is 99% touch. */
+    min-height: 44px;
+    padding: 0 14px;
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    background: var(--nv-paper);
+    color: var(--nv-ink);
+    font-family: var(--nv-font-text);
+    font-size: 0.86rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.cl-rail__chip.is-on {
+    background: var(--nv-ink);
+    color: var(--nv-paper);
+}
+
+/* Hover never outranks the on state, and touch gets :active instead so
+   the hover style cannot stick after a tap. */
+@media (hover: hover) {
+    .cl-rail__chip:hover:not(.is-on) { background: var(--nv-lav-soft); }
+}
+
+.cl-rail__chip:active { transform: translateY(1px); }
+
+.cl-rail__chip:focus-visible {
+    outline: 2px solid var(--nv-fill);
+    outline-offset: 2px;
+}
+
+.cl-rail__n {
+    font-size: 0.74rem;
+    font-variant-numeric: tabular-nums;
+    /* Toward the ink, never toward the paper: fading a count toward the
+       background is the move that shipped 1:1 text on this site once. */
+    color: color-mix(in srgb, currentColor 62%, transparent);
+}
+
+.cl-rail__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    background: var(--nv-paper);
+    color: var(--nv-ink-soft);
+}
+
+/* 16px, because iOS zooms the viewport when a focused input is smaller. */
+.cl-rail__search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    font-family: var(--nv-font-text);
+    font-size: 16px;
+    color: var(--nv-ink);
+    outline: none;
+}
+
+.cl-rail__search input::-webkit-search-cancel-button { display: none; }
+
+.cl-rail__clear {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    flex: none;
+    border: 0;
+    border-radius: 50%;
+    background: var(--nv-lav-soft);
+    color: var(--nv-ink);
+    cursor: pointer;
+}
+
+/* ── The status line ───────────────────────────────────────────────── */
+
+/* Collapses to nothing when it has nothing to say, rather than holding
+   an empty line's worth of space above the grid. */
+.cl-hub__status.is-quiet {
+    margin: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.cl-hub__status {
+    margin: 18px 0 14px;
+    font-family: var(--nv-font-text);
+    font-size: 0.92rem;
+    color: var(--nv-ink);
+}
+
+.cl-hub__status strong { font-weight: 700; }
+
+.cl-hub__statusLede {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--nv-ink-soft);
+    max-width: 62ch;
+}
+
+.cl-hub__reset {
+    border: 0;
+    background: none;
+    padding: 0;
+    font: inherit;
+    color: var(--nv-fill);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+/* ── The grid ──────────────────────────────────────────────────────── */
+
+/* auto-fill with a floor, so the column count follows the width instead
+   of being declared per breakpoint, and a filtered set of three does not
+   stretch three cards across the whole shell. */
+.cl-grid {
+    display: grid;
+    /* FIXED COLUMN COUNTS, NOT auto-fill.
+
+       auto-fill with a 160px floor gave one column at 320px and five at
+       1440, and at 390px the two columns were narrow enough to clip the
+       trade name and the sector chip. Column counts are a design
+       decision here, not something to be derived from a minimum width.
+
+       Two even on the narrowest phone: one column made each tile a full
+       screen and the catalogue an 8700px scroll. At two, a thumb swipe
+       passes four trades instead of one. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+@media (min-width: 900px) {
+    .cl-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+}
+
+@media (min-width: 1200px) {
+    /* Four, not five. Twenty-four divides by four, so the last row is
+       always full; five leaves an orphan of four. */
+    .cl-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (min-width: 640px) {
+    .cl-rail {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 14px;
+    }
+    .cl-rail__search { width: 230px; }
+}
+
+/* TEN CHIPS DO NOT FIT ON ONE ROW, SO THEY WRAP RATHER THAN CLIP.
+
+   Side by side with the search box at 1440px the row ran out at "Stay"
+   and hid Industry entirely: a filter you cannot see is worse than no
+   filter. Horizontal scroll is right on a phone, where a swipe is
+   natural and the row is obviously scrollable. On a pointer device a
+   clipped row with no visible scrollbar reads as broken, so from 900px
+   the chips wrap onto as many lines as they need. */
+@media (min-width: 900px) {
+    .cl-rail { grid-template-columns: minmax(0, 1fr) auto; }
+    .cl-rail__chips {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        row-gap: 8px;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SERVICE PAGES
+   ══════════════════════════════════════════════════════════════════════
+
+   Rebuilt from five loose sections to four dense ones. The old page was
+   3889px tall and two of its sections held 119 and 197 characters: a
+   four-card row with an empty half-screen under it, and a repeated FAQ.
+   Nothing here is a band waiting for content. */
+
+/* TIGHTER RHYTHM THAN THE HOME PAGE, ON PURPOSE.
+
+   --nv-section-y is 144px, which is right for a landing page where each
+   band is a separate argument and the space between them is the beat. A
+   service page is reference material: somebody deciding reads it top to
+   bottom in one go, and 288px of empty space between every section
+   turned four sections of real content into a 3300px scroll.
+
+   96px still separates the bands clearly. Measured before: sections of
+   738/733/753/470px holding 569/445/465/182px of content. */
+.cl-svc__head,
+.cl-svc__head + .nv-section,
+.cl-svc__head ~ .nv-section {
+    padding-block: clamp(48px, 6vw, 96px);
+}
+
+/* The first section still has to clear the floating bar. */
+.cl-svc__head {
+    padding-top: calc(14px + 78px + clamp(24px, 4vw, 44px));
+}
+
+.cl-svc__top {
+    display: grid;
+    gap: clamp(24px, 4vw, 44px);
+    /* center, not start. The headline column is much taller than the
+       panel, so pinning the panel to the top left a growing pool of
+       empty space under it as the headline wrapped to four lines. */
+    align-items: center;
+}
+
+.cl-svc__intro { min-width: 0; }
+
+.cl-svc__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+/* WHAT YOU GET, ON THE FIRST SCREEN.
+   A bordered panel rather than another band, so it reads as the answer
+   sitting beside the pitch rather than as the next thing to scroll to. */
+.cl-svc__deliver {
+    padding: 20px;
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    background: var(--nv-paper);
+    box-shadow: var(--nv-pop);
+}
+
+.cl-svc__deliverTitle {
+    margin: 0 0 12px;
+    font-family: var(--nv-font-display);
+    font-size: 1.1rem;
+    color: var(--nv-ink);
+}
+
+.cl-svc__deliverList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 9px;
+}
+
+.cl-svc__deliverList li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 9px;
+    align-items: start;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--nv-ink);
+}
+
+.cl-svc__deliverList svg {
+    margin-top: 3px;
+    color: var(--nv-fill);
+}
+
+/* ── How it runs, and what we need ─────────────────────────────────── */
+
+.cl-svc__flow {
+    display: grid;
+    gap: clamp(28px, 4vw, 48px);
+    align-items: start;
+}
+
+.cl-svc__h2 { margin-bottom: 18px; }
+
+.cl-svc__stages {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 14px;
+}
+
+.cl-svc__stage {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: start;
+}
+
+.cl-svc__stageN {
+    font-family: var(--nv-font-display);
+    font-size: 1.05rem;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    /* Toward the ink, not the paper. */
+    color: color-mix(in srgb, var(--nv-ink) 42%, var(--nv-lav-soft));
+}
+
+.cl-svc__stageBody { display: grid; gap: 2px; min-width: 0; }
+
+.cl-svc__stageName {
+    font-weight: 700;
+    color: var(--nv-ink);
+}
+
+.cl-svc__stageText {
+    font-size: 0.93rem;
+    line-height: 1.55;
+    color: var(--nv-ink-soft);
+}
+
+.cl-svc__need {
+    padding: 20px;
+    border-radius: var(--nv-radius);
+    background: var(--nv-paper);
+    border: 2px solid var(--nv-ink);
+}
+
+.cl-svc__needTitle {
+    margin: 0;
+    font-family: var(--nv-font-display);
+    font-size: 1.05rem;
+    color: var(--nv-ink);
+}
+
+.cl-svc__needLede {
+    margin: 6px 0 14px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--nv-ink-soft);
+}
+
+.cl-svc__needList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+}
+
+.cl-svc__needList li {
+    position: relative;
+    padding-left: 18px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--nv-ink);
+}
+
+/* An open square, not a tick: these are things the reader has not done
+   yet, and a tick says done. */
+.cl-svc__needList li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.42em;
+    width: 8px;
+    height: 8px;
+    border: 2px solid var(--nv-fill);
+    border-radius: 2px;
+}
+
+/* ── The close and the other two ───────────────────────────────────── */
+
+.cl-svc__footRow {
+    display: grid;
+    gap: clamp(24px, 4vw, 44px);
+    align-items: start;
+}
+
+.cl-svc__closeText {
+    margin: 0 0 18px;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--nv-ink-soft);
+    max-width: 46ch;
+}
+
+.cl-svc__others { display: grid; gap: 10px; }
+
+.cl-svc__other {
+    display: grid;
+    gap: 4px;
+    padding: 16px 18px;
+    border: 2px solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    background: var(--nv-paper);
+    text-decoration: none;
+    transition: transform 0.14s var(--nv-ease), box-shadow 0.14s var(--nv-ease);
+}
+
+@media (hover: hover) {
+    .cl-svc__other:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: var(--nv-pop);
+    }
+}
+
+.cl-svc__other:active { transform: translate(1px, 1px); box-shadow: none; }
+
+.cl-svc__otherName {
+    font-family: var(--nv-font-display);
+    font-size: 1.02rem;
+    color: var(--nv-ink);
+}
+
+.cl-svc__otherSeo {
+    font-size: 0.87rem;
+    line-height: 1.45;
+    color: var(--nv-ink-soft);
+}
+
+.cl-svc__otherGo {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 4px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--nv-fill);
+}
+
+@media (min-width: 900px) {
+    /* The pitch takes the larger share; the deliverables panel is a
+       fixed-ish column so it does not stretch on a wide screen. */
+    .cl-svc__top { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+    .cl-svc__flow { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+    .cl-svc__footRow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+/* ── The two-item dock, on every page that is not home ─────────────────── */
+
+/* Sits where ClDock sits on the home page, so the control is in the same
+   place whichever page you are on. Nothing is ever highlighted: both are
+   destinations rather than sections, and a permanent highlight on one of
+   two links is decoration pretending to be state. */
+.cl-minidock {
+    position: fixed;
+    left: 50%;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    /* Ink border, blue shadow. Exactly the header's arrangement: the
+       outline is the object's edge and stays ink like every other
+       bordered thing on the site, and only the offset shadow carries the
+       colour. A blue border as well made the control read as a blue
+       object rather than as the site's own chrome with a coloured
+       shadow under it. */
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    background: color-mix(in srgb, var(--nv-paper) 92%, transparent);
+    backdrop-filter: saturate(1.6) blur(14px);
+    /* Matches the header: the two floating controls on a page should be
+       the same object in two places, not two different objects. */
+    box-shadow: 6px 6px 0 var(--nv-fill);
+}
+
+.cl-minidock__item {
+    /* Square, icon only. 46px clears the 44px floor, and two of them plus
+       the padding is a control about the width of a thumb rather than a
+       text bar sitting across the bottom of somebody's screen. */
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    color: var(--nv-ink);
+    text-decoration: none;
+    touch-action: manipulation;
+}
+
+.cl-minidock__item--cta {
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
+}
+
+@media (hover: hover) {
+    .cl-minidock__item:hover:not(.cl-minidock__item--cta) {
+        background: var(--nv-lav-soft);
+    }
+}
+
+.cl-minidock__item:active { transform: translateY(1px); }
+
+.cl-minidock__item:focus-visible {
+    outline: 2px solid var(--nv-fill);
+    outline-offset: 2px;
 }

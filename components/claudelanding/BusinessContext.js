@@ -50,6 +50,7 @@ import {
 } from 'react';
 import { SECTORS, COMMON_SECTORS, DEFAULT_SECTOR, findSector } from './sectors';
 import useReducedMotionPref from './useReducedMotionPref';
+import { track } from '@/lib/analytics';
 
 /* Used wherever the visitor has not typed anything. Deliberately generic:
    it reads as a placeholder rather than as a real business we are naming. */
@@ -88,7 +89,16 @@ export function BusinessProvider({ children }) {
        experience" this flag exists to prevent. Set from onFocus/onBlur on
        the input in ClBusinessSetup.js. */
     const [fieldFocused, setFieldFocused] = useState(false);
+    /* Whether this visitor has already handed over a number through the
+       setup card. Phase 2 added one field there, revealed only once
+       `locked` is true, and this is what stops the page asking a second
+       time after they have answered. Like `locked` it never goes back:
+       a visitor who submits and then edits their business name should
+       not be asked again on the same page view. Deliberately not
+       persisted, for the same reason nothing else here is. */
+    const [submitted, setSubmitted] = useState(false);
     const timer = useRef(null);
+    const namedSent = useRef(false);
     const reduceMotion = useReducedMotionPref();
 
     useEffect(() => {
@@ -99,6 +109,18 @@ export function BusinessProvider({ children }) {
     const trimmed = name.trim();
     const named = trimmed.length > 0;
     const locked = named && sectorChosen;
+
+    /* Two analytics events, each fired once. `track` is a no-op without
+       consent, so this costs nothing for a visitor who declined.
+       Guarded by a ref rather than the state itself because `named` is
+       true on every render after the first character, not just the one
+       where it changed. */
+    useEffect(() => {
+        if (named && !namedSent.current) {
+            namedSent.current = true;
+            track('business_named');
+        }
+    }, [named]);
 
     /* Sector auto-advance. Stops the instant any of "commit", "chosen" or
        "the visitor is in the field" is true. Focus is included because a
@@ -139,6 +161,9 @@ export function BusinessProvider({ children }) {
        and never this, which is the whole distinction the file depends on. */
     function pickSector(id) {
         setTypeId(id);
+        /* Only fire on the first deliberate pick. Re-picking is the same
+           visitor changing their mind, not a second conversion. */
+        if (!sectorChosen) track('sector_chosen', { sector: id });
         setSectorChosen(true);
     }
 
@@ -153,6 +178,8 @@ export function BusinessProvider({ children }) {
             locked,
             sectorChosen,
             setFieldFocused,
+            submitted,
+            markSubmitted: () => setSubmitted(true),
             /* What every mock renders. Never empty. */
             displayName: trimmed || FALLBACK_NAME,
             /* True only once the visitor has actually typed something, so a
@@ -169,7 +196,7 @@ export function BusinessProvider({ children }) {
                 activeSector.names[nameTick % activeSector.names.length],
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [draft, name, typeId, locked, sectorChosen, nameTick]);
+    }, [draft, name, typeId, locked, sectorChosen, nameTick, submitted]);
 
     return (
         <BusinessContext.Provider value={value}>

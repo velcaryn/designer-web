@@ -21,7 +21,14 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
-const SCAN = ['components', 'app'];
+/* `lib` and `content` were added when the demo sites landed. Before that
+   this guard walked components/ and app/ only, which meant anything under
+   lib/ was completely unscanned: lib/leadIntake.js could have carried a
+   hard-coded number and nothing would have said so. `content/` holds the
+   sixteen demo business data files, which is exactly where a plausible
+   fake Indian mobile would otherwise slip through and ship. A guard that
+   does not walk the directory holding the risky data is decoration. */
+const SCAN = ['components', 'app', 'lib', 'content'];
 const EXTS = new Set(['.js', '.jsx', '.ts', '.tsx', '.css']);
 /* The single source of truth is allowed to contain the real values. */
 const ALLOWED = new Set(['config/site.js']);
