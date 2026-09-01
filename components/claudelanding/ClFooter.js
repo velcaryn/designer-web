@@ -16,6 +16,21 @@ const NAV_GROUPS = [
         ],
     },
     {
+        /* Three verticals, not all 24: a link-farm footer is worse for
+           search than no vertical links at all. These three are picked
+           for the highest-intent search terms ("wedding photographer
+           website", "restaurant website design"), and the group's
+           existence proves the pattern out; the remaining 21 are reached
+           from their own /demo-site card and its DemoCta link, not from
+           here. */
+        title: 'For your trade',
+        links: [
+            { href: '/for/photo-studio', label: 'Photo studios' },
+            { href: '/for/restaurant', label: 'Restaurants' },
+            { href: '/for/clinic', label: 'Clinics' },
+        ],
+    },
+    {
         title: 'Studio',
         links: [
             { href: '/cloud', label: 'VelBiz Cloud' },

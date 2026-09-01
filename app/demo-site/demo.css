@@ -580,6 +580,34 @@
     .vd-cta__btn:hover { background: #2ee673; }
 }
 
+.vd-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+
+/* The quieter, second link to app/for/[slug]: real content for a visitor
+   not ready to message yet, rather than a second loud button competing
+   with the WhatsApp CTA above it. */
+.vd-cta__read {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--f-inter), system-ui, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fbfbfd;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(251, 251, 253, 0.4);
+}
+
+@media (hover: hover) {
+    .vd-cta__read:hover { text-decoration-color: #fbfbfd; }
+}
+
 /* ── Phase 1 stub. Replaced by real sections in Phase 2. ───────────────── */
 
 .vd-stub__trade {

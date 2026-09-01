@@ -21,11 +21,27 @@
  * shipped the previous client's number. This is the only live WhatsApp
  * link on any demo page. The fictional business's own order buttons never
  * open a real chat, because there is no business behind them.
+ *
+ * THE SECOND LINK, TO /for/<slug>
+ *
+ * A visitor who taps this CTA is exactly the audience app/for/[slug]
+ * exists for: someone who has just looked at a real sample and is
+ * deciding whether to talk to VelBiz. Sending them straight to WhatsApp
+ * works for someone ready to talk now; the /for page is there for
+ * someone who wants to read VelBiz's own pitch for their trade first,
+ * with its own indexable page for anyone who lands on the demo cold from
+ * search rather than a WhatsApp share.
+ *
+ * Rendered only when a vertical page actually exists for this slug
+ * (checked at build time via `hasContent`, passed down from the route,
+ * not guessed here), so a demo whose vertical page has not been written
+ * yet never links to a 404.
  */
-import { WhatsappLogo } from '@phosphor-icons/react';
+import Link from 'next/link';
+import { WhatsappLogo, ArrowRight } from '@phosphor-icons/react';
 import { waLink } from '@/config/site';
 
-export default function DemoCta({ label, trade }) {
+export default function DemoCta({ label, trade, slug, hasVerticalPage }) {
     const message = trade
         ? `Hello, I looked at the ${label} demo on your site. I run a ${trade} and I would like a website like that.`
         : `Hello, I looked at the ${label} demo on your site. I would like a website like that for my business.`;
@@ -36,14 +52,22 @@ export default function DemoCta({ label, trade }) {
                 <p className="vd-cta__text">
                     Want a site like this for your own business?
                 </p>
-                <a
-                    href={waLink(message)}
-                    className="vd-btn vd-cta__btn"
-                    rel="noreferrer noopener"
-                >
-                    <WhatsappLogo size={20} weight="fill" aria-hidden="true" />
-                    Ask us about it
-                </a>
+                <div className="vd-cta__actions">
+                    <a
+                        href={waLink(message)}
+                        className="vd-btn vd-cta__btn"
+                        rel="noreferrer noopener"
+                    >
+                        <WhatsappLogo size={20} weight="fill" aria-hidden="true" />
+                        Ask us about it
+                    </a>
+                    {hasVerticalPage && (
+                        <Link href={`/for/${slug}`} className="vd-cta__read">
+                            What we build for a {trade}
+                            <ArrowRight size={14} weight="bold" aria-hidden="true" />
+                        </Link>
+                    )}
+                </div>
             </div>
         </div>
     );

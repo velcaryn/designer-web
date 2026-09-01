@@ -22,10 +22,42 @@
  * NO INVENTED CLAIMS. There is no aggregateRating, no review and no
  * priceRange, because we have no real ones and fabricating them in
  * markup a crawler reads is worse than fabricating them in prose.
+ *
+ * THE `pageFaqs` PROP
+ *
+ * app/for/[slug]/page.js renders its own three or four trade-specific
+ * questions through ClFaq, not the ten on config/site.js. Emitting the
+ * home page's FAQPage node on that page would be exactly the drift the
+ * comment above warns about: JSON-LD claiming answers that are nowhere
+ * on the visible page. Passing the same array the page renders through
+ * `pageFaqs` keeps the one-array-two-consumers rule intact per page,
+ * rather than only globally.
+ *
+ * THE `verticalService` PROP
+ *
+ * Set by app/for/[slug]/page.js to add one extra Service node scoped to
+ * that page's own trade, alongside (not instead of) the three real
+ * services below. Left undefined everywhere else.
  */
-import { brand, contact, phoneHref, faqs, services } from '@/config/site';
+import { brand, contact, phoneHref, faqs as siteFaqs, services } from '@/config/site';
 
-export default function StructuredData() {
+/* Confirmed with the user: the organisation and every Service node in
+   this graph name the same eight places, so the signal is consistent
+   across the whole graph rather than only on new pages. Chennai,
+   Coimbatore and Vellore added alongside the original five districts. */
+const AREA_SERVED = [
+    { '@type': 'City', name: 'Tirunelveli' },
+    { '@type': 'City', name: 'Nagercoil' },
+    { '@type': 'City', name: 'Thoothukudi' },
+    { '@type': 'City', name: 'Tenkasi' },
+    { '@type': 'City', name: 'Madurai' },
+    { '@type': 'City', name: 'Chennai' },
+    { '@type': 'City', name: 'Coimbatore' },
+    { '@type': 'City', name: 'Vellore' },
+    { '@type': 'State', name: 'Tamil Nadu' },
+];
+
+export default function StructuredData({ pageFaqs = siteFaqs, verticalService = null }) {
     const site = `https://${brand.domain}`;
 
     /* @graph rather than three separate script tags: it lets the nodes
@@ -59,15 +91,10 @@ export default function StructuredData() {
                    is what makes a local pack result possible at all.
                    The wider state stays on the list because we do take
                    work from Chennai and Coimbatore; it is last because
-                   the order is read as priority. */
-                areaServed: [
-                    { '@type': 'City', name: 'Tirunelveli' },
-                    { '@type': 'City', name: 'Nagercoil' },
-                    { '@type': 'City', name: 'Thoothukudi' },
-                    { '@type': 'City', name: 'Tenkasi' },
-                    { '@type': 'City', name: 'Madurai' },
-                    { '@type': 'State', name: 'Tamil Nadu' },
-                ],
+                   the order is read as priority. Widened again, this
+                   time deliberately, to the AREA_SERVED constant above:
+                   see its comment for the confirmed eight-place list. */
+                areaServed: AREA_SERVED,
                 /* Coordinates for the district centre. A LocalBusiness
                    without geo is a business Maps cannot place. */
                 geo: {
@@ -114,10 +141,7 @@ export default function StructuredData() {
                    signal, and one that claims more is a liability. */
                 serviceType: 'Web design and development, Ecommerce development, SEO',
                 provider: { '@id': `${site}/#organization` },
-                areaServed: [
-                    { '@type': 'City', name: 'Tirunelveli' },
-                    { '@type': 'State', name: 'Tamil Nadu' },
-                ],
+                areaServed: AREA_SERVED,
                 description:
                     'Websites and online shops designed and built for small businesses, taken live, and kept found in search.',
             },
@@ -133,11 +157,23 @@ export default function StructuredData() {
                 description: svc.seo,
                 url: `${site}/services/${svc.slug}`,
                 provider: { '@id': `${site}/#organization` },
-                areaServed: [
-                    { '@type': 'City', name: 'Tirunelveli' },
-                    { '@type': 'State', name: 'Tamil Nadu' },
-                ],
+                areaServed: AREA_SERVED,
             })),
+            /* The one vertical Service node for this page, when the page
+               is a /for/<slug> landing page. Not a loop over all 24: a
+               page's JSON-LD should describe THAT page, and looping the
+               whole manifest into every page would claim 24 services on
+               a page that visibly sells one. */
+            ...(verticalService ? [{
+                '@type': 'Service',
+                '@id': `${site}/for/${verticalService.slug}#service`,
+                name: verticalService.metaTitle,
+                serviceType: `${verticalService.trade} website design`,
+                description: verticalService.metaDescription,
+                url: `${site}/for/${verticalService.slug}`,
+                provider: { '@id': `${site}/#organization` },
+                areaServed: AREA_SERVED,
+            }] : []),
             {
                 /* FAQPage, built from the SAME array ClFaq renders.
                    Never type these answers twice. On an earlier build the
@@ -149,7 +185,7 @@ export default function StructuredData() {
                 '@type': 'FAQPage',
                 '@id': `${site}/#faq`,
                 isPartOf: { '@id': `${site}/#website` },
-                mainEntity: faqs.map((item) => ({
+                mainEntity: pageFaqs.map((item) => ({
                     '@type': 'Question',
                     name: item.q,
                     acceptedAnswer: {

@@ -27,6 +27,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { notFound } from 'next/navigation';
 import { SLUGS, findDemo } from '@/content/demos';
+import { findVertical } from '@/content/verticals';
 import { loadDemo } from '@/content/demos/load';
 import DemoCta from '@/components/demo/DemoCta';
 import DemoLogo from '@/components/demo/DemoLogo';
@@ -115,6 +116,16 @@ export default async function DemoPage({ params }) {
 
     const demo = await loadDemo(slug);
 
+    /* Whether app/for/[slug] has a real page for this same slug. Checked
+       against the manifest AND the file on disk, the same two-part check
+       app/sitemap.js uses, so this CTA never links to a route that would
+       404: the manifest lists all 24 possible slugs, but only the ones
+       with a written content/verticals/<slug>.js file actually render. */
+    const hasVerticalPage = Boolean(
+        findVertical(slug)
+        && fs.existsSync(path.join(process.cwd(), 'content', 'verticals', `${slug}.js`)),
+    );
+
     /* Not written yet. Themed from the card's swatch so the hub's colour
        bar still matches what the visitor lands on. */
     if (!demo) {
@@ -145,7 +156,7 @@ export default async function DemoPage({ params }) {
                         </div>
                     </section>
                 </main>
-                <DemoCta label={card.trade} trade={card.trade.toLowerCase()} />
+                <DemoCta label={card.trade} trade={card.trade.toLowerCase()} slug={card.slug} hasVerticalPage={hasVerticalPage} />
             </div>
         );
     }
@@ -218,7 +229,7 @@ export default async function DemoPage({ params }) {
             </main>
 
             <DemoSwitcher current={demo.slug} />
-            <DemoCta label={card.trade} trade={card.trade.toLowerCase()} />
+            <DemoCta label={card.trade} trade={card.trade.toLowerCase()} slug={card.slug} hasVerticalPage={hasVerticalPage} />
         </div>
     );
 }

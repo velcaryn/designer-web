@@ -54,13 +54,22 @@
  * so opening question 3 would shunt question 6 from the left column
  * into the right one under the reader's cursor. With two halves, an
  * answer opening on the left can only move things below it on the left.
+ *
+ * THE `faqs` PROP
+ *
+ * Added so a per-vertical landing page (app/for/[slug]/page.js) can pass
+ * its own three or four trade-specific questions instead of the home
+ * page's ten. Defaults to config/site.js's array, so every existing
+ * caller is unaffected. The FAQPage JSON-LD for a vertical page is built
+ * from the SAME array it is given here, for the reason stated above:
+ * one array, two consumers, no drift.
  */
 import { useState } from 'react';
 import { Plus, Minus } from '@phosphor-icons/react';
-import { faqs } from '@/config/site';
+import { faqs as siteFaqs } from '@/config/site';
 import Reveal from '@/components/Reveal';
 
-export default function ClFaq() {
+export default function ClFaq({ faqs = siteFaqs }) {
     const [open, setOpen] = useState(null);
 
     /* Math.ceil, so an odd count puts the extra question in the LEFT

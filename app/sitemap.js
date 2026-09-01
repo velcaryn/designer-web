@@ -12,6 +12,9 @@
  * legal pages, which exist to be findable rather than to be found.
  */
 import { brand } from '@/config/site';
+import { VERTICALS } from '@/content/verticals';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const PAGES = [
     { path: '', priority: 1.0, changeFrequency: 'monthly' },
@@ -28,14 +31,26 @@ const PAGES = [
     { path: '/credits', priority: 0.3, changeFrequency: 'yearly' },
 ];
 
+/* One entry per business vertical that actually has a written landing
+   page. VERTICALS lists all 24 slugs the route CAN serve, but only the
+   ones with a content/verticals/<slug>.js file resolve to a real page;
+   the rest 404 (see app/for/[slug]/page.js). Listing a 404 in the
+   sitemap teaches Google that the sitemap is unreliable, so this checks
+   the file exists rather than assuming the whole list is live. */
+function liveVerticalPaths() {
+    return VERTICALS
+        .filter((v) => fs.existsSync(path.join(process.cwd(), 'content', 'verticals', `${v.slug}.js`)))
+        .map((v) => ({ path: `/for/${v.slug}`, priority: 0.7, changeFrequency: 'monthly' }));
+}
+
 export default function sitemap() {
     /* One timestamp for the whole build. Per-page dates would need a real
        source (git mtime, a CMS); inventing them per request would tell
        crawlers the pages change daily when they do not. */
     const lastModified = new Date();
 
-    return PAGES.map(({ path, priority, changeFrequency }) => ({
-        url: `https://${brand.domain}${path}`,
+    return [...PAGES, ...liveVerticalPaths()].map(({ path: p, priority, changeFrequency }) => ({
+        url: `https://${brand.domain}${p}`,
         lastModified,
         changeFrequency,
         priority,
