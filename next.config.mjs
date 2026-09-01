@@ -176,4 +176,5 @@ const nextConfig = {
     },
 };
 
+// Deploy trigger: rebuild to pick up NEXT_PUBLIC_GA_MEASUREMENT_ID from Netlify env.
 export default nextConfig;
