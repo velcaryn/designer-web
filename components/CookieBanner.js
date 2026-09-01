@@ -137,11 +137,22 @@ export default function CookieBanner() {
            where somebody who actually wants the detail will read it
            properly rather than skim it over a hero image. */
         <div className="cl-consent" role="region" aria-label="Analytics consent">
+            {/* Two lengths, one row. The bar is nowrap so it stays a
+                single line at every width, and the long sentence does
+                not fit a 320px phone: rather than let it ellipsis into
+                nonsense, the short form is shown there and the full one
+                from 480px up. CSS picks, so there is no layout shift and
+                no JS measuring anything. */}
             <p className="cl-consent__body">
-                We count visits with Google Analytics.
+                <span className="cl-consent__long">
+                    We count visits with Google Analytics.
+                </span>
+                <span className="cl-consent__short">
+                    We count visits.
+                </span>
                 {' '}
                 <Link href="/privacy" className="cl-consent__link">
-                    How we use it
+                    Details
                 </Link>
             </p>
 
