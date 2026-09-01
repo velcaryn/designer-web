@@ -253,11 +253,15 @@ body:has(.cl-dock) .nv-section {
  * boundary to solve a problem that only occurs where content happens to
  * end near the fold.
  *
- * The dock now hides itself while the visitor scrolls down and returns
- * when they scroll up or stop (see ClDock.js), so it is not sitting over
- * anything during the scroll that used to expose this. What remains here
- * is a smaller reserve for the case the audit actually found: content
- * resting under a dock that is on screen.
+ * The dock used to hide itself on scroll-down, which let this reserve be
+ * cut to 48px. That hide was removed: it read as a glitch, because the
+ * page's most-used control disappeared during the exact motion a visitor
+ * spends most of their time performing.
+ *
+ * So the reserve carries the whole job again, and it is now the dock's
+ * measured footprint rather than a guess: 70px tall at a 16px offset is
+ * 86px. With the dock pinned visible at the old 48px, text sat under it
+ * at 24 of 48 scroll positions down the home page.
  *
  * Desktop stays excluded. The two-column layouts above 900px never
  * showed the problem, and adding a reserve there would reintroduce the
@@ -265,7 +269,7 @@ body:has(.cl-dock) .nv-section {
  * records once. */
 @media (max-width: 899px) {
     body:has(.cl-dock) .nv-section {
-        padding-bottom: max(clamp(32px, 5vw, 72px), 48px);
+        padding-bottom: max(clamp(32px, 5vw, 72px), 86px);
     }
 
     /* The last section before the footer is the one place the dock
@@ -4957,8 +4961,23 @@ body:has(.cl-contact__form) .cl-dock {
         margin-inline: auto;
     }
 
-    /* The icon sphere is decorative and was 508px. */
-    .cl-tech__sphereCard { max-height: 380px; }
+    /* THE SPHERE SHRINKS. THE CARD IS NOT CAPPED.
+
+       This was `max-height: 380px` on the card, which was the wrong
+       lever twice over. The card is a flex column of head, sphere and
+       footer, and the sphere alone has `min-height: 360px`: capping the
+       parent at 380 could not make the children fit, so with the card's
+       default overflow: visible the icon cloud simply painted outside
+       its own border and over the section below. Adding overflow: hidden
+       then clipped the footer instead of fixing anything.
+
+       Shrinking the sphere is the actual fix. 240px still reads as a
+       rotating cloud of logos on a phone, and head plus sphere plus
+       footer now fit inside a card that sizes to its own contents. */
+    .cl-stack__sphere {
+        min-height: 240px;
+        padding: 12px;
+    }
 
     /* The Cloud teaser was 952px, the second tallest block on the page,
        for a section whose whole job is one line and one link. */
@@ -5099,37 +5118,18 @@ body:has(.cl-contact__form) .cl-dock {
 
 /* ── Bentos ────────────────────────────────────────────────────────────── */
 
-/* ONE GRID FOR EVERY SECTOR.
-   This carried six per-sector compositions: a 7/5 pair, an 8/4 lead, a
-   5-7-7-5 flip, a mirrored lead, twins, and an austere plain. It was a
-   layout exercise rather than a catalogue, and with nineteen trades to
-   scan it made the page harder to read, not richer: the eye had to
-   re-learn the grid at every heading.
-   A card is a card. The differentiation is the mark, the palette and the
-   trade name, which is what the visitor is actually reading for. */
-.cl-bento {
-    display: grid;
-    gap: 10px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
+/* THE HUB'S OWN BENTO RULES WERE HERE, AND THEY WERE DEAD CODE.
 
-@media (min-width: 768px) {
-    .cl-bento { gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
+   The demo hub used to group its cards into nine sector bentos sharing
+   the class name `.cl-bento`. It now renders one filterable grid under
+   `.cl-grid`, and nothing in the codebase produces a hub bento any more.
 
-@media (min-width: 1200px) {
-    .cl-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-
-/* A sector with fewer cards than the grid has columns left a ragged
-   half-empty row, which is what made the two-card sectors look like a
-   mistake. `auto-fit` with a max cell width lets two cards share the row
-   properly instead of hugging the left edge. */
-@media (min-width: 768px) {
-    .cl-bento {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    }
-}
+   The rules outlived the markup, and because they sit later in this file
+   they were winning over the CONTENT bento in ClBento.js: "Everything it
+   takes, in one place" was laying six cells out in five columns plus a
+   lonely sixth, because an auto-fit rule meant for demo cards was
+   overriding the three-column rule meant for this one. Same class name,
+   two different components, and the later one won. */
 
 /* Industry and property stay austere: their mark plates invert to the ink
    so the B2B trades read as the B2B pages they are. */

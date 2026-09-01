@@ -164,52 +164,33 @@ function DockItem({ id, label, Icon, isActive, reduceMotion, dockRef }) {
 
 export default function ClDock() {
     const [active, setActive] = useState('top');
-    const [hidden, setHidden] = useState(false);
     const dockRef = useRef(null);
     const reduceMotion = useReducedMotionPref();
     const { secondsLeft, isDefault, themeName, reset } = useLabStatus();
 
-    /* Hide while scrolling DOWN, come back on scroll up or on a pause.
-     *
-     * The dock is fixed, so it sits over whatever is at the bottom of the
-     * viewport. Every section used to reserve 100px of bottom padding for
-     * it, which across eleven sections was about 1000px of dead space on
-     * a page already running to nineteen viewports on a phone.
-     *
-     * Getting out of the way is cheaper than being permanently allowed
-     * for. Scrolling down means the visitor is reading ahead and not
-     * navigating; scrolling up, or stopping, means they might be.
-     *
-     * The 240ms idle timer is what makes it feel right rather than
-     * twitchy: without it the dock flickers back on every momentum
-     * wobble at the end of a flick scroll.
-     *
-     * Never hides when the page is barely scrolled, so it is visible at
-     * rest at the top, and never on desktop, where the two-column
-     * layouts do not put content under it. */
-    useEffect(() => {
-        if (typeof window === 'undefined') return undefined;
-        if (window.matchMedia('(min-width: 900px)').matches) return undefined;
+    /* NO HIDE-ON-SCROLL. IT WAS REMOVED, AND THE REASON IT EXISTED IS
+       SOLVED A DIFFERENT WAY.
 
-        let last = window.scrollY;
-        let idle;
+       The dock used to slide away while the visitor scrolled down and
+       return when they stopped. That bought back the ~950px of bottom
+       padding that eleven sections were each paying to keep content out
+       from under a permanently visible dock.
 
-        function onScroll() {
-            const y = window.scrollY;
-            const down = y > last && y > 240;
-            last = y;
-            setHidden(down);
+       It read as a glitch. On a phone the dock vanished the instant a
+       flick began and reappeared 240ms after it ended, so the single
+       most-used control on the page was missing during the exact motion
+       a visitor spends most of their time doing. Reported as "removing
+       the bottom floater for a moment and bringing it back", which is
+       precisely what it was.
 
-            window.clearTimeout(idle);
-            idle = window.setTimeout(() => setHidden(false), 240);
-        }
+       The clearance problem is real: with the dock pinned visible,
+       measured across the home page at 390px, text sat underneath it at
+       24 of 48 scroll positions. So the reserve is kept and widened to
+       the dock's actual footprint (70px tall at a 16px offset, so 86px)
+       rather than the 48px it had been cut to. That costs about 420px
+       across the page against 15,014px of total height, under 3%, and
+       it buys a control that is always where the visitor left it. */
 
-        window.addEventListener('scroll', onScroll, { passive: true });
-        return () => {
-            window.removeEventListener('scroll', onScroll);
-            window.clearTimeout(idle);
-        };
-    }, []);
 
     useEffect(() => {
         /* WHY THIS IS NOT AN IntersectionObserver ANY MORE.
@@ -266,7 +247,7 @@ export default function ClDock() {
 
     return (
         <nav
-            className={`cl-dock${hidden ? ' is-hidden' : ''}`}
+            className="cl-dock"
             aria-label="Page sections"
             ref={dockRef}
         >
