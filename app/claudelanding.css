@@ -3583,9 +3583,17 @@ a.cl-bento__cell:active {
 /* `bottom: 16px` plus the safe-area inset, not `16px` added to it: on a
    device with no home-indicator inset the dock still sits a full 16px off
    the edge rather than being pulled flush by an env() that resolves to 0. */
+/* The dock's resting offset. `--cl-dock-lift` is 0 normally and becomes
+   the consent bar's height while that bar is on screen, so the two stack
+   without either being placed relative to a guess about the other. The
+   variable is set in app/globals.css, beside the consent bar it belongs
+   to. */
 .cl-dock {
     position: fixed;
-    bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+    bottom: calc(
+        max(16px, calc(env(safe-area-inset-bottom, 0px) + 12px))
+        + var(--cl-dock-lift, 0px)
+    );
     left: 50%;
     transform: translateX(-50%);
     z-index: var(--nv-z-nav);
@@ -6250,7 +6258,13 @@ body:has(.cl-contact__form) .cl-dock {
 .cl-minidock {
     position: fixed;
     left: 50%;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    /* Same lift as the full dock. Both are bottom-centre controls and
+       the consent bar takes the bottom edge on a phone, so both have to
+       move up by its height; only the home page has .cl-dock, every
+       other page has this one, and the first fix missed it. */
+    bottom: calc(
+        16px + env(safe-area-inset-bottom, 0px) + var(--cl-dock-lift, 0px)
+    );
     transform: translateX(-50%);
     z-index: 40;
     display: flex;

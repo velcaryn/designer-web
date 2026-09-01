@@ -817,8 +817,22 @@ img, svg { display: block; max-width: 100%; }
         left: 12px;
         right: 12px;
         max-width: none;
-        bottom: calc(94px + env(safe-area-inset-bottom, 0px));
+        /* BELOW THE DOCK, WHICH IS WHAT WAS ASKED FOR.
+
+           Two earlier attempts put the bar ABOVE the dock, reasoning
+           that the dock already sits at the viewport bottom so "below"
+           would run off-screen. That reasoning was wrong: the dock is
+           not fixed in place. It is the thing that moves.
+
+           The bar takes the bottom edge; the dock lifts by the bar's
+           height plus the gap, via --cl-dock-lift below. */
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     }
+
+    /* 42px bar + 12px offset + 10px gap. Scoped to this breakpoint, so
+       the desktop corner placement never lifts the dock: there the two
+       sit side by side and neither needs to move. */
+    body:has(.cl-consent) { --cl-dock-lift: 64px; }
 }
 
 @media (max-width: 480px) {
