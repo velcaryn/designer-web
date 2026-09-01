@@ -91,7 +91,7 @@ export default function DemoBanner({ position = 'top' }) {
                 <img
                     src="/vb-mark-light.svg"
                     alt=""
-                    width={52}
+                    width={38}
                     height={29}
                     className="vd-pitch__mark"
                 />

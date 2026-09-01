@@ -80,10 +80,12 @@ export default function ClFooter() {
                                     src="/vb-mark-light.svg"
                                     alt=""
                                     className="cl-foot__logo"
-                                    /* 1.81 landscape after the viewBox crop.
-                                       These were 26x26 and would squash it. */
-                                    width={44}
-                                    height={24}
+                                    /* 1.31 after the viewBox crop, closer
+                                       to square than the mark this
+                                       replaced. Sized to match the CSS
+                                       height in .cl-foot__logo. */
+                                    width={42}
+                                    height={32}
                                 />
                                 {/* The second word fades out of the first,
                                     so the lockup reads as one object with

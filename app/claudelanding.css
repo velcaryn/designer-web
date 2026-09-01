@@ -2182,9 +2182,11 @@ a.cl-bento__cell:active {
 }
 
 .cl-foot__logo {
-    /* Landscape after the viewBox crop, so height-sized like the header
-       mark rather than forced into a square. */
-    height: 24px;
+    /* Close to square after the viewBox crop, so height-sized like the
+       header mark rather than forced into an exact square. Sized up
+       from 24px on request: the footer lockup has more room than the
+       header bar does, and the mark reads better with it. */
+    height: 32px;
     width: auto;
     flex: none;
     /* No filter: invert(1). That was here to whiten a mark whose fill was
@@ -3289,9 +3291,9 @@ a.cl-bento__cell:active {
     touch-action: manipulation;
 }
 
-/* The mark is landscape (876 x 483, a 1.81 ratio) after its viewBox was
-   cropped to the glyph. It was a 26px SQUARE here, which would squash it,
-   so it is sized by height and lets width follow. */
+/* The mark is close to square (892.87 x 682.46, a 1.31 ratio) after its
+   viewBox was cropped to the glyph's own bounds. Sized by height and
+   lets width follow, same as before. */
 /* TWO MARKS, ONE SHOWN.
 
    The mark is an <img>, a separate document that inherits nothing, so a
@@ -3304,12 +3306,19 @@ a.cl-bento__cell:active {
 .nv-root[data-dark='true'] .cl-topbar__brandIcon--light { display: inline-block; }
 
 .cl-topbar__brandIcon {
-    height: 28px;
+    /* Taller than the text's own line box on purpose. The V and B shapes
+       both come to sharp points rather than flat terminals, which reads
+       as smaller than a geometric height comparison suggests: at the
+       text's exact cap-height the mark looked visibly undersized and,
+       because .cl-topbar__brand centers by box rather than by ink, also
+       looked misaligned against "VelBiz". Sized here against the
+       wordmark's cap-height with headroom instead of the full line box,
+       and centered by the flex box on .cl-topbar__brand, which now
+       works correctly because the SVG's own crop is symmetric around
+       the glyph (see public/vb-mark.svg's comment on its margin). */
+    height: 34px;
     width: auto;
     flex: none;
-    /* Optical, not geometric: the mark's baseline sits above the type's
-       because of the descender dots, so it rides 1px low to line up. */
-    transform: translateY(1px);
 }
 
 /* "Digital" is set apart from "VelBiz" so the lockup reads as a name plus
@@ -3336,7 +3345,7 @@ a.cl-bento__cell:active {
    "EXAM...". */
 @media (max-width: 420px) {
     .cl-topbar__brand { gap: 7px; font-size: 1.12rem; }
-    .cl-topbar__brandIcon { height: 25px; }
+    .cl-topbar__brandIcon { height: 30px; }
     .cl-topbar__brandMark { letter-spacing: 0.06em; }
 }
 

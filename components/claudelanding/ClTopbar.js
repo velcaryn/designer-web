@@ -83,16 +83,16 @@ export default function ClTopbar({
                     <img
                         src="/vb-mark.svg"
                         alt=""
-                        width={40}
-                        height={22}
+                        width={44}
+                        height={34}
                         className="cl-topbar__brandIcon cl-topbar__brandIcon--ink"
                     />
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src="/vb-mark-light.svg"
                         alt=""
-                        width={40}
-                        height={22}
+                        width={44}
+                        height={34}
                         className="cl-topbar__brandIcon cl-topbar__brandIcon--light"
                     />
                     {brand.shortName}
