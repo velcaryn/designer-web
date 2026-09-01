@@ -121,35 +121,44 @@ export default function CookieBanner() {
     if (consent !== null) return null;
 
     return (
+        /* ONE LINE, NOT A CARD.
+
+           This was a 218px block with a heading and three sentences,
+           which is 26% of a 390px phone screen: a quarter of the first
+           impression spent on a question nobody came here to answer.
+
+           The consent itself is kept. It gates Google Analytics, which
+           sets cookies and sends an IP to Google, and the privacy page
+           states plainly that nothing is collected unless the visitor
+           agrees. Removing the gate would make that sentence false.
+
+           What is cut is the explanation, not the choice. The full
+           account lives on the privacy page, linked from here, which is
+           where somebody who actually wants the detail will read it
+           properly rather than skim it over a hero image. */
         <div className="cl-consent" role="region" aria-label="Analytics consent">
-            <div className="cl-consent__text">
-                <p className="cl-consent__title">Can we count the visit?</p>
-                <p className="cl-consent__body">
-                    We use Google Analytics to see which parts of this site
-                    people actually use. Nothing is collected unless you say
-                    yes. Details are in our
-                    {' '}
-                    <Link href="/privacy" className="cl-consent__link">
-                        privacy policy
-                    </Link>
-                    .
-                </p>
-            </div>
+            <p className="cl-consent__body">
+                We count visits with Google Analytics.
+                {' '}
+                <Link href="/privacy" className="cl-consent__link">
+                    How we use it
+                </Link>
+            </p>
 
             <div className="cl-consent__actions">
                 <button
                     type="button"
-                    className="nv-btn nv-btn--ghost cl-consent__btn"
+                    className="cl-consent__btn cl-consent__btn--no"
                     onClick={decline}
                 >
-                    No thanks
+                    No
                 </button>
                 <button
                     type="button"
-                    className="nv-btn nv-btn--primary cl-consent__btn"
+                    className="cl-consent__btn cl-consent__btn--yes"
                     onClick={accept}
                 >
-                    Yes, that is fine
+                    Allow
                 </button>
             </div>
         </div>

@@ -656,45 +656,121 @@ img, svg { display: block; max-width: 100%; }
    allowed radii. --nv-z-drawer, because it must clear the dock.
    ========================================================================== */
 
+/* ONE SLIM BAR, NOT A CARD.
+
+   This was a 218px block: a heading, three sentences and two full-size
+   buttons, measured at 26% of a 390px phone screen. The consent is kept
+   because it gates Google Analytics and the privacy page promises
+   nothing is collected without it; what is cut is the explanation,
+   which now lives where somebody would actually read it.
+
+   Sits ABOVE the dock, not over it. Both are fixed to the bottom centre
+   and the first version put them at the same offset: measured at 1440px
+   the consent bar covered the dock completely, 66px of overlap, so the
+   page's own navigation was hidden behind a question. The dock is 62px
+   plus its 16px offset, so 94px clears it with breathing room. */
 .cl-consent {
     position: fixed;
     left: 50%;
-    bottom: 20px;
+    bottom: calc(94px + env(safe-area-inset-bottom, 0px));
     transform: translateX(-50%);
     z-index: var(--nv-z-drawer);
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 18px;
-    width: calc(100% - 32px);
-    max-width: 660px;
-    padding: 20px 22px;
+    gap: 10px;
+    width: calc(100% - 24px);
+    max-width: 520px;
+    padding: 6px 6px 6px 14px;
     background: var(--nv-paper);
     border: var(--nv-stroke) solid var(--nv-ink);
-    border-radius: var(--nv-radius);
-    box-shadow: var(--nv-pop);
-}
-
-.cl-consent__text {
-    flex: 1 1 280px;
-    min-width: 0;
-}
-
-.nv-root .cl-consent__title {
-    margin: 0 0 4px;
-    font-family: var(--nv-font-display);
-    font-size: var(--nv-body);
-    font-weight: 700;
-    color: var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    /* Matches the header and the docks: the floating things on a page
+       should read as one family. */
+    box-shadow: 6px 6px 0 var(--nv-fill);
 }
 
 .nv-root .cl-consent__body {
+    /* `1 1 auto`, not `flex: 1` with min-width: 0. The latter let the
+       sentence shrink to zero width while the buttons took the whole
+       bar. */
+    flex: 1 1 auto;
     margin: 0;
     font-family: var(--nv-font-text);
-    font-size: var(--nv-small);
-    line-height: 1.5;
+    font-size: 0.8rem;
+    line-height: 1.35;
     /* A real token, never opacity: 45% of anything is roughly 1.9:1. */
     color: var(--nv-ink-soft);
+}
+
+.cl-consent__actions {
+    display: flex;
+    gap: 6px;
+    flex: none;
+}
+
+/* 44px is the playbook floor and these are the only controls in the bar.
+   The bar is 56px tall in total, against 218px before. */
+.cl-consent__btn {
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: var(--nv-radius-pill);
+    font-family: var(--nv-font-text);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+    white-space: nowrap;
+}
+
+.cl-consent__btn--no {
+    border: var(--nv-stroke) solid var(--nv-ink);
+    background: var(--nv-paper);
+    color: var(--nv-ink);
+}
+
+.cl-consent__btn--yes {
+    border: var(--nv-stroke) solid var(--nv-fill);
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
+}
+
+@media (hover: hover) {
+    .cl-consent__btn--no:hover { background: var(--nv-lav-soft); }
+    .cl-consent__btn--yes:hover { filter: brightness(1.08); }
+}
+
+.cl-consent__btn:active { transform: translateY(1px); }
+
+.cl-consent__btn:focus-visible {
+    outline: 2px solid var(--nv-fill);
+    outline-offset: 2px;
+}
+
+/* NARROW PHONE: TEXT ON TOP, BUTTONS UNDER IT.
+
+   A first attempt kept one row down to 320px with `flex: 1; min-width:
+   0` on the sentence. That let the text shrink to ZERO width while the
+   two buttons took 310px of a 366px bar, and the collapsed text then
+   wrapped one word per line: 202px tall, barely better than the card it
+   replaced.
+
+   Two rows is the honest answer at this width. 104px, against 218px
+   before, and the buttons keep their 44px. */
+@media (max-width: 560px) {
+    .cl-consent {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 12px 14px;
+        border-radius: var(--nv-radius);
+    }
+
+    .nv-root .cl-consent__body { font-size: 0.78rem; text-align: left; }
+
+    /* Both buttons share the row, so neither is a tiny target beside a
+       wide one. */
+    .cl-consent__actions { justify-content: stretch; }
+    .cl-consent__btn { flex: 1; padding: 0 10px; }
 }
 
 .cl-consent__link {
