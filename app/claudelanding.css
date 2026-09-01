@@ -3600,6 +3600,9 @@ a.cl-bento__cell:active {
     display: flex;
     align-items: center;
     gap: 8px;
+    /* The lift animates so the dock rises into the space the
+       consent bar leaves, rather than snapping up after it. */
+    transition: bottom 260ms var(--nv-ease, ease);
 }
 
 /* `align-items: center`, not `flex-end`: the row no longer has a label
@@ -6283,6 +6286,9 @@ body:has(.cl-contact__form) .cl-dock {
     /* Matches the header: the two floating controls on a page should be
        the same object in two places, not two different objects. */
     box-shadow: 6px 6px 0 var(--nv-fill);
+    /* The lift animates so the dock rises into the space the
+       consent bar leaves, rather than snapping up after it. */
+    transition: bottom 260ms var(--nv-ease, ease);
 }
 
 .cl-minidock__item {

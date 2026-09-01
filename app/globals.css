@@ -674,8 +674,26 @@ img, svg { display: block; max-width: 100%; }
    else is and where a dismissible notice belongs. On a phone there is
    no free corner, so it sits below the dock instead: the dock is the
    control a visitor uses repeatedly and it keeps the prime position. */
+/* THE DISSOLVE.
+
+   All three exits run through it: Allow, No, and the timeout. The bar
+   fades and sinks slightly, and the dock's lift returns to zero over the
+   same 260ms, so the dock rises into the space as the bar leaves rather
+   than jumping after it.
+
+   `pointer-events: none` while leaving, so a second tap during the fade
+   cannot fire the handler twice. */
+.cl-consent.is-leaving {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+}
+
 .cl-consent {
     position: fixed;
+    transition:
+        opacity 260ms var(--nv-ease, ease),
+        transform 260ms var(--nv-ease, ease);
     right: 12px;
     left: auto;
     bottom: calc(12px + env(safe-area-inset-bottom, 0px));
@@ -829,10 +847,16 @@ img, svg { display: block; max-width: 100%; }
         bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     }
 
-    /* 42px bar + 12px offset + 10px gap. Scoped to this breakpoint, so
-       the desktop corner placement never lifts the dock: there the two
-       sit side by side and neither needs to move. */
-    body:has(.cl-consent) { --cl-dock-lift: 64px; }
+    /* 42px bar + 12px offset + 4px gap, down from 10. The two are a
+       stacked pair rather than two unrelated things sharing a corner, so
+       they sit close enough to read as one group. Scoped to this
+       breakpoint: on a desktop they are in different corners and neither
+       moves. */
+    body:has(.cl-consent) { --cl-dock-lift: 58px; }
+
+    /* The dock settles down as the bar dissolves, rather than snapping
+       the instant the choice is made. Same duration as the fade. */
+    body:has(.cl-consent.is-leaving) { --cl-dock-lift: 0px; }
 }
 
 @media (max-width: 480px) {
