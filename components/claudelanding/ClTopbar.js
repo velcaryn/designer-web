@@ -56,6 +56,12 @@ export default function ClTopbar({
     /* Where the lockup points. "/" everywhere except the home page,
        where it is the top of the page it is already on. */
     home = '/',
+    /* Where the CTA points. "/#talk" everywhere, so a visitor on /cloud or
+       a service page lands on the home page's contact section. A page
+       that carries its own #talk (the landing drafts) passes "#talk", or
+       "Contact us" would navigate away from the page being read. The
+       LABEL stays fixed; see the note below. */
+    ctaHref = '/#talk',
 }) {
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -63,10 +69,10 @@ export default function ClTopbar({
        same defect as a lockup whose width changes: the eye tracks it as
        a different control. It said "Get started" on /cloud and
        "Contact us" everywhere else. */
-    const CTA = { href: '/#talk', label: 'Contact us' };
+    const CTA = { href: ctaHref, label: 'Contact us' };
 
     return (
-        <header className="cl-topbar">
+        <header className={`cl-topbar${menuOpen ? ' is-open' : ''}`}>
             <div className="cl-topbar__inner">
                 <Link href={home} className="cl-topbar__brand">
                     {/* TWO FILES, ONE SHOWN.

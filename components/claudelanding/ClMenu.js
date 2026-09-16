@@ -26,8 +26,22 @@
  *
  * Links come in as a prop rather than being defined here, because the
  * three headers do not carry the same ones.
+ *
+ * WHY THE SHEET IS A PORTAL
+ *
+ * .cl-topbar carries a backdrop-filter, and a filter makes an element
+ * the containing block for its position: fixed descendants. Rendered
+ * inside the bar, the "full-screen" .cl-menu was in fact confined to the
+ * bar's own box: measured 344px wide on a 390px phone, and its backdrop
+ * never dimmed the page. Portalling to document.body puts it where the
+ * CSS always said it was. The sheet then sits under the bar with the
+ * bar's own left/right/shell arithmetic, and its top edge is measured
+ * from the bar's real bottom (64 to 72px plus the stroke, depending on
+ * the width) in a layout effect that writes the style directly, so it
+ * lands before paint and no state changes inside an effect.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { List, X } from '@phosphor-icons/react';
 
@@ -65,6 +79,24 @@ export default function ClMenu({ open, onOpen, onClose, links, cta }) {
         }
     }, [open]);
 
+    /* The sheet's top edge is the bar's bottom edge minus one stroke, so
+       the two borders overlap into a single line and the sheet reads as
+       the bar unfolding. Measured, not assumed: the bar is 70px tall at
+       390px and 74 at 640px, with the stroke. */
+    useLayoutEffect(() => {
+        if (!open) return undefined;
+        const bar = toggle.current?.closest('.cl-topbar');
+        const el = sheet.current;
+        if (!bar || !el) return undefined;
+        const place = () => {
+            const stroke = parseFloat(getComputedStyle(bar).borderTopWidth) || 3;
+            el.style.top = `${Math.round(bar.getBoundingClientRect().bottom - stroke)}px`;
+        };
+        place();
+        window.addEventListener('resize', place);
+        return () => window.removeEventListener('resize', place);
+    }, [open]);
+
     function onSheetKeyDown(e) {
         if (e.key !== 'Tab') return;
         const items = sheet.current?.querySelectorAll('a[href], button:not([disabled])');
@@ -96,7 +128,7 @@ export default function ClMenu({ open, onOpen, onClose, links, cta }) {
                     : <List size={20} weight="bold" />}
             </button>
 
-            {open && (
+            {open && createPortal(
                 <div className="cl-menu" role="dialog" aria-modal="true" aria-label="Menu">
                     <button
                         type="button"
@@ -111,10 +143,11 @@ export default function ClMenu({ open, onOpen, onClose, links, cta }) {
                         onKeyDown={onSheetKeyDown}
                     >
                         <nav className="cl-menu__links" aria-label="Main">
-                            {links.map((link) => (
+                            {links.map((link, i) => (
                                 <Link
                                     key={link.href}
                                     href={link.href}
+                                    style={{ '--i': i }}
                                     className={`cl-menu__link${link.active ? ' is-active' : ''}`}
                                     aria-current={link.active ? 'page' : undefined}
                                     onClick={onClose}
@@ -134,7 +167,8 @@ export default function ClMenu({ open, onOpen, onClose, links, cta }) {
                             </Link>
                         )}
                     </div>
-                </div>
+                </div>,
+                document.body,
             )}
         </>
     );

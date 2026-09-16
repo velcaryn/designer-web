@@ -66,6 +66,20 @@ export const metadata = {
         url: `https://${brand.domain}`,
         locale: 'en_IN',
         type: 'website',
+        images: [
+            {
+                url: '/opengraph-image',
+                width: 1200,
+                height: 630,
+                alt: `${brand.name} - ${brand.tagline}`,
+            },
+        ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: `${brand.name} | ${brand.tagline}`,
+        description: brand.description,
+        images: ['/opengraph-image'],
     },
     /* Geo meta, per the playbook's SEO section. These are not a ranking
        factor on their own, but they are cheap, they are read by several

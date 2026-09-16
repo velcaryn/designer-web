@@ -16,3 +16,6 @@ next-env.d.ts
 public/Screenshots/
 dev.log
 video-suite/
+.vscode/
+.Rhistory
+*.gz

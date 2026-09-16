@@ -897,3 +897,76 @@ img, svg { display: block; max-width: 100%; }
 /* Dock clearance is handled by the bar's own `bottom` above, which is
    94px at every width. This used to set 96px below 900px only, so on a
    desktop the two overlapped. */
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   Vendored animation keyframes (registry/magicui)
+   ══════════════════════════════════════════════════════════════════════
+
+   Copied from the registry items' own `css` fields so the motion matches
+   upstream, declared here as plain keyframes rather than as Tailwind theme
+   utilities: every route can reach them, and the reduced-motion block at
+   the end switches all three off. Colours come from the components'
+   callers, never from here. */
+
+@keyframes nv-aurora {
+    0%   { background-position: 0% 50%;   transform: rotate(-5deg) scale(0.9); }
+    25%  { background-position: 50% 100%; transform: rotate(5deg) scale(1.1); }
+    50%  { background-position: 100% 50%; transform: rotate(-3deg) scale(0.95); }
+    75%  { background-position: 50% 0%;   transform: rotate(3deg) scale(1.05); }
+    100% { background-position: 0% 50%;   transform: rotate(-5deg) scale(0.9); }
+}
+
+.nv-aurora {
+    background-size: 200% auto;
+    animation: nv-aurora 8s ease-in-out infinite alternate;
+}
+
+@keyframes nv-shine {
+    0%   { background-position: 0% 0%; }
+    50%  { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+.nv-shine { animation: nv-shine var(--duration, 14s) infinite linear; }
+
+@keyframes nv-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--pulse-color); }
+    50%      { box-shadow: 0 0 0 var(--distance, 8px) color-mix(in srgb, var(--pulse-color) 45%, transparent); }
+}
+
+.nv-pulse { animation: nv-pulse var(--duration, 1.5s) ease-out infinite; }
+
+@keyframes nv-line-shadow {
+    0%   { background-position: 0 0; }
+    100% { background-position: 100% -100%; }
+}
+
+/* LineShadowText (registry/magicui/line-shadow-text.jsx). The word, and
+   behind it a hatched copy read from data-text, offset by 0.04em. */
+.nv-lineShadow {
+    position: relative;
+    z-index: 0;
+    display: inline-flex;
+}
+
+.nv-lineShadow::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0.04em;
+    left: 0.04em;
+    z-index: -1;
+    background-image: linear-gradient(45deg, transparent 45%, var(--shadow-color) 45%, var(--shadow-color) 55%, transparent 0);
+    background-size: 0.06em 0.06em;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: nv-line-shadow 15s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nv-aurora,
+    .nv-shine,
+    .nv-pulse,
+    .nv-lineShadow::after { animation: none; }
+}

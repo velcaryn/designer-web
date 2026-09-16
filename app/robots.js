@@ -25,7 +25,7 @@ export default function robots() {
     return {
         rules: {
             userAgent: '*',
-            allow: '/',
+            allow: ['/', '/demo-site'],
             disallow: ['/api/', '/demo-site/'],
         },
         sitemap: `https://${brand.domain}/sitemap.xml`,

@@ -42,6 +42,17 @@ export const contact = {
     emailInfo: 'info@velbiz.com',
     instagram: 'https://instagram.com/velbiz.digital',
     instagramHandle: '@velbiz.digital',
+    /* THE POSTS SHOWN ON THE LANDING PAGE, BY PERMALINK.
+
+       Instagram's public feed cannot be fetched without an app token and
+       a Business account, and the Basic Display API that used to allow
+       it was retired in December 2024. So the grid is a list of post
+       links kept here and rendered as Instagram's own embed frames.
+       Paste the permalink of each post to show (the URL of the post,
+       "https://www.instagram.com/p/<code>/"), newest first, four to six
+       of them. With none listed the section shows the follow button
+       alone. */
+    instagramPosts: [],
 };
 
 export const phoneHref = `tel:+${contact.phone}`;
@@ -75,22 +86,128 @@ export function waEnquiry({ name, email, company, brief }) {
 }
 
 /**
- * The price band shown near the contact section.
+ * The two fixed plans.
  *
- * A BAND, NOT A PRICE LIST, AND DELIBERATELY NOT A PRICING PAGE.
+ * WHY FIXED NUMBERS RATHER THAN THE BAND THAT USED TO BE HERE
  *
- * Price is the objection that ends most enquiries before they start: a
- * small business owner who cannot guess whether this costs twenty
- * thousand or two lakh assumes the worse number and does not write. A
- * range near the CTA answers that. A pricing PAGE does the opposite, by
- * inviting line-item comparison against whoever is cheapest and turning
- * a conversation into a procurement exercise.
+ * `pricing` below still carries a band, and it still drives the home
+ * page at `/` and the three service pages. This block is the newer,
+ * narrower answer, and it exists because the band was the wrong shape
+ * for the audience the simplified landing page is written for.
  *
- * NO TIMELINE HERE. CLAUDE.md allows delivery estimates only inside the
- * estimator, where a band is clamped against a scope the visitor
- * actually selected, and the estimator does not exist. A number of weeks
- * quoted against a project nobody has described yet is a promise made
- * before anything is known.
+ * A shop owner who has never bought a website cannot place themselves
+ * inside "Rs 10,000 to 30,000". They do not know which end they are, so
+ * they assume the top, and the range does the very thing it was added to
+ * prevent. Two named things with two fixed numbers answers instead: this
+ * one, or that one, and this is what separates them.
+ *
+ * THE OLD ARGUMENT AGAINST A PRICE TABLE STILL HAS A POINT
+ *
+ * It said a table invites line-item comparison against whoever is
+ * cheapest. That is true, and it is the cost of being legible to
+ * somebody who would otherwise not write at all. Two plans is not a
+ * feature ladder: there is no third tier engineered to make the second
+ * look reasonable, and the cheaper one is a complete website rather
+ * than a crippled version of the expensive one.
+ *
+ * THE TIMELINE IS STATED, WHICH IS A CHANGE
+ *
+ * CLAUDE.md banned delivery estimates outside an estimator, on the
+ * grounds that a number of weeks quoted against an undescribed project
+ * is a promise made before anything is known. Confirmed with the user
+ * that 5 and 7 days are real, sellable commitments against these two
+ * defined scopes, which is the condition the old rule was protecting.
+ * It is a promise against a KNOWN scope now, not an open one. Anything
+ * outside these two plans goes back to being quoted after a
+ * conversation, with no number of days attached.
+ *
+ * Written as words, never as a numeric range with a dash: "5 to 7", not
+ * "5-7". The dash forms are what the en dashes in the previous draft
+ * were, and they are what the house style bans.
+ */
+export const plans = [
+    {
+        id: 'starter',
+        name: 'Starter Business Website',
+        who: 'For local shops, clinics, consultants and service providers.',
+        price: '9,999',
+        /* ASCII hyphen, never an en dash: the dash forms are what the
+           house style bans. Read as "5 to 7". */
+        days: '5-7',
+        lead: null,
+        gets: [
+            'Custom pages designed for your business',
+            'Mobile-first layout that loads in under 2 seconds',
+            '1-tap WhatsApp ordering and customer enquiry buttons',
+            'Google Business Profile and Google Maps setup',
+            'Professional copywriting in English and Tamil',
+            '100% code and domain ownership in your name',
+        ],
+    },
+    {
+        id: 'advanced',
+        name: 'Advanced Business Website',
+        who: 'For established businesses that want to scale further.',
+        price: '17,999',
+        days: '10-14',
+        /* Rendered as the first, bold line of the list. One line does
+           the work of a column of repeated ticks. */
+        lead: 'Everything in Starter, plus',
+        gets: [
+            'A dashboard to monitor your customers',
+            'Inventory management',
+            'Quotes and invoicing',
+            'Business analytics',
+        ],
+        /* Sub-points under one line, keyed by that line's text. Kept
+           beside `gets` rather than nested inside it so the older
+           drafts, which render `gets` as plain strings, keep working. */
+        details: {
+            'A dashboard to monitor your customers': [
+                'Add and edit the content on the website',
+                'Upload photos and videos',
+                'Update customer testimonials',
+            ],
+        },
+    },
+    {
+        id: 'ecommerce',
+        name: 'Full-Scale E-Commerce Suite',
+        who: 'For stores, brands and sellers ready to take payments and ship anywhere.',
+        price: '24,999',
+        days: '10-14',
+        lead: 'Everything in Advanced, plus',
+        gets: [
+            'Complete online store with shopping cart and checkout',
+            'Direct UPI (Google Pay, PhonePe, Paytm), cards and net banking',
+            'Merchant admin dashboard to manage orders, stock and customers',
+            'Modern payment gateway (Razorpay) integration',
+            'Zero platform commission taken by us on your sales',
+        ],
+    },
+];
+
+/**
+ * How a plan's price is written on the landing page: "₹9,999/-", the
+ * way a shop in Tamil Nadu writes a price on a board. `pricing.currency`
+ * stays "Rs" for the band on the older pages. One function so the cards,
+ * the FAQ answer and any future mention cannot spell it three ways.
+ */
+export function planPrice(plan) {
+    return `₹${plan.price}/-`;
+}
+
+/**
+ * The price band.
+ *
+ * STILL THE RIGHT ANSWER FOR THE PAGES THAT USE IT. The home page at
+ * `/` and the three service pages describe work that genuinely varies:
+ * a catalogue build and a five-page brochure are not the same job, and
+ * quoting one number for both would be a lie in one direction or the
+ * other. `plans` above is the answer for the two scopes that ARE fixed.
+ *
+ * NO TIMELINE HERE, STILL. The days in `plans` are attached to two
+ * defined scopes. This band is not, so nothing here promises one.
  */
 export const pricing = {
     from: '10,000',
@@ -120,6 +237,65 @@ export const pricing = {
        is not the place to quietly reinstate it. */
     cloudNote: 'VelBiz Cloud is priced separately, once we know what you run.',
 };
+
+/**
+ * The questions for the two-plan landing page.
+ *
+ * WHY A SECOND ARRAY RATHER THAN REUSING `faqs`
+ *
+ * The same one-array-two-consumers rule applies, just per page: the
+ * component renders this and StructuredData receives the identical array
+ * through `pageFaqs`, exactly as app/for/[slug]/page.js already does. The
+ * drift the rule exists to prevent is JSON-LD claiming answers that are
+ * not on the visible page, and that is a per-page property.
+ *
+ * It cannot reuse `faqs` because `faqs[0]` answers the BAND. A page whose
+ * whole argument is two fixed numbers cannot carry an answer that says
+ * the price is a range, and a crawler cannot be told both.
+ *
+ * SEVEN, NOT TEN. The previous draft of this page asked eight and
+ * answered several of them in vocabulary the reader does not have: T+1
+ * settlement cycles, ERP integrations, admin dashboards. What is left is
+ * what somebody actually worries about before sending money to a website
+ * company, in the words they would use.
+ *
+ * Numbers are derived from `plans` so the answer, the price cards and
+ * the structured data cannot disagree.
+ */
+export const planFaqs = [
+    {
+        q: 'What does it cost?',
+        a: `A website is ${pricing.currency} ${plans[0].price}. An online shop, where customers pay you on the site, is ${pricing.currency} ${plans[2].price}. That is the whole number. There is no hourly rate running in the background and no bill at the end that is bigger than the one you agreed to.`,
+    },
+    {
+        q: 'Do I need the shop, or is the website enough?',
+        /* The place where saying "not yet" earns more than an upsell.
+           Carried over in substance from faqs, because it is the most
+           useful answer on the page and it is still true. */
+        a: 'Often the website is enough, and we will tell you when it is. If most of your orders come from people who live nearby and already know you, a website and a WhatsApp button will serve you better than a checkout nobody uses. The shop earns its keep when you are selling to people who cannot walk in, posting things beyond your own town, or retyping the same order into a bill every evening.',
+    },
+    {
+        q: 'How does the money reach me?',
+        /* "T+1 settlement cycle" in the previous draft. Same fact. */
+        a: 'It goes straight into your bank account, usually the next working day. The payment account is opened in your name, not ours, so we never hold your money and we take nothing per sale.',
+    },
+    {
+        q: 'Who owns it when it is finished?',
+        a: 'You do, all of it. The domain, the website, the photographs and every account are in your name from the first day. If you ever want to move to somebody else you take the lot with you, and we will help you move it.',
+    },
+    {
+        q: 'Can I change things myself afterwards?',
+        a: 'Yes. Changing a price, adding something new or marking it sold out takes about a minute, on your phone. We show you how on a call at the end and record it, so you can watch it again rather than having to remember.',
+    },
+    {
+        q: 'Do I have to write it all?',
+        a: 'No. Most people find describing their own business harder than they expect, so we talk to you, write it, and you tell us what we got wrong. If you would rather write it yourself that is fine, and it costs less.',
+    },
+    {
+        q: 'What happens after it goes live?',
+        a: 'It is yours and it keeps working whether or not you carry on with us. There is no monthly fee you have to pay to keep it switched on. If you want something changed later you message us.',
+    },
+];
 
 /**
  * The questions people actually ask before they get in touch.
@@ -208,6 +384,34 @@ export const faqs = [
            we made up. */
         a: 'Sometimes not, and we will say so. If most of your orders are repeat customers within a few kilometres, a catalogue and a WhatsApp button will serve you better than a checkout nobody uses. A shop earns its keep when you are selling to people who cannot walk in, shipping beyond your own town, or spending time every day retyping the same order into a bill. We would rather build you the smaller thing that works than the bigger thing that sits idle.',
     },
+];
+
+/**
+ * The ten home-page questions, with ONE answer rewritten, for /newlanding-v4.
+ *
+ * faqs[0] answers the BAND. v4 shows three fixed prices a few screens
+ * above the FAQ, and a band under fixed tiers is the contradiction a
+ * cautious buyer opens first. The other nine are shared by reference so
+ * they cannot drift. StructuredData receives this same array from the
+ * page, per the one-array-two-consumers rule. Replace `faqs` with this
+ * at promotion.
+ */
+export const v4Faqs = [
+    {
+        q: faqs[0].q,
+        a: `A website is ${planPrice(plans[0])}. An advanced website with a dashboard, inventory, quotes and analytics is ${planPrice(plans[1])}. A full online shop that takes payments is ${planPrice(plans[2])}. Each is a one-time price, agreed before anything starts, and there is no monthly fee to keep the website switched on.`,
+    },
+    ...faqs.slice(1),
+];
+
+/* The categories the landing page's FAQ filters by, as indexes into
+   v4Faqs. Three, because ten questions under one heading is a wall and
+   ten under five headings is a taxonomy. A question can belong to one
+   group; the "All" chip shows everything. */
+export const v4FaqGroups = [
+    { id: 'cost', label: 'Cost and ownership', questions: [0, 1, 4] },
+    { id: 'build', label: 'Building it', questions: [2, 3, 5, 6] },
+    { id: 'shop', label: 'Selling online', questions: [7, 8, 9] },
 ];
 
 /**

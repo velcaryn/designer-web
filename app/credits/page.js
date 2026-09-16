@@ -19,12 +19,32 @@ import { brand } from '@/config/site';
 import '../claudelanding.css';
 import StructuredData from '@/components/StructuredData';
 import ClLegalNav from '@/components/claudelanding/ClLegalNav';
-import ClFooter from '@/components/claudelanding/ClFooter';
+import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
+import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 
 export const metadata = {
-    title: 'Credits',
+    title: `Credits | ${brand.name}`,
     description: `Third-party assets and open-source work used to build ${brand.shortName}'s website.`,
     alternates: { canonical: '/credits' },
+    openGraph: {
+        title: `Credits | ${brand.name}`,
+        description: `Third-party assets and open-source work used to build ${brand.shortName}'s website.`,
+        url: '/credits',
+        siteName: brand.name,
+        locale: 'en_IN',
+        type: 'website',
+        images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: `Credits - ${brand.name}` }],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: `Credits | ${brand.name}`,
+        description: `Third-party assets and open-source work used to build ${brand.shortName}'s website.`,
+        images: ['/opengraph-image'],
+    },
+    robots: {
+        index: true,
+        follow: true,
+    },
 };
 
 export default function CreditsPage() {
@@ -87,7 +107,8 @@ export default function CreditsPage() {
                 </section>
             </main>
 
-            <ClFooter />
+            <Nl4Footer home="/" />
+            <Nl4Dock home="/" />
         </>
     );
 }

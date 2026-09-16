@@ -33,26 +33,53 @@ import '../../claudelanding.css';
 
 import { brand } from '@/config/site';
 import HubNav from '@/components/demo/HubNav';
-import ClFooter from '@/components/claudelanding/ClFooter';
-import ClMiniDock from '@/components/claudelanding/ClMiniDock';
+import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
+import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 import HubGrid from '@/components/demo/HubGrid';
+import ClLab from '@/components/claudelanding/ClLab';
+import ClProof from '@/components/claudelanding/ClProof';
+import { LabProvider } from '@/components/claudelanding/LabContext';
 import { DEMOS } from '@/content/demos';
 
 export const metadata = {
-    title: 'See a finished site',
+    title: `See a Finished Site | ${brand.name}`,
     description:
-        `Sixteen complete example websites, one per trade. Pick yours and see what ${brand.shortName} builds.`,
+        `Twenty-four complete example websites, one per trade, and a colour and typeface lab that repaints the page live. Pick yours and see what ${brand.shortName} builds.`,
     alternates: { canonical: '/demo-site' },
-    /* The hub itself is ours and could be indexed, but it links to sixteen
-       noindex pages and exists to be sent directly. Keeping it out of
-       search means the sixteen cannot be reached through it by a crawler
-       either. */
-    robots: { index: false, follow: false },
+    openGraph: {
+        title: `See a Finished Site | ${brand.name}`,
+        description:
+            `Twenty-four complete example websites, one per trade, and a colour and typeface lab that repaints the page live. Pick yours and see what ${brand.shortName} builds.`,
+        url: '/demo-site',
+        siteName: brand.name,
+        locale: 'en_IN',
+        type: 'website',
+        images: [
+            {
+                url: '/opengraph-image',
+                width: 1200,
+                height: 630,
+                alt: `See a finished site - ${brand.name}`,
+            },
+        ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: `See a Finished Site | ${brand.name}`,
+        description:
+            `Twenty-four complete example websites, one per trade, and a colour and typeface lab that repaints the page live. Pick yours and see what ${brand.shortName} builds.`,
+        images: ['/opengraph-image'],
+    },
 };
 
 export default function DemoHubPage() {
     return (
-        <>
+        /* LabProvider is mandatory, not decorative: ClLab publishes its
+           countdown through useLabPublish(), which reads ctx._publish, and
+           the default context has no _publish. ClLab outside a provider
+           throws on mount. ClMiniDock reads the same context to show the
+           revert pill. */
+        <LabProvider>
             <HubNav />
 
             <main>
@@ -89,10 +116,24 @@ export default function DemoHubPage() {
                 </section>
 
                 <HubGrid demos={DEMOS} />
+
+                {/* THE LAB LIVES HERE NOW.
+                    It was built for the home page, where it sat as the
+                    sixth of eleven sections and was reached by almost
+                    nobody. On the hub it sits under twenty-four designs
+                    that already make the point it exists to make: pick a
+                    palette and a typeface, and watch a page full of
+                    different businesses hold together. */}
+                <ClLab />
+
+                {/* Real shipped client builds: Liha palm jaggery shop and
+                    Velcaryn medical supplies, showing mobile and desktop
+                    views in device frames. */}
+                <ClProof />
             </main>
 
-            <ClMiniDock />
-            <ClFooter />
-        </>
+            <Nl4Footer home="/" />
+            <Nl4Dock home="/" />
+        </LabProvider>
     );
 }

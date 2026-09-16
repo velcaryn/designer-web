@@ -3528,29 +3528,73 @@ a.cl-bento__cell:active {
     cursor: pointer;
 }
 
+/* THE SHEET IS THE HEADER'S EXTENSION, NOT A SEPARATE BOX.
+
+   It used to be a 520px card floating under the bar, centred on the
+   viewport. It now spans exactly the bar's own width (the same
+   gutter/shell arithmetic .cl-topbar uses), tucks under the bar's
+   bottom edge with its top corners square, and drops in with a short
+   scale-and-fade from that edge, so the links read as unfolding out of
+   the header. The bar itself squares its bottom corners while open (see
+   .cl-topbar.is-open) and the two become one shape. */
+@keyframes cl-menuDrop {
+    from { opacity: 0; transform: translateY(-10px) scaleY(0.96); }
+    to   { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+@keyframes cl-menuLink {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 .cl-menu__sheet {
-    position: relative;
-    width: 100%;
-    max-width: 520px;
-    /* Clears the header the sheet drops out of, rather than covering it:
-       the toggle stays visible and reachable while the menu is open. */
-    margin-top: calc(14px + 64px + 10px);
+    position: absolute;
+    /* The bar's own arithmetic (see .cl-topbar): one gutter in from each
+       edge, capped at the shell, centred. The outer edges therefore land
+       on the bar's outer edges at every width. `top` is set by ClMenu
+       from the bar's measured bottom edge. */
+    left: var(--nv-gutter);
+    right: var(--nv-gutter);
+    max-width: var(--nv-shell);
+    margin-inline: auto;
+    top: 88px;
+    transform-origin: top center;
+    animation: cl-menuDrop 0.28s var(--nv-ease) both;
     padding: 14px;
     background: var(--nv-paper);
     border: var(--nv-stroke) solid var(--nv-ink);
-    border-radius: var(--nv-radius);
-    box-shadow: var(--nv-pop);
+    /* Square on top: it continues the bar, whose bottom corners square
+       themselves while open (.cl-topbar.is-open). */
+    border-radius: 0 0 28px 28px;
+    box-shadow: 6px 6px 0 var(--nv-fill);
     max-height: calc(100vh - 120px);
     overflow-y: auto;
-}
-
-@media (min-width: 640px) {
-    .cl-menu__sheet { margin-top: calc(14px + 72px + 10px); }
 }
 
 .cl-menu__links {
     display: flex;
     flex-direction: column;
+}
+
+/* Each link drops in a beat after the one above it, so the list reads
+   as unfolding out of the bar rather than appearing as a block. */
+
+.cl-menu__link {
+    animation: cl-menuLink 0.32s var(--nv-ease) both;
+    animation-delay: calc(60ms + var(--i, 0) * 45ms);
+}
+
+/* The bar while its menu is open: bottom corners squared so the sheet
+   continues its edge, lifted above the backdrop, and its blue shadow
+   handed to the sheet so the pair casts one shadow. */
+.cl-topbar.is-open {
+    z-index: calc(var(--nv-z-drawer) + 1);
+    border-radius: 28px 28px 0 0;
+    box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cl-menu__sheet, .cl-menu__link { animation: none; }
 }
 
 .cl-menu__link {
@@ -5543,6 +5587,8 @@ body:has(.cl-contact__form) .cl-dock {
 }
 
 .cl-svc__card {
+    position: relative;
+    overflow: hidden;
     padding: 22px;
     background: var(--nv-paper);
     border: var(--nv-stroke) solid var(--nv-ink);
@@ -5654,6 +5700,8 @@ body:has(.cl-contact__form) .cl-dock {
 }
 
 .cl-svc__other {
+    position: relative;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -6026,15 +6074,15 @@ body:has(.cl-contact__form) .cl-dock {
 
    96px still separates the bands clearly. Measured before: sections of
    738/733/753/470px holding 569/445/465/182px of content. */
-.cl-svc__head,
 .cl-svc__head + .nv-section,
 .cl-svc__head ~ .nv-section {
     padding-block: clamp(48px, 6vw, 96px);
 }
 
-/* The first section still has to clear the floating bar. */
+/* The first section clears the floating bar with generous clearance. */
 .cl-svc__head {
-    padding-top: calc(14px + 78px + clamp(24px, 4vw, 44px));
+    padding-top: calc(14px + 78px + clamp(36px, 5vw, 64px)) !important;
+    padding-bottom: clamp(48px, 6vw, 96px);
 }
 
 .cl-svc__top {
@@ -6059,7 +6107,9 @@ body:has(.cl-contact__form) .cl-dock {
    A bordered panel rather than another band, so it reads as the answer
    sitting beside the pitch rather than as the next thing to scroll to. */
 .cl-svc__deliver {
-    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    padding: 24px;
     border: 2px solid var(--nv-ink);
     border-radius: var(--nv-radius);
     background: var(--nv-paper);
@@ -6330,4 +6380,494 @@ body:has(.cl-contact__form) .cl-dock {
 .cl-minidock__item:focus-visible {
     outline: 2px solid var(--nv-fill);
     outline-offset: 2px;
+}
+
+/* The lab's revert pill, inside the minidock. A copy of .cl-dock__lab:
+   the same control on the same edge of the screen has to read as the
+   same object. Rendered by ClMiniDock only while a preview is live. */
+.cl-minidock__lab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 14px;
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-small);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    touch-action: manipulation;
+    animation: cl-fill 0.25s var(--nv-ease) both;
+}
+.cl-minidock__lab:active { transform: translateY(1px); }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   404 (app/not-found.js): a glyph matrix behind one heading and one way home
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-notfound {
+    position: relative;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    padding-block: 140px 96px;
+    overflow: hidden;
+}
+
+.nv-notfound__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    /* Fades the matrix out toward the edges so the type sits on clean
+       paper in the middle. */
+    mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
+}
+
+.nv-notfound__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.nv-notfound__code {
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-d0);
+    font-weight: 600;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: var(--nv-lav);
+}
+
+.nv-notfound__title {
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-d2);
+    font-weight: 600;
+    line-height: 1.05;
+    color: var(--nv-ink);
+    max-width: 16ch;
+}
+
+.nv-notfound__lede { margin-bottom: 14px; }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   SHARED CHROME FROM THE v4 LANDING PAGE: the dock and the footer.
+   Moved here from app/newlanding-v4/newlanding-v4.css so /cloud and the
+   service pages, which import this file, wear the same bottom control
+   and the same footer as the landing page. Class names keep their nv4-
+   prefix; renaming would buy nothing and would invalidate the notes
+   that name them.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════
+   Dock (the fixed position, the safe-area inset and the consent-bar lift
+   come from .cl-dock in claudelanding.css; the reserve under every section
+   comes from body:has(.cl-dock) .nv-section in the same file)
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* THE HEADER'S CLOTHES, EXACTLY: paper at 92% with a blur, the ink
+   stroke, and the blue hard shadow. Two floating bars in two different
+   materials would read as two different products. Width follows the
+   magnified content; the centring transform keeps growth symmetric. */
+.nv4-dock__bar {
+    padding: 5px;
+    gap: 2px;
+    background: color-mix(in srgb, var(--nv-paper) 92%, transparent);
+    backdrop-filter: saturate(1.6) blur(14px);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    box-shadow: 6px 6px 0 var(--nv-fill);
+}
+
+/* THE LINK COVERS THE WHOLE ICON BOX. magicui's DockIcon pads itself by
+   max(6px, 20% of its size) inline, so a child sized 100% is the box
+   minus the padding: at 44px that measured a 26px link inside a 44px
+   circle, with the ring around it dead to a tap. Positioning the link
+   over the box makes the entire circle the target, 48px at rest. */
+.nv4-dock__icon {
+    position: relative;
+    overflow: visible;
+}
+
+.nv4-dock__item {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--nv-radius-pill);
+    color: var(--nv-ink);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s var(--nv-ease), transform 0.12s var(--nv-ease);
+}
+
+.nv4-dock__item.is-active {
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv4-dock__item:hover:not(.is-active) { background: var(--nv-lav-soft); }
+}
+
+.nv4-dock__item:active { transform: scale(0.92); }
+
+.nv4-dock__item:focus-visible {
+    outline: 3px solid var(--nv-ink);
+    outline-offset: 2px;
+}
+
+/* THE GLYPH IS A MASK. The owner's Footer-*.svg files are drawn in
+   currentColor, which an <img> cannot pass through, so the file masks a
+   box filled with the link's colour: ink at rest, paper on the blue. */
+.nv4-dock__glyph {
+    display: block;
+    width: 22px;
+    height: 22px;
+    background: currentColor;
+    -webkit-mask: var(--icon) center / contain no-repeat;
+    mask: var(--icon) center / contain no-repeat;
+}
+
+@media (min-width: 900px) {
+    .nv4-dock__glyph { width: 24px; height: 24px; }
+}
+
+/* The label above the icon: hidden until hover, focus, or a touch that
+   sets .is-pressed. Ink pill, paper text, the small hard shadow. */
+.nv4-dock__label {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    transform: translate(-50%, 4px);
+    padding: 5px 10px;
+    background: var(--nv-ink);
+    color: var(--nv-paper);
+    border-radius: var(--nv-radius-pill);
+    box-shadow: var(--nv-pop-sm);
+    font-family: var(--nv-font-text);
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s var(--nv-ease), transform 0.15s var(--nv-ease);
+}
+
+.nv4-dock__item.is-pressed .nv4-dock__label,
+.nv4-dock__item:focus-visible .nv4-dock__label {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv4-dock__item:hover .nv4-dock__label {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Footer: two rows. The one dark panel on the page, like ClFooter, so
+   every page ends the same way. Text pairs with the ink ground: paper
+   and a paper-toward-ink mix, never the page's own soft tokens.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv4-foot {
+    background: var(--nv-ink);
+    color: var(--nv-paper);
+    padding-block: clamp(56px, 8vw, 96px) 0;
+}
+
+.nv4-foot__top {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding-bottom: 40px;
+    border-bottom: 2px solid color-mix(in srgb, var(--nv-paper) 18%, transparent);
+}
+
+.nv4-foot__lockup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nv4-foot__logo { width: 44px; height: 34px; }
+
+.nv4-foot__name {
+    font-family: var(--nv-font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--nv-paper);
+}
+
+@media (min-width: 900px) {
+    .nv4-foot__logo {
+        width: 68px;
+        height: 52px;
+    }
+    .nv4-foot__name {
+        font-size: 1.85rem;
+    }
+}
+
+.nv4-foot__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 6px 12px;
+    border: 2px solid color-mix(in srgb, var(--nv-paper) 30%, transparent);
+    border-radius: var(--nv-radius-pill);
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nv-paper);
+}
+
+.nv4-foot__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--nv-lav);
+}
+
+.nv4-foot__tagline {
+    margin-top: 16px;
+    max-width: 40ch;
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--nv-paper) 78%, var(--nv-ink) 22%);
+}
+
+/* THE LARGE LINKS. Compact on mobile, expansive on desktop. */
+.nv4-foot__big {
+    display: flex;
+    flex-direction: column;
+}
+
+.nv4-foot__bigLink {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 44px;
+    padding-block: 8px;
+    border-top: 2px solid color-mix(in srgb, var(--nv-paper) 18%, transparent);
+    font-family: var(--nv-font-display);
+    font-size: clamp(1.1rem, 4vw, 1.35rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--nv-paper);
+    touch-action: manipulation;
+}
+
+.nv4-foot__bigLink svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    color: var(--nv-lav);
+    transition: transform 0.2s var(--nv-ease);
+}
+
+.nv4-foot__bigLink:last-child { border-bottom: 2px solid color-mix(in srgb, var(--nv-paper) 18%, transparent); }
+
+@media (min-width: 900px) {
+    .nv4-foot__bigLink {
+        gap: 16px;
+        min-height: 60px;
+        padding-block: 10px;
+        font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+        line-height: 1.1;
+    }
+    .nv4-foot__bigLink svg {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv4-foot__bigLink:hover { color: var(--nv-lav); }
+    .nv4-foot__bigLink:hover svg { transform: translate(3px, -3px); }
+}
+
+.nv4-foot__bigLink:active svg { transform: translate(3px, -3px); }
+
+.nv4-foot__bottom {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding-block: 40px;
+}
+
+.nv4-foot__groups {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px 20px;
+}
+
+.nv4-foot__groupHead {
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--nv-paper) 70%, var(--nv-ink) 30%);
+    margin-bottom: 12px;
+}
+
+.nv4-foot__list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.nv4-foot__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+    font-size: var(--nv-small);
+    font-weight: 600;
+    color: var(--nv-paper);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv4-foot__link:hover { color: var(--nv-lav); }
+}
+
+.nv4-foot__badge {
+    padding: 1px 7px;
+    border-radius: var(--nv-radius-pill);
+    background: var(--nv-lav);
+    color: var(--nv-on-accent);
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.nv4-foot__contact { display: flex; flex-direction: column; align-items: flex-start; }
+
+.nv4-foot__wa { margin-bottom: 16px; }
+
+.nv4-foot__contactList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nv4-foot__contactList li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 32px;
+    font-size: var(--nv-small);
+    color: color-mix(in srgb, var(--nv-paper) 82%, var(--nv-ink) 18%);
+}
+
+.nv4-foot__contactList svg { color: var(--nv-lav); flex: none; }
+
+.nv4-foot__contactList a { color: var(--nv-paper); font-weight: 600; }
+
+.nv4-foot__legal {
+    padding-block: 18px;
+    border-top: 2px solid color-mix(in srgb, var(--nv-paper) 18%, transparent);
+    font-size: var(--nv-micro);
+    color: color-mix(in srgb, var(--nv-paper) 70%, var(--nv-ink) 30%);
+}
+
+@media (min-width: 720px) {
+    .nv4-foot__groups { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (min-width: 960px) {
+    .nv4-foot__top { grid-template-columns: 1.1fr 1fr; gap: 56px; }
+    .nv4-foot__bottom { grid-template-columns: 1fr 260px; gap: 56px; }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+    .nv4-dock__item, .nv4-dock__label, .nv4-foot__bigLink svg { transition: none; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   /services index (app/services/page.js): one card per service
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv-svcIndex__head { padding-top: calc(14px + 78px + clamp(36px, 5vw, 64px)) !important; }
+
+.nv-svcIndex__title {
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-d1);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--nv-ink);
+    margin-bottom: 18px;
+}
+
+.nv-svcIndex__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+
+.nv-svcIndex__card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 26px 24px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+    touch-action: manipulation;
+    transition: transform 0.12s var(--nv-ease), box-shadow 0.12s var(--nv-ease);
+}
+
+.nv-svcIndex__card:active { transform: translate(6px, 6px); box-shadow: 0 0 0 var(--nv-ink); }
+
+@media (hover: hover) and (pointer: fine) {
+    .nv-svcIndex__card:hover { transform: translate(-2px, -2px); box-shadow: var(--nv-pop-lg); }
+}
+
+.nv-svcIndex__cardTitle {
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-d3);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--nv-ink);
+    margin-bottom: 10px;
+}
+
+.nv-svcIndex__cardLede {
+    color: var(--nv-ink-soft);
+    line-height: 1.6;
+    flex: 1;
+}
+
+.nv-svcIndex__cardGo {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 20px;
+    font-weight: 800;
+    color: var(--nv-lav);
+}
+
+@media (min-width: 900px) {
+    .nv-svcIndex__grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
 }

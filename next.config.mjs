@@ -76,7 +76,7 @@ const CSP = [
     "form-action 'self'",
     "frame-ancestors 'none'",
     "object-src 'none'",
-    "img-src 'self' data: blob: https://cdn.simpleicons.org",
+    "img-src 'self' data: blob: https://cdn.simpleicons.org https://images.unsplash.com",
     "font-src 'self' data:",
     /* 'unsafe-inline' for styles is required by the lab and by every
        inline style object; Next also injects its own style tags. */
@@ -105,8 +105,14 @@ const CSP = [
     "worker-src 'none'",
     "manifest-src 'none'",
     "media-src 'none'",
-    "frame-src 'none'",
-    "child-src 'none'",
+    /* OPENED FOR ONE ORIGIN, 2026-09-15. The landing page shows the
+       studio's Instagram posts as Instagram's own embed frames
+       (components/newlanding-v4/Nl4Follow.js), which is the only way to
+       show real posts without an app token. Nothing else may frame: the
+       list is the single origin, not a wildcard, and the demo pages'
+       "no embedded map" decision recorded above still stands. */
+    "frame-src https://www.instagram.com",
+    "child-src https://www.instagram.com",
 
     /* Rewrites any stray http:// subresource to https before it is
        fetched, rather than letting it fail or downgrade. Cheap, and it
@@ -149,7 +155,14 @@ const nextConfig = {
         formats: ['image/avif', 'image/webp'],
     },
     poweredByHeader: false,
-    allowedDevOrigins: ['*.trycloudflare.com', 'statutory-src-packs-senators.trycloudflare.com'],
+    async redirects() {
+        return [
+            { source: '/newlanding', destination: '/', permanent: true },
+            { source: '/newlanding-v2', destination: '/', permanent: true },
+            { source: '/newlanding-v3', destination: '/', permanent: true },
+            { source: '/newlanding-v4', destination: '/', permanent: true },
+        ];
+    },
     async headers() {
         return [
             {

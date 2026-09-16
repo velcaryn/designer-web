@@ -1,103 +1,106 @@
-'use client';
-
 /**
- * The home page: the growth landing page, now living at `/` directly.
+ * The primary homepage for VelBiz Digital.
  *
- * This used to be a separate route, `/claudelanding`, built alongside the
- * original homepage while that homepage's design was still current. Once
- * this page replaced it as the real homepage, keeping both around stopped
- * making sense: two competing homepages is exactly the "duplicate code"
- * this project's rule against it exists to prevent. The original homepage
- * and its components, and the satellite pages that only made sense next to
- * it (/newlanding, /faq, /rebuild, /tech-stack, and the old /cloud-replica
- * and its login/onboarding stubs), were removed in the same change that
- * moved this page here. This file is the whole surviving homepage.
+ * Promoted from /newlanding-v4 (September 2026).
  *
- * Nine sections, in the order the argument runs:
+ * WHAT IT IS MADE OF
  *
- *   hero+setup  the outcome, then the visitor names their business
- *   grow        the three beats, now about their business
- *   what        the six things we do
- *   cloud       the bridge to the back office
- *   tech        who built this and will it last
- *   lab         the design system holding together under a different skin
- *   work        the proof, last rather than fourth
- *   talk        one action
- *   crowd       the closing full-bleed strip, just above the footer
+ * The first draft's block structure and its pricing presentation, the
+ * second draft's copy register and machinery (real screenshots, the real
+ * demo sites, prices from config, one CTA intent), and the live home
+ * page's hero, FAQ, "who builds this" and crowd sections. The reader is
+ * a business owner around fifty who reads English fully but is not
+ * technical and has never bought a website.
  *
- * ClDock carries every navigation link at every width; ClHeader is brand
- * and one CTA only. LabProvider wraps everything because both ClLab (the
- * writer) and ClDock (a reader, for the countdown pill) need it.
+ * Section order runs: what we do, why it matters, what it does, what it
+ * costs, what else we do, the questions, the ask, who we are, our work,
+ * the crowd, Instagram. Every section id is a target for the header, the
+ * dock or both; change one and change Nl4Nav.js and Nl4Dock.js with it.
  *
- * WHY THIS IS A CLIENT COMPONENT
+ * A server component. Only five leaves need the browser (the nav's menu,
+ * the hero, the FAQ disclosure, the ask card's analytics call, the dock)
+ * and each carries its own 'use client'. `metadata` therefore lives here
+ * rather than in the root layout.
  *
- * The business name and the lab's live theme are context every section can
- * read, and both providers have to sit above all of them. A client
- * component cannot export `metadata`, which is why this route's metadata
- * lives in app/layout.js instead, merged into the root layout now that this
- * page IS the root.
- *
- * The stylesheet is imported here rather than added to app/globals.css,
- * which stays the small shared token file every route (this one and
- * /cloud) builds on.
+ * ONE ARRAY, TWO CONSUMERS. StructuredData is handed the exact array
+ * ClFaq renders, so the answers a crawler is given and the answers a
+ * person reads cannot drift.
  */
 import './claudelanding.css';
+import './newlanding-v4.css';
 
-import { BusinessProvider } from '@/components/claudelanding/BusinessContext';
-import { LabProvider } from '@/components/claudelanding/LabContext';
+import { brand, plans, pricing, v4Faqs } from '@/config/site';
 import StructuredData from '@/components/StructuredData';
-import ClHeader from '@/components/claudelanding/ClHeader';
-import ClDock from '@/components/claudelanding/ClDock';
-import ClHero from '@/components/claudelanding/ClHero';
-import ClGrowth from '@/components/claudelanding/ClGrowth';
-import ClBento from '@/components/claudelanding/ClBento';
-import ClCloudTeaser from '@/components/claudelanding/ClCloudTeaser';
-import ClTech from '@/components/claudelanding/ClTech';
-import ClLab from '@/components/claudelanding/ClLab';
-import ClProof from '@/components/claudelanding/ClProof';
-import ClWho from '@/components/claudelanding/ClWho';
-import ClInvest from '@/components/claudelanding/ClInvest';
-import ClFaq from '@/components/claudelanding/ClFaq';
-import ClContact from '@/components/claudelanding/ClContact';
 import ClCrowd from '@/components/claudelanding/ClCrowd';
-import ClFooter from '@/components/claudelanding/ClFooter';
+import Nl4Nav from '@/components/newlanding-v4/Nl4Nav';
+import Nl4Hero from '@/components/newlanding-v4/Nl4Hero';
+import Nl4Why from '@/components/newlanding-v4/Nl4Why';
+import Nl4Examples from '@/components/newlanding-v4/Nl4Examples';
+import Nl4Metrics from '@/components/newlanding-v4/Nl4Metrics';
+import Nl4Price from '@/components/newlanding-v4/Nl4Price';
+import Nl4Content from '@/components/newlanding-v4/Nl4Content';
+import Nl4Faq from '@/components/newlanding-v4/Nl4Faq';
+import Nl4Ask from '@/components/newlanding-v4/Nl4Ask';
+import Nl4Who from '@/components/newlanding-v4/Nl4Who';
+import Nl4Follow from '@/components/newlanding-v4/Nl4Follow';
+import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
+import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
+
+export const metadata = {
+    title: 'Websites for small businesses',
+    description: `We build websites for small businesses. From ${pricing.currency} ${plans[0].price}, one fixed price agreed before anything starts. ${brand.shortName}, ${brand.base}.`,
+    alternates: { canonical: '/' },
+    openGraph: {
+        title: `${brand.name} | Websites for small businesses`,
+        description: `We build websites for small businesses. From ${pricing.currency} ${plans[0].price}, one fixed price agreed before anything starts. ${brand.shortName}, ${brand.base}.`,
+        url: '/',
+        siteName: brand.name,
+        locale: 'en_IN',
+        type: 'website',
+        images: [
+            {
+                url: '/opengraph-image',
+                width: 1200,
+                height: 630,
+                alt: `${brand.name} - Websites for small businesses`,
+            },
+        ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: `${brand.name} | Websites for small businesses`,
+        description: `We build websites for small businesses. From ${pricing.currency} ${plans[0].price}, one fixed price agreed before anything starts. ${brand.shortName}, ${brand.base}.`,
+        images: ['/opengraph-image'],
+    },
+};
 
 export default function HomePage() {
     return (
-        <BusinessProvider>
-            <LabProvider>
-                <StructuredData />
-                <ClHeader />
-                <main>
-                    <ClHero />
-                    <ClGrowth />
-                    <ClBento />
-                    <ClCloudTeaser />
-                    <ClTech />
-                    <ClLab />
-                    <ClProof />
-                    {/* Price then questions then the ask, in that order.
-                        Both are objection handling, so they belong
-                        immediately before the CTA rather than earlier:
-                        a visitor who has not yet seen the work has no
-                        reason to care what it costs. */}
-                    {/* Between the work and the price. Someone who has
-                        just seen what we build and is about to see what
-                        it costs is exactly the person wondering who they
-                        would be paying. */}
-                    <ClWho />
-                    <ClInvest />
-                    <ClFaq />
-                    <ClContact />
-                    {/* Last thing in <main>, immediately above the footer:
-                        a full-bleed blue crowd strip is the final
-                        impression before the page's administrative
-                        content. */}
-                    <ClCrowd />
-                </main>
-                <ClFooter />
-                <ClDock />
-            </LabProvider>
-        </BusinessProvider>
+        <>
+            <StructuredData pageFaqs={v4Faqs} />
+            <Nl4Nav />
+
+            <main>
+                <Nl4Hero />
+                <Nl4Why />
+                <Nl4Metrics />
+                <Nl4Price />
+                <Nl4Content />
+                <Nl4Faq />
+                <Nl4Ask />
+                <Nl4Who />
+                {/* The examples sit here, above the crowd, at the owner's
+                    request: the last thing before the closing image is
+                    the proof. The hero's "Explore live demo" still points
+                    at them. */}
+                <Nl4Examples />
+                <ClCrowd />
+                <Nl4Follow />
+            </main>
+
+            <Nl4Footer />
+            <Nl4Dock />
+        </>
     );
 }
+

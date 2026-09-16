@@ -23,12 +23,32 @@ import { brand, contact } from '@/config/site';
 import '../claudelanding.css';
 import StructuredData from '@/components/StructuredData';
 import ClLegalNav from '@/components/claudelanding/ClLegalNav';
-import ClFooter from '@/components/claudelanding/ClFooter';
+import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
+import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 
 export const metadata = {
-    title: 'Privacy',
+    title: `Privacy | ${brand.name}`,
     description: `What ${brand.shortName} collects on this site, and what it does not.`,
     alternates: { canonical: '/privacy' },
+    openGraph: {
+        title: `Privacy | ${brand.name}`,
+        description: `What ${brand.shortName} collects on this site, and what it does not.`,
+        url: '/privacy',
+        siteName: brand.name,
+        locale: 'en_IN',
+        type: 'website',
+        images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: `Privacy - ${brand.name}` }],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: `Privacy | ${brand.name}`,
+        description: `What ${brand.shortName} collects on this site, and what it does not.`,
+        images: ['/opengraph-image'],
+    },
+    robots: {
+        index: true,
+        follow: true,
+    },
 };
 
 export default function PrivacyPage() {
@@ -142,7 +162,8 @@ export default function PrivacyPage() {
                 </section>
             </main>
 
-            <ClFooter />
+            <Nl4Footer home="/" />
+            <Nl4Dock home="/" />
         </>
     );
 }

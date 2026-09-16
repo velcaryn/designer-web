@@ -35,9 +35,13 @@ import '../../claudelanding.css';
 import { brand, services, findService, faqs, pricing, waLink } from '@/config/site';
 import StructuredData from '@/components/StructuredData';
 import ClServiceNav from '@/components/claudelanding/ClServiceNav';
-import ClFooter from '@/components/claudelanding/ClFooter';
-import ClMiniDock from '@/components/claudelanding/ClMiniDock';
+import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
+import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 import Reveal from '@/components/Reveal';
+import { SparklesText } from '@/registry/magicui/sparkles-text';
+import { AuroraText } from '@/registry/magicui/aurora-text';
+import { ShineBorder } from '@/registry/magicui/shine-border';
+import { PulsatingButton } from '@/registry/magicui/pulsating-button';
 
 export function generateStaticParams() {
     return services.map((s) => ({ slug: s.slug }));
@@ -56,6 +60,34 @@ export async function generateMetadata({ params }) {
             title: `${svc.title} | ${brand.name}`,
             description: svc.seo,
             url: `/services/${svc.slug}`,
+            siteName: brand.name,
+            locale: 'en_IN',
+            type: 'website',
+            images: [
+                {
+                    url: '/opengraph-image',
+                    width: 1200,
+                    height: 630,
+                    alt: `${svc.title} - ${brand.name}`,
+                },
+            ],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${svc.title} | ${brand.name}`,
+            description: svc.seo,
+            images: ['/opengraph-image'],
+        },
+        robots: {
+            index: true,
+            follow: true,
+            googleBot: {
+                index: true,
+                follow: true,
+                'max-video-preview': -1,
+                'max-image-preview': 'large',
+                'max-snippet': -1,
+            },
         },
     };
 }
@@ -74,35 +106,33 @@ export default async function ServicePage({ params }) {
 
             <main>
                 {/* HEAD AND DELIVERABLES ON ONE SCREEN.
-
-                    They were two sections, and the gap between them was
-                    most of the wasted space on the page: a reader had to
-                    scroll past an empty band to find out what they get.
                     Side by side above 900px, stacked below. */}
                 <section className="nv-section nv-ground--paper cl-svc__head">
                     <div className="nv-shell cl-svc__top">
                         <div className="cl-svc__intro">
                             <span className="nv-eyebrow">{svc.kicker}</span>
-                            <h1 className="cl-svc__title">{svc.headline}</h1>
+                            <h1 className="cl-svc__title">
+                                <SparklesText sparklesCount={4}>{svc.headline}</SparklesText>
+                            </h1>
                             <p className="nv-lede cl-svc__lede">{svc.lede}</p>
 
                             <div className="cl-svc__actions">
-                                <a
+                                <PulsatingButton
                                     href={waLink(`Hello ${brand.shortName}, I would like to talk about ${svc.title.toLowerCase()}.`)}
                                     className="nv-btn nv-btn--primary"
                                     rel="noreferrer noopener"
                                 >
                                     Talk to us about this
-                                </a>
+                                </PulsatingButton>
                                 <Link href="/demo-site" className="nv-btn nv-btn--ghost">
                                     See finished examples
                                 </Link>
                             </div>
                         </div>
 
-                        {/* The answer to "what do I actually get", on the
-                            first screen rather than three scrolls down. */}
+                        {/* The answer to "what do I actually get", with animated glow border. */}
                         <aside className="cl-svc__deliver">
+                            <ShineBorder borderWidth={2} duration={12} shineColor={['var(--nv-lav)', '#7000ff', 'var(--nv-lav)']} />
                             <h2 className="cl-svc__deliverTitle">What you get</h2>
                             <ul className="cl-svc__deliverList">
                                 {svc.deliverables.map((d) => (
@@ -116,15 +146,11 @@ export default async function ServicePage({ params }) {
                     </div>
                 </section>
 
-                {/* HOW IT WORKS AND WHAT WE NEED, ALSO ONE SECTION.
-
-                    Two columns, because they are two halves of the same
-                    answer: this is the order it happens in, and this is
-                    the part that depends on you. */}
+                {/* HOW IT WORKS AND WHAT WE NEED */}
                 <section className="nv-section nv-ground--warm">
                     <div className="nv-shell cl-svc__flow">
                         <div>
-                            <h2 className="cl-h2 cl-svc__h2">How it runs</h2>
+                            <h2 className="cl-h2 cl-svc__h2">How it <span className="nv-mark">runs</span></h2>
                             <ol className="cl-svc__stages">
                                 {svc.stages.map((st, i) => (
                                     <li key={st.name} className="cl-svc__stage">
@@ -156,14 +182,14 @@ export default async function ServicePage({ params }) {
                     </div>
                 </section>
 
-                {/* The detail, for a reader who wants it. Below the
-                    decision-making content rather than above it. */}
+                {/* WHAT IS INCLUDED WITH GLOW BORDERS */}
                 <section className="nv-section nv-ground--paper">
                     <div className="nv-shell">
-                        <h2 className="cl-h2 cl-svc__h2">What is included</h2>
+                        <h2 className="cl-h2 cl-svc__h2">What is <span className="nv-mark">included</span></h2>
                         <div className="cl-svc__grid">
                             {svc.includes.map((item) => (
                                 <Reveal key={item.name} className="cl-svc__card">
+                                    <ShineBorder borderWidth={1.5} duration={14} shineColor={['var(--nv-lav)', 'rgba(0,102,204,0.3)', 'var(--nv-lav)']} />
                                     <h3 className="cl-svc__cardTitle">{item.name}</h3>
                                     <p className="cl-svc__cardText">{item.text}</p>
                                 </Reveal>
@@ -172,27 +198,25 @@ export default async function ServicePage({ params }) {
                     </div>
                 </section>
 
-                {/* The other two services, and the close, in one band
-                    rather than two. The blue price section that used to
-                    sit between them said the same number as the lede. */}
+                {/* CLOSE AND OTHER SERVICES */}
                 <section className="nv-section nv-ground--warm cl-svc__foot">
                     <div className="nv-shell cl-svc__footRow">
                         <div className="cl-svc__close">
                             <h2 className="cl-h2 cl-svc__h2">
-                                Tell us what you sell.
+                                Tell us what you <AuroraText>sell</AuroraText>.
                             </h2>
                             <p className="cl-svc__closeText">
                                 One conversation, no charge and no pitch
                                 deck. If we are not the right fit we will
                                 say so.
                             </p>
-                            <a
+                            <PulsatingButton
                                 href={waLink(`Hello ${brand.shortName}, I would like to talk about ${svc.title.toLowerCase()}.`)}
                                 className="nv-btn nv-btn--primary"
                                 rel="noreferrer noopener"
                             >
                                 Message us on WhatsApp
-                            </a>
+                            </PulsatingButton>
                         </div>
 
                         <div className="cl-svc__others">
@@ -202,6 +226,7 @@ export default async function ServicePage({ params }) {
                                     href={`/services/${o.slug}`}
                                     className="cl-svc__other"
                                 >
+                                    <ShineBorder borderWidth={1.5} duration={10} shineColor={['var(--nv-lav)', '#7000ff', 'var(--nv-lav)']} />
                                     <span className="cl-svc__otherName">{o.title}</span>
                                     <span className="cl-svc__otherSeo">{o.seo}</span>
                                     <span className="cl-svc__otherGo">
@@ -215,8 +240,8 @@ export default async function ServicePage({ params }) {
                 </section>
             </main>
 
-            <ClMiniDock />
-            <ClFooter />
+            <Nl4Footer home="/" />
+            <Nl4Dock home="/" />
         </>
     );
 }

@@ -1,0 +1,1383 @@
+/*
+  /newlanding-v4 - the landing page intended to become the home page
+  ==================================================================
+
+  Everything here is prefixed `nv4-`. The page also uses the shared atoms
+  from app/globals.css (.nv-shell, .nv-section, .nv-ground--*, .nv-lede,
+  .nv-btn) and the chrome and sections from app/claudelanding.css (the
+  topbar, the hero, the FAQ, who-builds-this, the crowd, the footer, the
+  dock's fixed position), so this file holds only what those do not.
+
+  MOBILE FIRST, THROUGHOUT. Every grid is one column at the base and gains
+  columns under min-width queries. There are no max-width queries in this
+  file. Nothing here is a desktop layout squeezed down.
+
+  THE FOUR LOCKS APPLY (see the header of app/globals.css): light all the
+  way down; ink for text and outlines, --nv-lav for the highlight; two radii
+  only; one border weight and one hard ink shadow. Every value below is a
+  token except spacing.
+
+  HOVER. Every hover rule sits inside @media (hover: hover) so a tap on a
+  phone does not leave an element stuck in its hover state, and anything
+  with an active variant carries :not(.is-active). Guarded by check:css.
+
+  TOUCH. Every control is at least 48px on its short side, carries
+  touch-action: manipulation, and has :active press feedback: things with
+  a shadow slide down-right by the shadow's offset so it reads as absorbed;
+  things without one scale down slightly.
+
+  THREE TRAPS THIS FILE AVOIDS ON PURPOSE (each cost a debugging round on
+  the earlier drafts):
+
+    A. Content is never wrapped in Reveal, only section headings. An
+       IntersectionObserver that does not fire otherwise leaves a section
+       blank; measured, 12 of 22 did not fire.
+    B. A margin on a <ul> or <ol> is written `.nv-root .nv4-x`, because
+       app/globals.css has `.nv-root ul { margin: 0 }` at (0,1,1), which
+       beats a bare class regardless of source order.
+    C. The first draft's stylesheet used --nv-accent, --nv-support and
+       --nv-soft, which exist nowhere. The real tokens are --nv-lav,
+       --nv-ink-soft and --nv-lav-soft.
+*/
+
+/* ══════════════════════════════════════════════════════════════════════
+   Shared type
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv4-h2 {
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-d2);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--nv-ink);
+    margin-bottom: 18px;
+    max-width: 20ch;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Hero additions (the hero itself is .cl-hero from claudelanding.css)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv4-hero__lede strong {
+    color: var(--nv-ink);
+    font-weight: 700;
+}
+
+/* SIZED FOR THIS HEADLINE. .cl-hero__title inherits --nv-d1 (73.6px at
+   1440px), which fitted the old four-word headline. "We build websites
+   for / small businesses." is seven words on two forced lines, and at
+   that size the first line wrapped and the whole thing ran to three.
+   Measured, not guessed. A hero headline past two lines at desktop is a
+   font-size error, never a copy-length one. (0,2,0) beats the (0,1,0)
+   rule in claudelanding.css. */
+.nv-root .cl-hero__title {
+    font-size: clamp(2rem, 4.3vw, 3.7rem);
+    line-height: 1.06;
+}
+
+/* Both actions on one line at every width. The button keeps its pill;
+   the demo link is text with the sparkle stars, underlined in the
+   accent, 48px tall so it is as easy to tap as the button beside it. */
+.nv-root .cl-hero .cl-actions {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 16px;
+}
+
+.nv4-hero__demo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 4px;
+    font-weight: 800;
+    font-size: var(--nv-body);
+    color: var(--nv-lav);
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 6px;
+    white-space: nowrap;
+    touch-action: manipulation;
+}
+
+.nv4-hero__demo strong { font-weight: inherit; }
+
+@media (max-width: 379px) {
+    .nv-root .cl-hero .cl-actions .nv-btn { padding-inline: 18px; }
+    .nv4-hero__demo { font-size: var(--nv-small); }
+}
+
+/* THE TYPED PROOF LINE. One line, a tick, and TextType cycling the four
+   pointers. Its three upstream rules (.text-type*) live here rather than
+   in a sibling stylesheet. min-height holds the line's box while the
+   text is empty between sentences, so the hero does not breathe. */
+.nv4-hero__type {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: clamp(28px, 4vw, 36px);
+    min-height: 32px;
+    font-size: var(--nv-small);
+    font-weight: 700;
+    color: var(--nv-ink);
+}
+
+.nv4-hero__typeMark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--nv-radius-pill);
+    background: var(--nv-lav);
+    color: var(--nv-on-accent);
+}
+
+.text-type {
+    display: inline-block;
+    white-space: pre-wrap;
+}
+
+.text-type__cursor {
+    margin-left: 0.25rem;
+    display: inline-block;
+    opacity: 1;
+    color: var(--nv-lav);
+}
+
+.text-type__cursor--hidden { display: none; }
+
+/* The aurora word. The gradient is clipped to the glyphs and the span is
+   inline-block so the animation's rotate and scale have a box to act on;
+   a little padding keeps the descender of the g inside the clip. */
+.nv-root .cl-hero__title .nv-aurora {
+    padding-bottom: 0.08em;
+    padding-inline: 0.02em;
+}
+
+@media (min-width: 960px) {
+    .nv4-hero__type { margin-top: 40px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Why
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv4-why__head { margin-bottom: 40px; }
+
+/* The heading holds one line from 900px (the 20ch cap on .nv4-h2 broke
+   the question mark onto its own line), and the word with its question
+   mark never splits. In the accent, per the brief. */
+.nv4-why__title { max-width: none; }
+.nv4-why__word { color: var(--nv-lav); white-space: nowrap; }
+
+.nv4-why__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 2px solid color-mix(in srgb, var(--nv-ink) 14%, transparent);
+}
+
+.nv4-why__item {
+    padding-block: 28px;
+    border-bottom: 2px solid color-mix(in srgb, var(--nv-ink) 14%, transparent);
+}
+
+/* The illustration sits above the words at every width. On a phone it is
+   a modest 150px so three of them do not turn the section into a scroll
+   of pictures; at desktop each column gets a 200px figure. The figure box
+   is sized so the SVG's own ratio never shifts the text under it. */
+/* PHONE: PICTURE BESIDE THE HEADING, WORDS UNDER BOTH.
+   Three stacked pictures over three stacked headings spent a screen and
+   a half on a phone. Each block is now a two-column grid, picture and
+   heading on the first row, the paragraph across both below; the middle
+   block puts its picture on the right so the three read as a zigzag.
+   From 900px they stand as three columns with the picture on top. */
+.nv4-why__item {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    grid-template-areas: "fig head" "body body";
+    column-gap: 14px;
+    align-items: center;
+}
+
+.nv4-why__item:nth-child(2) {
+    grid-template-columns: minmax(0, 1fr) 104px;
+    grid-template-areas: "head fig" "body body";
+}
+
+.nv4-why__figure {
+    grid-area: fig;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 104px;
+    margin-bottom: 0;
+}
+
+.nv4-why__itemHead { grid-area: head; margin-bottom: 0; }
+
+.nv4-why__itemBody { grid-area: body; margin-top: 12px; }
+
+.nv4-why__img {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.nv4-why__itemHead {
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-d3);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--nv-ink);
+    margin-bottom: 10px;
+}
+
+.nv4-why__itemBody {
+    color: var(--nv-ink-soft);
+    line-height: 1.6;
+    max-width: 62ch;
+}
+
+@media (min-width: 900px) {
+    .nv4-why__list {
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: 34px;
+        border-top: 0;
+    }
+    .nv4-why__item {
+        border-bottom: 0;
+        border-top: 3px solid var(--nv-ink);
+        padding-top: 22px;
+    }
+    .nv4-why__item,
+    .nv4-why__item:nth-child(2) {
+        display: block;
+    }
+    .nv4-why__figure { height: 200px; justify-content: flex-start; align-items: flex-end; margin-bottom: 18px; }
+    .nv4-why__itemHead { margin-bottom: 10px; }
+    .nv4-why__itemBody { margin-top: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Examples
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv4-examples__head { margin-bottom: 36px; }
+
+/* Two up from 320px. Eight cards single-file measured 2026px on a phone
+   on the second draft, a quarter of the page for one section. */
+.nv4-examples__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.nv4-example {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 16px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop-sm);
+    touch-action: manipulation;
+    transition:
+        transform 0.12s var(--nv-ease),
+        box-shadow 0.12s var(--nv-ease);
+}
+
+.nv4-example__swatch {
+    display: block;
+    height: 10px;
+    width: 64px;
+    border-radius: var(--nv-radius-pill);
+    margin-bottom: 16px;
+    border: 2px solid var(--nv-ink);
+    background: linear-gradient(
+        to right,
+        var(--sw-a) 0 33.33%,
+        var(--sw-b) 33.33% 66.66%,
+        var(--sw-c) 66.66% 100%
+    );
+}
+
+.nv4-example__trade {
+    font-family: var(--nv-font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--nv-ink);
+}
+
+.nv4-example__blurb {
+    margin-top: 6px;
+    font-size: var(--nv-micro);
+    color: var(--nv-ink-soft);
+    line-height: 1.5;
+    flex: 1;
+}
+
+.nv4-example__go {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 16px;
+    font-size: var(--nv-small);
+    font-weight: 800;
+    color: var(--nv-lav);
+}
+
+.nv4-examples__more {
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv4-example:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: var(--nv-pop);
+    }
+}
+
+@media (hover: none) {
+    .nv4-example:active {
+        transform: translate(4px, 4px);
+        box-shadow: 0 0 0 var(--nv-ink);
+    }
+}
+
+@media (min-width: 600px) {
+    .nv4-examples__grid { gap: 16px; }
+    .nv4-example { padding: 22px; }
+    .nv4-example__trade { font-size: 1.25rem; }
+    .nv4-example__blurb { margin-top: 8px; font-size: var(--nv-small); }
+}
+
+@media (min-width: 900px) {
+    .nv4-examples__grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Metrics (ported from newlanding.css 1480-1600, tokens mapped per trap C)
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Three children (mark, heading, lede) placed by name, because a plain
+   1fr auto grid put the lede beside the heading and dropped the mark
+   to a row of its own: measured, not assumed. */
+.nv4-metrics__head {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas: "mark" "head" "lede";
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 36px;
+}
+
+.nv4-metrics__head > .nv4-h2 { grid-area: head; }
+.nv4-metrics__head > .nv-lede { grid-area: lede; }
+
+/* The three Build glyphs as one mark, set close; trust in the accent.
+   Masks over currentColor, the same technique as the dock icons. On a
+   phone it is centred and pulled up so it sits just under the rule of
+   the block above; from 900px it sits to the right of the heading and
+   the heading keeps the space it would otherwise have spent. */
+.nv4-metrics__mark {
+    grid-area: mark;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4vw;
+    /* 80% of the viewport, as asked, capped so it never outgrows a
+       tablet-width phone before the 900px layout takes over. */
+    width: 80vw;
+    max-width: 420px;
+    margin-inline: auto;
+    margin-top: -14px;
+    margin-bottom: 8px;
+    color: var(--nv-ink);
+}
+
+@media (min-width: 900px) {
+    .nv4-metrics__head {
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "head mark" "lede mark";
+        gap: 6px 32px;
+    }
+    .nv4-metrics__mark {
+        justify-content: flex-end;
+        width: auto;
+        max-width: none;
+        margin: 0;
+        gap: 14px;
+    }
+    /* Bigger, as asked: the mark now reads as a real logo beside the
+       heading rather than a strip of small icons in its shadow. */
+    .nv4-metrics__glyph { width: 92px; height: 92px; }
+    .nv4-metrics__glyph--trust { width: 154px; }
+}
+
+.nv4-metrics__glyph {
+    display: block;
+    /* Flexes to fill the 80vw row rather than a fixed px size, so the
+       mark actually reaches 80% width on any phone rather than just
+       centering a small fixed-size cluster. flex-basis 0 with grow
+       makes each glyph share the row equally before the trust glyph's
+       extra flex-grow widens it. */
+    flex: 1 1 0;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    background: currentColor;
+    -webkit-mask: var(--icon) center / contain no-repeat;
+    mask: var(--icon) center / contain no-repeat;
+}
+
+.nv4-metrics__glyph--trust { flex: 1.7 1 0; color: var(--nv-lav); }
+
+@media (min-width: 900px) {
+    .nv4-metrics__glyph { flex: none; }
+    .nv4-metrics__glyph--trust { flex: none; }
+}
+
+/* THE THREE WORDS GLOW. A soft accent text-shadow, deliberately: the
+   edge lock is about box shadows reading as a printed second
+   impression, and this is a halo on three words the owner asked to
+   stand out. Nowhere else. */
+.nv4-glow {
+    color: var(--nv-lav);
+    text-shadow:
+        0 0 12px color-mix(in srgb, var(--nv-lav) 55%, transparent),
+        0 0 28px color-mix(in srgb, var(--nv-lav) 30%, transparent);
+}
+
+.nv4-metrics__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+
+.nv4-metric {
+    /* position + overflow for the ShineBorder overlay, which is absolute
+       inset 0 and takes this radius. */
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 18px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop-sm);
+    transition:
+        transform 0.12s var(--nv-ease),
+        box-shadow 0.12s var(--nv-ease);
+}
+
+.nv4-metric__head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--nv-lav-soft);
+}
+
+.nv4-metric__headText {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.nv4-lottie {
+    flex: none;
+    border-radius: var(--nv-radius);
+    background: var(--nv-lav-soft);
+    overflow: hidden;
+}
+
+.nv4-metric__num {
+    font-family: var(--nv-font-display);
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--nv-lav);
+}
+
+.nv4-metric__label {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--nv-ink);
+}
+
+.nv4-metric__sub {
+    font-size: var(--nv-micro);
+    color: var(--nv-ink-soft);
+    line-height: 1.3;
+}
+
+.nv4-metric__title {
+    font-family: var(--nv-font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--nv-ink);
+    margin-bottom: 6px;
+}
+
+.nv4-metric__desc {
+    font-size: 0.82rem;
+    color: var(--nv-ink-soft);
+    line-height: 1.55;
+    margin-bottom: 14px;
+    flex: 1;
+}
+
+.nv4-metric__foot { margin-top: auto; }
+
+.nv4-metric__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    background: var(--nv-lav-soft);
+    color: var(--nv-lav-deep);
+    border-radius: var(--nv-radius-pill);
+    font-size: var(--nv-micro);
+    font-weight: 700;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv4-metric:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: var(--nv-pop);
+    }
+}
+
+@media (hover: none) {
+    .nv4-metric:active {
+        transform: translate(4px, 4px);
+        box-shadow: 0 0 0 var(--nv-ink);
+    }
+}
+
+@media (min-width: 640px) {
+    .nv4-metrics__grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+    .nv4-metrics__grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Price (ported from newlanding.css 1750-1870, tokens mapped per trap C)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv4-price__head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 36px;
+}
+
+/* The rupee, tilted like everything else on this site that sits a little
+   off-square. Above the heading on a phone, beside it from 900px. */
+.nv4-price__figure {
+    display: flex;
+    justify-content: center;
+    order: -1;
+}
+
+.nv4-price__img {
+    width: min(150px, 40%);
+    height: auto;
+    transform: rotate(-6deg);
+}
+
+@media (min-width: 900px) {
+    .nv4-price__head { grid-template-columns: 1fr 240px; gap: 40px; }
+    .nv4-price__figure { order: 0; justify-content: flex-end; }
+    .nv4-price__img { width: 220px; }
+}
+
+.nv4-price__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.nv4-plan {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 28px 22px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+}
+
+/* THE MIDDLE PLAN LEADS. Accent ground, on-accent text, the large hard
+   shadow, and a lift at desktop so it stands proud of its neighbours.
+   Every colour inside pairs with the accent surface, never the page.
+   Its button is the ghost (paper) one: a blue button on a blue card
+   would vanish. The ink border and ink shadow stay: the edge lock. */
+.nv4-plan--lead {
+    background: var(--nv-lav);
+    color: var(--nv-on-accent);
+    box-shadow: var(--nv-pop-lg);
+}
+
+.nv4-plan--lead .nv4-plan__name,
+.nv4-plan--lead .nv4-plan__figure,
+.nv4-plan--lead .nv4-plan__item { color: var(--nv-on-accent); }
+
+.nv4-plan--lead .nv4-plan__who,
+.nv4-plan--lead .nv4-plan__days { color: var(--nv-on-accent-soft); }
+
+.nv4-plan--lead .nv4-plan__item svg { color: var(--nv-on-accent); }
+
+/* Sub-points under a line: small, indented, a soft dot each. */
+.nv-root .nv4-plan__sub {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+    padding-left: 2px;
+}
+
+.nv4-plan__sub li {
+    position: relative;
+    padding-left: 14px;
+    font-size: var(--nv-small);
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.nv4-plan__sub li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.55;
+}
+
+.nv4-plan__name {
+    font-family: var(--nv-font-display);
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--nv-ink);
+    margin-bottom: 6px;
+}
+
+.nv4-plan__who {
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.nv4-plan__figure {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    color: var(--nv-ink);
+}
+
+.nv4-price__title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.nv4-price__rupee {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    flex: none;
+    border-radius: var(--nv-radius-pill);
+    background: var(--nv-lav);
+    color: var(--nv-on-accent);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    box-shadow: var(--nv-pop-sm);
+}
+
+.nv4-plan__amount {
+    font-family: var(--nv-font-display);
+    font-size: clamp(2.6rem, 6vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.nv4-plan__days {
+    margin-top: 6px;
+    font-size: var(--nv-small);
+    font-weight: 700;
+    color: var(--nv-ink-faint);
+}
+
+/* Trap B: a <ul>. */
+.nv-root .nv4-plan__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 22px;
+    margin-bottom: 28px;
+    flex: 1;
+}
+
+.nv4-plan__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.92rem;
+    color: var(--nv-ink);
+    line-height: 1.45;
+}
+
+.nv4-plan__item svg {
+    flex: none;
+    margin-top: 3px;
+    color: var(--nv-lav);
+}
+
+.nv4-plan__item--lead { font-weight: 800; }
+
+.nv4-plan__cta {
+    margin-top: auto;
+    width: 100%;
+    touch-action: manipulation;
+}
+
+/* The Cloud announcement under the cards: one accent band, a rocket, a
+   line and the link, all one tap target. Stacks on a phone. */
+.nv4-announce {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 32px;
+    padding: 18px 20px;
+    background: var(--nv-lav);
+    color: var(--nv-on-accent);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+    touch-action: manipulation;
+    transition: transform 0.12s var(--nv-ease), box-shadow 0.12s var(--nv-ease);
+}
+
+.nv4-announce:active { transform: translate(6px, 6px); box-shadow: 0 0 0 var(--nv-ink); }
+
+.nv4-announce__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border-radius: var(--nv-radius-pill);
+    background: var(--nv-paper);
+    color: var(--nv-lav);
+    border: var(--nv-stroke) solid var(--nv-ink);
+}
+
+.nv4-announce__text { line-height: 1.5; }
+
+.nv4-announce__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 18px;
+    background: var(--nv-paper);
+    color: var(--nv-ink);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    box-shadow: var(--nv-pop-sm);
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+@media (min-width: 720px) {
+    .nv4-announce { flex-direction: row; align-items: center; gap: 18px; padding: 18px 24px; }
+    .nv4-announce__text { flex: 1 1 auto; }
+}
+
+@media (min-width: 960px) {
+    .nv4-price__grid { grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch; }
+    .nv4-plan { padding: 36px 28px; }
+    .nv4-plan--lead { transform: translateY(-12px); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Content and social
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv4-content__head { margin-bottom: 36px; }
+
+.nv4-content__title { max-width: 24ch; }
+
+/* Each verb in the accent with its looping icon before it. The icon
+   inherits the accent through currentColor. */
+.nv4-verb {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--nv-lav);
+    white-space: nowrap;
+}
+
+.nv4-verb svg { flex: none; width: 0.85em; height: 0.85em; }
+
+.nv4-content__charge {
+    margin-top: 12px;
+    font-size: var(--nv-small);
+    font-weight: 800;
+    color: var(--nv-ink);
+}
+
+.nv4-content__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.nv4-content__figure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+    margin-bottom: 16px;
+    border-radius: var(--nv-radius);
+    background: var(--nv-lav-soft);
+    overflow: hidden;
+}
+
+.nv4-content__img {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    padding: 10px;
+    object-fit: contain;
+}
+
+.nv4-content__figure .nv4-lottie { background: transparent; border-radius: 0; }
+
+.nv4-content__item {
+    padding: 22px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop-sm);
+}
+
+.nv4-content__itemHead {
+    font-family: var(--nv-font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--nv-ink);
+    margin-bottom: 8px;
+}
+
+.nv4-content__itemBody {
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+    line-height: 1.55;
+}
+
+.nv4-content__more {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+@media (min-width: 900px) {
+    .nv4-content__list { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Ask
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* The illustration above the words on a phone, beside them from 720px:
+   the card widens to fit both and the picture takes a fixed column so
+   the text's measure does not change with it. */
+.nv4-ask__figure {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+
+.nv4-ask__img {
+    width: min(180px, 55%);
+    height: auto;
+}
+
+.nv4-ask__text { min-width: 0; }
+
+@media (min-width: 720px) {
+    .nv4-ask {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 28px;
+        align-items: center;
+        max-width: 880px;
+    }
+    .nv4-ask__figure { margin-bottom: 0; }
+    .nv4-ask__img { width: 100%; }
+}
+
+.nv4-ask {
+    max-width: 720px;
+    margin-inline: auto;
+    padding: 28px 24px;
+    background: var(--nv-paper);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop);
+}
+
+.nv4-ask__head {
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-d3);
+    font-weight: 600;
+    line-height: 1.12;
+    color: var(--nv-ink);
+    margin-bottom: 12px;
+}
+
+.nv4-ask__body {
+    color: var(--nv-ink-soft);
+    line-height: 1.6;
+    margin-bottom: 22px;
+}
+
+.nv4-ask__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.nv4-ask__actions .nv-btn {
+    width: 100%;
+    touch-action: manipulation;
+}
+
+/* Trap B: a <ul>. */
+.nv-root .nv4-ask__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 2px solid color-mix(in srgb, var(--nv-ink) 14%, transparent);
+}
+
+.nv4-ask__metaItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--nv-small);
+    color: var(--nv-ink-soft);
+}
+
+.nv4-ask__metaItem svg { color: var(--nv-lav); flex: none; }
+
+.nv4-ask__metaItem a {
+    color: var(--nv-ink);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+}
+
+@media (min-width: 600px) {
+    .nv4-ask { padding: 36px 32px; }
+    .nv4-ask__actions { flex-direction: row; flex-wrap: wrap; }
+    .nv4-ask__actions .nv-btn { width: auto; }
+    .nv-root .nv4-ask__meta { flex-direction: row; flex-wrap: wrap; gap: 10px 28px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Follow
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv4-follow { padding-block: clamp(48px, 7vw, 88px); }
+
+/* The last section is the one place the dock rests over content with
+   nothing below to scroll to. claudelanding.css reserves 104px for it on
+   phones only; at desktop the general reserve resolves to 60px and the
+   dock (66px tall, 16px up) sat over the Instagram button. Same selector
+   shape as the rule it extends, later in the cascade, every width. */
+body:has(.cl-dock) .nv4-follow { padding-bottom: 104px; }
+
+.nv4-follow__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+}
+
+.nv4-follow__head {
+    max-width: none;
+    margin-bottom: 4px;
+}
+
+.nv4-follow__body { margin-bottom: 18px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   FAQ (rows after .cl-faq in claudelanding.css; accent open state; chips)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv4-faq__head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    align-items: center;
+    max-width: 1060px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* The person answering a question: above the words on a phone, beside
+   them from 900px where the head becomes a row. */
+.nv4-faq__figure { display: flex; justify-content: center; order: -1; }
+
+.nv4-faq__img { width: min(170px, 45%); height: auto; }
+
+@media (min-width: 900px) {
+    .nv4-faq__head { grid-template-columns: 1fr 260px; gap: 32px; text-align: left; }
+    .nv4-faq__title, .nv-root .nv4-faq__head .nv-lede { margin-inline: 0; }
+    .nv4-faq__figure { order: 0; justify-content: flex-end; }
+    .nv4-faq__img { width: 240px; }
+}
+
+.nv4-faq__title { max-width: none; margin-inline: auto; }
+.nv4-faq__title strong { font-weight: inherit; }
+
+.nv-root .nv4-faq__head .nv-lede { margin-inline: auto; }
+
+/* The category chips. Pills, ink border, the active one filled with the
+   accent. 44px tall so a thumb hits them. */
+.nv4-faq__chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 26px;
+}
+
+.nv4-chip {
+    min-height: 44px;
+    padding: 0 16px;
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius-pill);
+    background: var(--nv-paper);
+    color: var(--nv-ink);
+    font-size: var(--nv-small);
+    font-weight: 800;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 0.12s var(--nv-ease), background-color 0.15s var(--nv-ease);
+}
+
+.nv4-chip.is-active {
+    background: var(--nv-lav);
+    color: var(--nv-on-accent);
+    box-shadow: var(--nv-pop-sm);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv4-chip:hover:not(.is-active) { background: var(--nv-lav-soft); }
+}
+
+.nv4-chip:active { transform: scale(0.96); }
+
+.nv4-faq {
+    max-width: 1060px;
+    margin: 28px auto 0;
+    display: grid;
+    gap: 14px;
+}
+
+.nv4-faq__col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+@media (min-width: 900px) {
+    .nv4-faq {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 28px;
+        align-items: start;
+    }
+}
+
+/* ONE QUESTION, ONE CONVERSATION. The item is a small thread: the
+   reader's bubble on the right, our reply on the left when open. */
+.nv4-faq__item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nv4-faq__turn {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.nv4-faq__turn--you { justify-content: flex-end; }
+.nv4-faq__turn--us { justify-content: flex-start; }
+
+/* Every other row swaps sides: the question on the left with its mascot
+   first, and the reply on the right with the VB mark after it. The tail
+   corners swap with them. */
+/* row-reverse turns the axis round: flex-end is now the LEFT edge, which
+   is where the flipped question goes with its mascot before it. */
+.nv4-faq__item--flip .nv4-faq__turn--you { justify-content: flex-end; flex-direction: row-reverse; }
+/* In row-reverse, flex-start is the RIGHT edge: the first attempt used
+   flex-end here and sent the reply left, measured. */
+.nv4-faq__item--flip .nv4-faq__turn--us { justify-content: flex-start; flex-direction: row-reverse; }
+.nv4-faq__item--flip .nv4-faq__q { border-radius: var(--nv-radius) var(--nv-radius) var(--nv-radius) 6px; }
+.nv4-faq__item--flip .nv4-faq__a { border-radius: var(--nv-radius) var(--nv-radius) 6px var(--nv-radius); }
+
+.nv4-faq__word { display: inline; }
+
+.nv4-faq__avatar {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--nv-radius-pill);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    font-size: var(--nv-micro);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+/* The mascot beside the question. A paper circle with the picture
+   inside it; the SVGs have their own ink outlines, so the circle's
+   stroke frames them. */
+.nv4-faq__avatar--you {
+    background: var(--nv-paper);
+    color: var(--nv-ink);
+    overflow: hidden;
+    width: 44px;
+    height: 44px;
+}
+
+.nv4-faq__avatar--you img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 3px;
+}
+
+.nv4-faq__avatar--us {
+    background: var(--nv-ink);
+    color: var(--nv-paper);
+}
+
+/* The question bubble: a button. Paper, ink stroke, the small hard
+   shadow, a square corner where the tail would be. */
+.nv4-faq__q {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: min(100%, 520px);
+    min-height: 52px;
+    padding: 12px 14px 12px 18px;
+    background: var(--nv-paper);
+    color: var(--nv-ink);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius) var(--nv-radius) 6px var(--nv-radius);
+    box-shadow: var(--nv-pop-sm);
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 0.12s var(--nv-ease), box-shadow 0.12s var(--nv-ease), background-color 0.15s var(--nv-ease);
+}
+
+.nv4-faq__q:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--nv-ink);
+}
+
+.nv4-faq__qText {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: var(--nv-font-display);
+    font-size: var(--nv-body);
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.nv4-faq__icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--nv-radius-pill);
+    background: var(--nv-lav-soft);
+    color: var(--nv-ink);
+}
+
+/* ONLY THE REPLY IS BLUE. The question stays paper when open, so the
+   thread reads "asked, answered" rather than one highlighted block; the
+   open state on the question is the minus icon in the accent. */
+.nv4-faq__item.is-open .nv4-faq__icon {
+    background: var(--nv-lav);
+    color: var(--nv-on-accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .nv4-faq__item:not(.is-open) .nv4-faq__q:hover { background: var(--nv-lav-soft); }
+}
+
+/* The reply bubble. Accent fill, on-accent text, the tail corner on
+   the other side. */
+/* 80%, not 100%: a long answer that filled the column read as centred,
+   and which side it had opened on was carried only by the avatar. The
+   gap on the far side is what says "this came from the other person". */
+.nv4-faq__a {
+    max-width: min(80%, 560px);
+    padding: 14px 18px;
+    background: var(--nv-lav);
+    color: var(--nv-on-accent);
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius) var(--nv-radius) var(--nv-radius) 6px;
+    box-shadow: var(--nv-pop-sm);
+}
+
+.nv-root .nv4-faq__a p {
+    margin: 0;
+    font-size: var(--nv-body);
+    line-height: 1.6;
+    color: var(--nv-on-accent);
+}
+
+@media (max-width: 480px) {
+    .nv4-faq__q { padding: 10px 12px 10px 14px; }
+    .nv4-faq__avatar--us { width: 30px; height: 30px; }
+    .nv4-faq__avatar--you { width: 38px; height: 38px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Ask: the pulsating WhatsApp link
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* PulsatingButton renders an <a> carrying .nv-btn, so it already has the
+   pill, the border and the press. The ring is its own absolutely placed
+   span, animated by .nv-pulse in globals.css; overflow stays visible so
+   the ring can grow past the edge. */
+.nv4-ask__wa { overflow: visible; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Who: the illustration beside the facts
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nv4-who__side {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.nv4-who__img {
+    width: min(280px, 70%);
+    height: auto;
+    margin-inline: auto;
+}
+
+@media (min-width: 900px) {
+    .nv4-who__img { width: 100%; max-width: 320px; margin-inline: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Crowd: shorter on a phone. The canvas draws its figures to the stage
+   height, so capping the height scales them down and the strip stops
+   taking a whole screen. Unchanged from 900px up.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.cl-crowd { height: 128px; }
+
+@media (min-width: 900px) {
+    .cl-crowd { height: clamp(180px, 22vw, 260px); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Follow: the post grid
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Trap B: a <ul>. */
+.nv-root .nv4-follow__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 1060px;
+    margin-block: 8px 28px;
+}
+
+.nv4-follow__cell {
+    border: var(--nv-stroke) solid var(--nv-ink);
+    border-radius: var(--nv-radius);
+    box-shadow: var(--nv-pop-sm);
+    overflow: hidden;
+    background: var(--nv-paper);
+}
+
+/* Instagram's embed is a fixed-height document; the frame shows the
+   image and the caption's first lines and clips the rest. Tall enough
+   for the square image plus its header at the widths the grid gives. */
+.nv4-follow__frame {
+    display: block;
+    width: 100%;
+    height: 420px;
+    border: 0;
+}
+
+@media (min-width: 900px) {
+    .nv-root .nv4-follow__grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .nv4-follow__frame { height: 520px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Reduced motion. Reveal switches itself off at the source; the dock's
+   motion values are zeroed inside the component. This clears the rest.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    .nv4-example,
+    .nv4-metric,
+    .nv4-dock__item,
+    .nv4-dock__label,
+    .nv4-chip,
+    .nv4-faq__q,
+    .nv4-foot__bigLink svg {
+        transition: none;
+    }
+}

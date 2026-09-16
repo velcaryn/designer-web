@@ -69,7 +69,15 @@ import { Plus, Minus } from '@phosphor-icons/react';
 import { faqs as siteFaqs } from '@/config/site';
 import Reveal from '@/components/Reveal';
 
-export default function ClFaq({ faqs = siteFaqs }) {
+export default function ClFaq({
+    faqs = siteFaqs,
+    /* The heading and lede, overridable per page for the same reason
+       `faqs` is: the landing drafts ask the same ten questions under a
+       different heading. Defaults are the home page's, so every existing
+       caller renders exactly as before. */
+    title = 'The questions we get most.',
+    lede = 'The cost, who owns what, and whether you need a shop or just a way to be found. If yours is not here, ask us.',
+}) {
     const [open, setOpen] = useState(null);
 
     /* Math.ceil, so an odd count puts the extra question in the LEFT
@@ -139,22 +147,26 @@ export default function ClFaq({ faqs = siteFaqs }) {
             <div className="nv-shell">
                 <Reveal className="cl-faq__head">
                     <span className="nv-eyebrow">Before you ask</span>
-                    <h2 className="cl-h2">The questions we get most.</h2>
-                    <p className="nv-lede">
-                        The cost, who owns what, and whether you need a
-                        shop or just a way to be found. If yours is not
-                        here, ask us.
-                    </p>
+                    <h2 className="cl-h2">{title}</h2>
+                    <p className="nv-lede">{lede}</p>
                 </Reveal>
 
-                <Reveal delay={0.06} className="cl-faq">
+                {/* A plain div, not a second Reveal. The list IS the section;
+                    wrapped in Reveal it depends on an IntersectionObserver
+                    firing, and measured in a headless scroll pass on the
+                    v4 draft it did not, leaving ten questions invisible.
+                    Reveal's own header states the rule: content is visible
+                    by default, animation is what JavaScript opts into. The
+                    heading above keeps its Reveal; failing there costs an
+                    animation, not the FAQ. */}
+                <div className="cl-faq">
                     <div className="cl-faq__col">
                         {faqs.slice(0, half).map((item, i) => renderItem(item, i))}
                     </div>
                     <div className="cl-faq__col">
                         {faqs.slice(half).map((item, i) => renderItem(item, i + half))}
                     </div>
-                </Reveal>
+                </div>
             </div>
         </section>
     );

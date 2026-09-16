@@ -35,8 +35,8 @@ import { findDemo } from '@/content/demos';
 import StructuredData from '@/components/StructuredData';
 import ClServiceNav from '@/components/claudelanding/ClServiceNav';
 import ClFaq from '@/components/claudelanding/ClFaq';
-import ClFooter from '@/components/claudelanding/ClFooter';
-import ClMiniDock from '@/components/claudelanding/ClMiniDock';
+import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
+import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 import Reveal from '@/components/Reveal';
 
 export function generateStaticParams() {
@@ -59,13 +59,41 @@ export async function generateMetadata({ params }) {
     if (!content) return {};
 
     return {
-        title: content.metaTitle,
+        title: `${content.metaTitle} | ${brand.name}`,
         description: content.metaDescription,
         alternates: { canonical: `/for/${slug}` },
         openGraph: {
             title: `${content.metaTitle} | ${brand.name}`,
             description: content.metaDescription,
             url: `/for/${slug}`,
+            siteName: brand.name,
+            locale: 'en_IN',
+            type: 'website',
+            images: [
+                {
+                    url: '/opengraph-image',
+                    width: 1200,
+                    height: 630,
+                    alt: `${content.metaTitle} - ${brand.name}`,
+                },
+            ],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${content.metaTitle} | ${brand.name}`,
+            description: content.metaDescription,
+            images: ['/opengraph-image'],
+        },
+        robots: {
+            index: true,
+            follow: true,
+            googleBot: {
+                index: true,
+                follow: true,
+                'max-video-preview': -1,
+                'max-image-preview': 'large',
+                'max-snippet': -1,
+            },
         },
     };
 }
@@ -160,8 +188,8 @@ export default async function VerticalPage({ params }) {
                 <ClFaq faqs={content.faqs} />
             </main>
 
-            <ClMiniDock />
-            <ClFooter />
+            <Nl4Footer home="/" />
+            <Nl4Dock home="/" />
         </>
     );
 }

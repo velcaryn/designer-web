@@ -37,9 +37,22 @@
  * thumb is worse than either alone.
  */
 import Link from 'next/link';
-import { House, ChatCircle } from '@phosphor-icons/react/ssr';
+import { House, ChatCircle, ArrowClockwise } from '@phosphor-icons/react/ssr';
+import { useLabStatus } from './LabContext';
 
 export default function ClMiniDock() {
+    /* THE LAB COUNTDOWN, ON THE PAGES THAT HAVE A LAB.
+
+       The pill used to live only in ClDock, which only the home page
+       renders. The lab now also sits on /demo-site, whose bottom control
+       is this one, so it needs the same surface: a visible way to see
+       the preview is temporary and to end it early.
+
+       Safe everywhere else. On /cloud and the service pages there is no
+       LabProvider, and the context's default value has isDefault: true,
+       so nothing renders and nothing is read that does not exist. */
+    const { secondsLeft, isDefault, themeName, reset } = useLabStatus();
+
     return (
         <nav className="cl-minidock" aria-label="Quick links">
             <Link href="/" className="cl-minidock__item" aria-label="Home">
@@ -52,6 +65,18 @@ export default function ClMiniDock() {
             >
                 <ChatCircle size={21} weight="bold" aria-hidden="true" />
             </Link>
+
+            {!isDefault && (
+                <button
+                    type="button"
+                    className="cl-minidock__lab"
+                    onClick={reset}
+                    aria-label={`Previewing ${themeName}. Reset now.`}
+                >
+                    <ArrowClockwise size={14} weight="bold" aria-hidden="true" />
+                    {secondsLeft}s
+                </button>
+            )}
         </nav>
     );
 }

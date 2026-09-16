@@ -16,6 +16,9 @@ const LINKS = [
     { href: '/', label: 'Home' },
     { href: '/services/websites', label: 'Services' },
     { href: '/cloud', label: 'Cloud' },
+    /* The colour and typeface lab lives on this page now; see the page
+       header for why it moved here from the home page. */
+    { href: '#lab', label: 'Colours' },
 ];
 
 export default function HubNav() {

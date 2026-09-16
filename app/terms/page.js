@@ -9,12 +9,32 @@ import { brand, contact } from '@/config/site';
 import '../claudelanding.css';
 import StructuredData from '@/components/StructuredData';
 import ClLegalNav from '@/components/claudelanding/ClLegalNav';
-import ClFooter from '@/components/claudelanding/ClFooter';
+import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
+import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 
 export const metadata = {
-    title: 'Terms',
+    title: `Terms | ${brand.name}`,
     description: `The terms of using ${brand.shortName}'s website.`,
     alternates: { canonical: '/terms' },
+    openGraph: {
+        title: `Terms | ${brand.name}`,
+        description: `The terms of using ${brand.shortName}'s website.`,
+        url: '/terms',
+        siteName: brand.name,
+        locale: 'en_IN',
+        type: 'website',
+        images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: `Terms - ${brand.name}` }],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: `Terms | ${brand.name}`,
+        description: `The terms of using ${brand.shortName}'s website.`,
+        images: ['/opengraph-image'],
+    },
+    robots: {
+        index: true,
+        follow: true,
+    },
 };
 
 export default function TermsPage() {
@@ -70,7 +90,8 @@ export default function TermsPage() {
                 </section>
             </main>
 
-            <ClFooter />
+            <Nl4Footer home="/" />
+            <Nl4Dock home="/" />
         </>
     );
 }

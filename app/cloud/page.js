@@ -23,13 +23,46 @@ import CloudDemo from '@/components/cloud/CloudDemo';
 import CloudModules from '@/components/cloud/CloudModules';
 import CloudSecurity from '@/components/cloud/CloudSecurity';
 import CloudCta from '@/components/cloud/CloudCta';
-import ClFooter from '@/components/claudelanding/ClFooter';
-import ClMiniDock from '@/components/claudelanding/ClMiniDock';
+import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
+import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 
 export const metadata = {
-    title: 'VelBiz Cloud',
+    title: `VelBiz Cloud | ${brand.name}`,
     description: `Orders, customers, stock, staff and the money in one system, wired to the website ${brand.shortName} builds you.`,
     alternates: { canonical: '/cloud' },
+    openGraph: {
+        title: `VelBiz Cloud | ${brand.name}`,
+        description: `Orders, customers, stock, staff and the money in one system, wired to the website ${brand.shortName} builds you.`,
+        url: '/cloud',
+        siteName: brand.name,
+        locale: 'en_IN',
+        type: 'website',
+        images: [
+            {
+                url: '/opengraph-image',
+                width: 1200,
+                height: 630,
+                alt: `VelBiz Cloud - ${brand.name}`,
+            },
+        ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: `VelBiz Cloud | ${brand.name}`,
+        description: `Orders, customers, stock, staff and the money in one system, wired to the website ${brand.shortName} builds you.`,
+        images: ['/opengraph-image'],
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+        },
+    },
 };
 
 export default function CloudPage() {
@@ -44,8 +77,8 @@ export default function CloudPage() {
                 <CloudSecurity />
                 <CloudCta />
             </main>
-            <ClMiniDock />
-            <ClFooter />
+            <Nl4Footer home="/" />
+            <Nl4Dock home="/" />
         </>
     );
 }
