@@ -43,7 +43,32 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { List, X } from '@phosphor-icons/react';
+import {
+    List,
+    X,
+    Globe,
+    Sparkle,
+    Cloud,
+    CurrencyInr,
+    Question,
+    User,
+    House,
+    ChatCircle,
+} from '@phosphor-icons/react';
+
+function getIcon(link) {
+    const l = (link.label || '').toLowerCase();
+    const h = (link.href || '').toLowerCase();
+    if (link.icon === 'services' || l.includes('service') || l.includes('website')) return <Globe size={18} weight="bold" />;
+    if (link.icon === 'demos' || l.includes('demo') || l.includes('example')) return <Sparkle size={18} weight="bold" />;
+    if (link.icon === 'cloud' || l.includes('cloud')) return <Cloud size={18} weight="bold" />;
+    if (link.icon === 'price' || l.includes('pric')) return <CurrencyInr size={18} weight="bold" />;
+    if (link.icon === 'faq' || l.includes('faq') || l.includes('question')) return <Question size={18} weight="bold" />;
+    if (link.icon === 'about' || l.includes('about') || l.includes('who')) return <User size={18} weight="bold" />;
+    if (l.includes('home') || h === '/' || h === '#top') return <House size={18} weight="bold" />;
+    if (l.includes('contact') || l.includes('talk')) return <ChatCircle size={18} weight="bold" />;
+    return <Sparkle size={18} weight="bold" />;
+}
 
 export default function ClMenu({ open, onOpen, onClose, links, cta }) {
     const sheet = useRef(null);
@@ -152,7 +177,8 @@ export default function ClMenu({ open, onOpen, onClose, links, cta }) {
                                     aria-current={link.active ? 'page' : undefined}
                                     onClick={onClose}
                                 >
-                                    {link.label}
+                                    <span className="cl-menu__label">{link.label}</span>
+                                    <span className="cl-menu__icon" aria-hidden="true">{getIcon(link)}</span>
                                 </Link>
                             ))}
                         </nav>

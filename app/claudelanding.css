@@ -3209,6 +3209,10 @@ a.cl-bento__cell:active {
        Still zero-blur and still 6px, so the shape of the shadow is the
        same one the whole site uses. Only the colour changes. */
     box-shadow: 6px 6px 0 var(--nv-fill);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 @media (min-width: 900px) {
@@ -3538,55 +3542,77 @@ a.cl-bento__cell:active {
    the header. The bar itself squares its bottom corners while open (see
    .cl-topbar.is-open) and the two become one shape. */
 @keyframes cl-menuDrop {
-    from { opacity: 0; transform: translateY(-10px) scaleY(0.96); }
-    to   { opacity: 1; transform: translateY(0) scaleY(1); }
+    from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes cl-menuLink {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateX(18px); }
+    to   { opacity: 1; transform: translateX(0); }
 }
 
 .cl-menu__sheet {
     position: absolute;
-    /* The bar's own arithmetic (see .cl-topbar): one gutter in from each
-       edge, capped at the shell, centred. The outer edges therefore land
-       on the bar's outer edges at every width. `top` is set by ClMenu
-       from the bar's measured bottom edge. */
     left: var(--nv-gutter);
     right: var(--nv-gutter);
     max-width: var(--nv-shell);
     margin-inline: auto;
     top: 88px;
     transform-origin: top center;
-    animation: cl-menuDrop 0.28s var(--nv-ease) both;
-    padding: 14px;
+    animation: cl-menuDrop 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    padding: 12px 14px;
     background: var(--nv-paper);
     border: var(--nv-stroke) solid var(--nv-ink);
-    /* Square on top: it continues the bar, whose bottom corners square
-       themselves while open (.cl-topbar.is-open). */
     border-radius: 0 0 28px 28px;
     box-shadow: 6px 6px 0 var(--nv-fill);
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 110px);
     overflow-y: auto;
 }
 
 .cl-menu__links {
     display: flex;
     flex-direction: column;
+    gap: 3px;
 }
 
-/* Each link drops in a beat after the one above it, so the list reads
-   as unfolding out of the bar rather than appearing as a block. */
-
+/* Staggered entry animation from right edge */
 .cl-menu__link {
-    animation: cl-menuLink 0.32s var(--nv-ease) both;
-    animation-delay: calc(60ms + var(--i, 0) * 45ms);
+    animation: cl-menuLink 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(30ms + var(--i, 0) * 32ms);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    min-height: 42px;
+    padding: 6px 14px;
+    border-radius: var(--nv-radius);
+    font-size: 0.925rem;
+    font-weight: 600;
+    color: var(--nv-ink);
+    text-align: right;
+    touch-action: manipulation;
+    transition: background-color 0.15s var(--nv-ease), transform 0.15s var(--nv-ease);
 }
 
-/* The bar while its menu is open: bottom corners squared so the sheet
-   continues its edge, lifted above the backdrop, and its blue shadow
-   handed to the sheet so the pair casts one shadow. */
+.cl-menu__label {
+    flex: 1;
+    text-align: right;
+}
+
+.cl-menu__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--nv-lav-soft);
+    color: var(--nv-fill);
+    flex-shrink: 0;
+    transition: transform 0.15s var(--nv-ease);
+}
+
+/* The bar while its menu is open */
 .cl-topbar.is-open {
     z-index: calc(var(--nv-z-drawer) + 1);
     border-radius: 28px 28px 0 0;
@@ -3597,36 +3623,36 @@ a.cl-bento__cell:active {
     .cl-menu__sheet, .cl-menu__link { animation: none; }
 }
 
-.cl-menu__link {
-    display: flex;
-    align-items: center;
-    min-height: 52px;
-    padding: 0 14px;
-    border-radius: var(--nv-radius);
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--nv-ink);
-    touch-action: manipulation;
-}
-
 .cl-menu__link.is-active {
     background: var(--nv-lav-soft);
 }
 
+.cl-menu__link.is-active .cl-menu__icon {
+    background: var(--nv-fill);
+    color: var(--nv-on-fill);
+}
+
 @media (hover: hover) and (pointer: fine) {
     .cl-menu__link:hover:not(.is-active) {
-        background: var(--nv-storm-soft);
+        background: var(--nv-lav-soft);
+        transform: translateX(-4px);
+    }
+    .cl-menu__link:hover .cl-menu__icon {
+        transform: scale(1.1);
     }
 }
 
 .cl-menu__link:active:not(.is-active) {
     background: var(--nv-storm-soft);
+    transform: scale(0.98);
 }
 
 .cl-menu__cta {
     width: 100%;
     justify-content: center;
-    margin-top: 12px;
+    margin-top: 10px;
+    min-height: 44px;
+    font-size: 0.95rem;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -3648,14 +3674,17 @@ a.cl-bento__cell:active {
         + var(--cl-dock-lift, 0px)
     );
     left: 50%;
-    transform: translateX(-50%);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateX(-50%) translateZ(0);
+    transform: translateX(-50%) translateZ(0);
     z-index: var(--nv-z-nav);
     display: flex;
     align-items: center;
     gap: 8px;
     /* The lift animates so the dock rises into the space the
        consent bar leaves, rather than snapping up after it. */
-    transition: bottom 260ms var(--nv-ease, ease);
+    transition: bottom 260ms var(--nv-ease, ease), opacity 200ms ease;
 }
 
 /* `align-items: center`, not `flex-end`: the row no longer has a label
@@ -4600,14 +4629,6 @@ body:has(.cl-contact__form) .cl-dock {
     transform: translateX(-50%) translateY(120%);
 }
 
-/* The dock already carries a transform for centring, so the transition
-   has to name both properties it actually animates. Sits outside the
-   reduced-motion guard below because a dock that vanishes instantly is
-   fine; one that slides is the part worth suppressing. */
-.cl-dock {
-    transition: opacity 200ms ease, transform 260ms var(--nv-ease);
-}
-
 /* Scrolled out of the way rather than faded in place, so it does not
    sit as a ghost over the content it was covering. Pointer events go
    with it: a control you cannot see must not be tappable. */
@@ -4615,6 +4636,7 @@ body:has(.cl-contact__form) .cl-dock {
     opacity: 0;
     pointer-events: none;
     transform: translateX(-50%) translateY(150%);
+    transition: opacity 200ms ease, transform 260ms var(--nv-ease);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -29,7 +29,6 @@
  * every section. The scroll reader is ClDock.js's.
  */
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { motion, useAnimationControls, useReducedMotion } from 'motion/react';
 import { Dock, DockIcon } from '@/registry/magicui/dock';
 
 const ITEMS = [
@@ -78,8 +77,6 @@ export default function Nl4Dock({ home = '' }) {
     const [active, setActive] = useState(home ? null : 'top');
     const [pressed, setPressed] = useState(null);
     const wide = useIsWide();
-    const reduce = useReducedMotion();
-    const bounce = useAnimationControls();
 
     useEffect(() => {
         if (home) return undefined;
@@ -87,14 +84,18 @@ export default function Nl4Dock({ home = '' }) {
         let frame = 0;
         const read = () => {
             frame = 0;
-            const line = window.innerHeight * 0.4;
-            let owner = SECTION_OWNER[ids[0]];
-            for (const id of ids) {
-                const el = document.getElementById(id);
-                if (!el) continue;
-                if (el.getBoundingClientRect().top <= line) owner = SECTION_OWNER[id] ?? owner;
+            // Detect bottom of page so rubber-banding / bottom overscroll never bounces active state
+            const isAtBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 70);
+            let owner = isAtBottom ? 'talk' : SECTION_OWNER[ids[0]];
+            if (!isAtBottom) {
+                const line = window.innerHeight * 0.4;
+                for (const id of ids) {
+                    const el = document.getElementById(id);
+                    if (!el) continue;
+                    if (el.getBoundingClientRect().top <= line) owner = SECTION_OWNER[id] ?? owner;
+                }
             }
-            setActive(owner);
+            setActive((prev) => (prev === owner ? prev : owner));
         };
         const onScroll = () => {
             if (frame) return;
@@ -119,19 +120,13 @@ export default function Nl4Dock({ home = '' }) {
 
     const onTap = (id) => {
         setPressed(id);
-        if (!reduce) {
-            bounce.start({
-                scale: [1, 1.12, 0.98, 1],
-                transition: { duration: 0.45, times: [0, 0.35, 0.7, 1], ease: 'easeOut' },
-            });
-        }
     };
 
     const size = wide ? 48 : 40;
 
     return (
         <nav className="cl-dock nv4-dock" aria-label="Page sections">
-            <motion.div animate={bounce} style={{ transformOrigin: '50% 100%' }}>
+            <div>
                 <Dock
                     className="nv4-dock__bar"
                     iconSize={size}
@@ -161,7 +156,7 @@ export default function Nl4Dock({ home = '' }) {
                         );
                     })}
                 </Dock>
-            </motion.div>
+            </div>
         </nav>
     );
 }

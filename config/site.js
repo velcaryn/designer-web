@@ -43,16 +43,61 @@ export const contact = {
     instagram: 'https://instagram.com/velbiz.digital',
     instagramHandle: '@velbiz.digital',
     /* THE POSTS SHOWN ON THE LANDING PAGE, BY PERMALINK.
-
-       Instagram's public feed cannot be fetched without an app token and
-       a Business account, and the Basic Display API that used to allow
-       it was retired in December 2024. So the grid is a list of post
-       links kept here and rendered as Instagram's own embed frames.
-       Paste the permalink of each post to show (the URL of the post,
-       "https://www.instagram.com/p/<code>/"), newest first, four to six
-       of them. With none listed the section shows the follow button
-       alone. */
-    instagramPosts: [],
+       Directly sourced from the official @velbiz.digital Instagram profile. */
+    instagramPosts: [
+        {
+            id: 'ig-post-1',
+            type: 'post',
+            shortcode: 'DdQaZkrob2n',
+            url: 'https://www.instagram.com/p/DdQaZkrob2n/',
+            image: '/images/instagram/post-1.jpg',
+            title: 'Festive Greetings - Ganesh Chaturthi',
+            caption: 'May the divine presence of Lord Ganesha bless your journey with wisdom, innovation, and boundless prosperity. Warm festive greetings from Velcaryn & VelBiz Digital!',
+            likes: 8,
+            comments: 0,
+            tag: 'Ganesh Chaturthi',
+            date: 'Sep 13, 2026',
+        },
+        {
+            id: 'ig-post-2',
+            type: 'post',
+            shortcode: 'DdQaOGdI9PL',
+            url: 'https://www.instagram.com/p/DdQaOGdI9PL/',
+            image: '/images/instagram/post-2.jpg',
+            title: 'New Beginnings & Digital Growth',
+            caption: 'Happy Ganesh Chaturthi from Velcaryn & VelBiz Digital! Honoring the Remover of Obstacles and the harbinger of new beginnings in life, enterprise, and digital innovation.',
+            likes: 9,
+            comments: 0,
+            tag: 'New Beginnings',
+            date: 'Sep 13, 2026',
+        },
+        {
+            id: 'ig-post-3',
+            type: 'post',
+            shortcode: 'DdQaH-7oYxH',
+            url: 'https://www.instagram.com/p/DdQaH-7oYxH/',
+            image: '/images/instagram/post-3.jpg',
+            title: 'Tradition & Digital Innovation',
+            caption: 'Embracing devotion, tradition, and bold new beginnings. Wishing you peace, enduring strength, and frictionless success in every digital venture you build.',
+            likes: 10,
+            comments: 0,
+            tag: 'Vinayaka Chaturthi',
+            date: 'Sep 13, 2026',
+        },
+        {
+            id: 'ig-post-4',
+            type: 'reel',
+            shortcode: 'DcgL0xnywdw',
+            url: 'https://www.instagram.com/reel/DcgL0xnywdw/',
+            image: '/images/instagram/post-4.jpg',
+            title: "Client Launch Reel - Liha's Karuppati",
+            caption: "Tradition, crafted into a digital experience. Introducing the new storefront & quick ordering flow for Liha's Karuppati, engineered & developed by VelBiz Digital.",
+            likes: 35,
+            comments: 1,
+            tag: 'Reel - Client Launch',
+            date: 'Aug 26, 2026',
+        },
+    ],
 };
 
 export const phoneHref = `tel:+${contact.phone}`;

@@ -26,6 +26,15 @@ const LINKS = [
     { href: '#who', label: 'About' },
 ];
 
+const MENU_LINKS = [
+    { href: '/services', label: 'Services', icon: 'services' },
+    { href: '/demo-site', label: 'Demo Websites', icon: 'demos' },
+    { href: '/cloud', label: 'VelBiz Cloud', icon: 'cloud' },
+    { href: '#price', label: 'Pricing', icon: 'price' },
+    { href: '#faq', label: 'FAQ', icon: 'faq' },
+    { href: '#who', label: 'About', icon: 'about' },
+];
+
 export default function Nl4Nav() {
-    return <ClTopbar qualifier="Digital" links={LINKS} ctaHref="#talk" home="#top" />;
+    return <ClTopbar qualifier="Digital" links={LINKS} menuLinks={MENU_LINKS} ctaHref="#talk" home="#top" />;
 }

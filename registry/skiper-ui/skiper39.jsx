@@ -58,8 +58,10 @@ export function CrowdCanvas({ src, rows = 15, cols = 7 }) {
 
         const resetPeep = ({ stage, peep }) => {
             const direction = Math.random() > 0.5 ? 1 : -1;
-            const offsetY = 100 - 250 * gsap.parseEase('power2.in')(Math.random());
-            const startY = stage.height - peep.height + offsetY;
+            const isMobile = stage.width < 640;
+            const maxJitter = isMobile ? 16 : 50;
+            const offsetY = maxJitter - (maxJitter * 2) * gsap.parseEase('power2.in')(Math.random());
+            const startY = stage.height - peep.height - (isMobile ? 8 : 16) + offsetY;
             let startX;
             let endX;
 
@@ -82,8 +84,10 @@ export function CrowdCanvas({ src, rows = 15, cols = 7 }) {
 
         const normalWalk = ({ peep, props }) => {
             const { startY, endX } = props;
-            const xDuration = 10;
+            const isMobile = stage.width < 640;
+            const xDuration = isMobile ? 8 : 10;
             const yDuration = 0.25;
+            const bobAmount = isMobile ? 5 : 10;
 
             const tl = gsap.timeline();
             tl.timeScale(randomRange(0.5, 1.5));
@@ -92,7 +96,7 @@ export function CrowdCanvas({ src, rows = 15, cols = 7 }) {
                 duration: yDuration,
                 repeat: xDuration / yDuration,
                 yoyo: true,
-                y: startY - 10,
+                y: startY - bobAmount,
             }, 0);
 
             return tl;
@@ -104,6 +108,8 @@ export function CrowdCanvas({ src, rows = 15, cols = 7 }) {
             const peep = {
                 image,
                 rect: [],
+                naturalWidth: 0,
+                naturalHeight: 0,
                 width: 0,
                 height: 0,
                 drawArgs: [],
@@ -114,7 +120,10 @@ export function CrowdCanvas({ src, rows = 15, cols = 7 }) {
                 walk: null,
                 setRect: (r) => {
                     peep.rect = r;
-                    [, , peep.width, peep.height] = r;
+                    [, , peep.naturalWidth, peep.naturalHeight] = r;
+                    const scale = stage.peepScale || 1;
+                    peep.width = peep.naturalWidth * scale;
+                    peep.height = peep.naturalHeight * scale;
                     peep.drawArgs = [peep.image, ...r, 0, 0, peep.width, peep.height];
                 },
                 render: (context) => {
@@ -211,7 +220,22 @@ export function CrowdCanvas({ src, rows = 15, cols = 7 }) {
             canvas.width = stage.width * devicePixelRatio;
             canvas.height = stage.height * devicePixelRatio;
 
-            crowd.forEach((peep) => peep.walk.kill());
+            // Responsive character scaling:
+            // Natural peep height is 324px.
+            // On mobile (<640px), zoom out to 0.46 (~150px tall), so the full figure from head to shoes
+            // is completely visible and fits with plenty of room on a phone!
+            // On tablet (<900px), 0.62 (~200px tall).
+            // On desktop (>=900px), 0.82 (~265px tall).
+            stage.peepScale = stage.width < 640 ? 0.46 : (stage.width < 900 ? 0.62 : 0.82);
+
+            allPeeps.forEach((peep) => {
+                peep.width = peep.naturalWidth * stage.peepScale;
+                peep.height = peep.naturalHeight * stage.peepScale;
+            });
+
+            crowd.forEach((peep) => {
+                if (peep.walk) peep.walk.kill();
+            });
             crowd.length = 0;
             availablePeeps.length = 0;
             availablePeeps.push(...allPeeps);

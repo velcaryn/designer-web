@@ -325,11 +325,41 @@
 .nv4-example__go {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     margin-top: 16px;
+    padding: 7px 16px;
     font-size: var(--nv-small);
     font-weight: 800;
     color: var(--nv-lav);
+    background: color-mix(in srgb, var(--nv-lav) 10%, var(--nv-paper));
+    border: 1.5px solid var(--nv-lav);
+    border-radius: var(--nv-radius-pill);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--nv-lav) 50%, transparent),
+                0 0 4px color-mix(in srgb, var(--nv-lav) 30%, transparent);
+    align-self: flex-start;
+    transition: transform 0.2s var(--nv-ease),
+                background 0.2s var(--nv-ease),
+                color 0.2s var(--nv-ease),
+                border-color 0.2s var(--nv-ease),
+                box-shadow 0.2s var(--nv-ease);
+}
+
+.nv4-example__go svg {
+    transition: transform 0.2s var(--nv-ease);
+}
+
+.nv4-example:hover .nv4-example__go {
+    transform: translateX(2px);
+    background: var(--nv-lav);
+    color: #ffffff;
+    border-color: var(--nv-lav);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--nv-lav) 85%, transparent),
+                0 0 10px color-mix(in srgb, var(--nv-fill) 70%, transparent),
+                var(--nv-pop-sm);
+}
+
+.nv4-example:hover .nv4-example__go svg {
+    transform: translateX(3px);
 }
 
 .nv4-examples__more {
@@ -1322,10 +1352,10 @@ body:has(.cl-dock) .nv4-follow { padding-bottom: 104px; }
    taking a whole screen. Unchanged from 900px up.
    ══════════════════════════════════════════════════════════════════════ */
 
-.cl-crowd { height: 128px; }
+.cl-crowd { height: 180px; }
 
 @media (min-width: 900px) {
-    .cl-crowd { height: clamp(180px, 22vw, 260px); }
+    .cl-crowd { height: clamp(220px, 22vw, 280px); }
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -1339,30 +1369,160 @@ body:has(.cl-dock) .nv4-follow { padding-bottom: 104px; }
     gap: 12px;
     width: 100%;
     max-width: 1060px;
-    margin-block: 8px 28px;
+    margin-block: 16px 28px;
+    padding: 0;
+    list-style: none;
 }
 
 .nv4-follow__cell {
+    position: relative;
     border: var(--nv-stroke) solid var(--nv-ink);
     border-radius: var(--nv-radius);
     box-shadow: var(--nv-pop-sm);
     overflow: hidden;
     background: var(--nv-paper);
+    transition: transform 0.2s var(--nv-ease), box-shadow 0.2s var(--nv-ease);
 }
 
-/* Instagram's embed is a fixed-height document; the frame shows the
-   image and the caption's first lines and clips the rest. Tall enough
-   for the square image plus its header at the widths the grid gives. */
-.nv4-follow__frame {
-    display: block;
+.nv4-follow__cell:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--nv-pop);
+}
+
+.nv4-follow__card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+}
+
+.nv4-follow__media {
+    position: relative;
     width: 100%;
-    height: 420px;
-    border: 0;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--nv-warm);
 }
 
-@media (min-width: 900px) {
-    .nv-root .nv4-follow__grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .nv4-follow__frame { height: 520px; }
+.nv4-follow__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s var(--nv-ease);
+}
+
+.nv4-follow__cell:hover .nv4-follow__img {
+    transform: scale(1.06);
+}
+
+.nv4-follow__reel-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    background: rgba(18, 20, 24, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #ffffff;
+    border-radius: var(--nv-radius-pill);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.nv4-follow__overlay {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--nv-ink) 55%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: #ffffff;
+    opacity: 0;
+    transition: opacity 0.22s var(--nv-ease);
+}
+
+.nv4-follow__cell:hover .nv4-follow__overlay {
+    opacity: 1;
+}
+
+.nv4-follow__stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.nv4-follow__meta {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--nv-paper);
+    border-top: 1.5px solid var(--nv-lav-soft);
+}
+
+.nv4-follow__meta-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.nv4-follow__date {
+    font-size: 0.68rem;
+    color: var(--nv-ink-soft);
+    font-weight: 600;
+}
+
+.nv4-follow__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--nv-fill);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.nv4-follow__caption {
+    font-size: 0.8rem;
+    color: var(--nv-ink-soft, var(--nv-ink));
+    line-height: 1.35;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.nv4-follow__btn {
+    margin-top: 6px;
+}
+
+@media (min-width: 860px) {
+    .nv-root .nv4-follow__grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+    .nv4-follow__meta {
+        padding: 12px 14px;
+        gap: 5px;
+    }
+    .nv4-follow__caption {
+        font-size: 0.82rem;
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════════════

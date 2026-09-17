@@ -70,7 +70,7 @@ export default function Nl4Examples() {
                                 <span className="nv4-example__trade">{demo.trade}</span>
                                 <span className="nv4-example__blurb">{demo.blurb}</span>
                                 <span className="nv4-example__go">
-                                    <span>Open it</span>
+                                    <span>Check it Out</span>
                                     <ArrowRight size={15} weight="bold" aria-hidden="true" />
                                 </span>
                             </Link>
