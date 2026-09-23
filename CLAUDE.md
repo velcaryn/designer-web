@@ -6,6 +6,12 @@ This is the Velbrant Studios site: our own studio site, not a client build.
 Every rule in it is something that was actually built, or a defect that was
 actually found.
 
+**The repo also holds VelBiz Cloud, the ERP**, under `app/(erp)` with its own
+root layout, database and admin area. Read `docs/VELBIZ_CLOUD.md` before
+touching anything under `app/(erp)`, `app/api/cloud`, `app/api/admin`,
+`components/cloud-app` or `lib/`. The playbook's brochure-site rules below
+apply to the marketing site in `app/(site)`.
+
 ## How the playbook applies here
 
 The playbook was written for client brochure sites: React + Vite, static,
