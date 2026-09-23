@@ -16,12 +16,11 @@
  * alternative was re-deriving the same posture from memory. That module
  * is the audited one; this file is now just the shape of one form.
  *
- * WHAT THIS DELIBERATELY DOES NOT DO
+ * WHAT IT DOES
  *
- * The source repo's route validated against a database, enforced tiers,
- * and created a tenant. None of that is in scope here and none of it
- * exists in this repo. This route does one thing: check the submission
- * looks human and well-formed, format it, and send it.
+ * Checks the submission looks human and well-formed, records it as a
+ * tenant awaiting approval (lib/cloud/pendingTenant.js), and sends the
+ * alert. Approval, and with it any access, happens in the admin area.
  */
 import {
     botSignalsFail,
@@ -37,6 +36,7 @@ import {
     sendTelegram,
     telegramConfigured,
 } from '@/lib/leadIntake';
+import { createPendingTenant } from '@/lib/cloud/pendingTenant';
 
 const LABEL = 'onboarding';
 
@@ -113,12 +113,46 @@ export async function POST(request) {
 
     const address = body.address || {};
     const line2 = clean(address.line2, 160);
+    const gstin = clean(body.gstin, 20).toUpperCase();
+    const businessType = clean(body.businessType, 40);
+
+    /* Recorded before the alert, so the request is waiting at
+       /admin/cloud/requests by the time anyone reads the message. A
+       duplicate email writes nothing and is answered like a new one. */
+    let recorded;
+    try {
+        recorded = await createPendingTenant({
+            businessName,
+            ownerName,
+            businessType,
+            email,
+            phone,
+            gstin,
+            address: {
+                line1: clean(address.line1, 160),
+                line2,
+                city: clean(address.city, 80),
+                state: clean(address.state, 80),
+                pin: clean(address.pin, 10),
+            },
+        });
+    } catch (err) {
+        console.error(`[${LABEL}] could not record the signup`, err?.message);
+        return Response.json(
+            { error: 'We could not take the signup just now. Please try again, or message us on WhatsApp.' },
+            { status: 500 },
+        );
+    }
+
     const lines = [
         'New VelBiz Cloud signup',
+        recorded.duplicate
+            ? 'This email is already registered. Nothing new was recorded.'
+            : `Waiting for approval at /admin/cloud/requests as ${recorded.tenantId}`,
         '',
         `Business:  ${businessName}`,
         `Owner:     ${ownerName}`,
-        `Type:      ${clean(body.businessType, 40) || 'Not given'}`,
+        `Type:      ${businessType || 'Not given'}`,
         `Email:     ${email}`,
         `Phone:     ${phone}`,
         '',
@@ -126,7 +160,7 @@ export async function POST(request) {
         `  ${clean(address.line1, 160) || 'Not given'}`,
         line2 ? `  ${line2}` : null,
         `  ${clean(address.city, 80)}, ${clean(address.state, 80)} ${clean(address.pin, 10)}`,
-        `  GSTIN: ${clean(body.gstin, 20) || 'Not given'}`,
+        `  GSTIN: ${gstin || 'Not given'}`,
     ].filter((line) => line !== null);
 
     const sent = await sendTelegram(lines, LABEL);

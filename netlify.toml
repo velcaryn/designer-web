@@ -4,3 +4,20 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# VelBiz Cloud (the ERP under /cloud and /admin) renders PDFs server-side with
+# puppeteer-core and @sparticuz/chromium. The Chromium binary (bin/*.br) is
+# read from disk at runtime rather than imported, so the function bundler
+# cannot see it and would drop it: the site would deploy fine and every PDF
+# route would then fail. Both packages stay external and the binary is
+# included explicitly.
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@sparticuz/chromium", "puppeteer-core"]
+  included_files = ["node_modules/@sparticuz/chromium/bin/**"]
+
+# Generates due recurring invoices. It calls /api/cron/generate-recurring-invoices
+# with the CRON_SECRET bearer token; hourly is finer than any schedule a tenant
+# can set.
+[functions."scheduled-recurring-invoices"]
+  schedule = "@hourly"

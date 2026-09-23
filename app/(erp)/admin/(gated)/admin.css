@@ -1,0 +1,369 @@
+/* ==========================================
+   VELCARYN ADMIN DASHBOARD CORE STYLESHEET
+   Dark Velvet Glassmorphism Design System
+   ========================================== */
+
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+    background: var(--bg-light, #0b0619);
+    color: var(--text-main, #ffffff);
+    font-family: var(--v2-font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Sidebar Container */
+.dashboard-sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #0b0619 0%, #120b26 50%, #190e38 100%);
+    border-right: 1px solid rgba(167, 139, 250, 0.18);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1.25rem;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+}
+
+.dashboard-sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+.dashboard-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(167, 139, 250, 0.2);
+    border-radius: 4px;
+}
+
+/* Sidebar Brand Header */
+.sidebar-brand {
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.15);
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.brand-logo-link {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+.brand-logo-link:hover {
+    transform: translateY(-1px);
+}
+
+.brand-logo-img {
+    height: 34px;
+    width: auto;
+    object-fit: contain;
+}
+
+.brand-badge-row {
+    margin-top: 0.5rem;
+}
+
+.brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(124, 58, 237, 0.22);
+    color: #c4b5fd;
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    box-shadow: 0 0 12px rgba(167, 139, 250, 0.15);
+}
+
+/* Sidebar Navigation */
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+}
+
+.nav-section-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(167, 139, 250, 0.5);
+    margin: 1.25rem 0 0.4rem 0.5rem;
+}
+
+/* Accordion Groups */
+.nav-group {
+    margin-bottom: 0.2rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.nav-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.nav-group-header:hover {
+    background: rgba(167, 139, 250, 0.12);
+    color: #ffffff;
+    border-color: rgba(167, 139, 250, 0.25);
+}
+
+.nav-group-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-group-children {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-left: 0.75rem;
+    margin-top: 4px;
+}
+
+/* Nav Item Links */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(241, 245, 249, 0.8);
+    text-decoration: none;
+    padding: 0.6rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid transparent;
+}
+
+.nav-item:hover {
+    background: rgba(167, 139, 250, 0.15);
+    color: #ffffff;
+    border-color: rgba(167, 139, 250, 0.25);
+    transform: translateX(2px);
+}
+
+.nav-item.active {
+    background: linear-gradient(90deg, rgba(124, 58, 237, 0.3) 0%, rgba(109, 40, 217, 0.15) 100%);
+    color: #ffffff;
+    border-left: 3px solid #a78bfa;
+    border-color: rgba(167, 139, 250, 0.4);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+}
+
+/* Highlight Nav Item Tints */
+.nav-item--highlight-blue {
+    background: rgba(59, 130, 246, 0.12);
+    color: #93c5fd;
+}
+.nav-item--highlight-blue:hover {
+    background: rgba(59, 130, 246, 0.22);
+    color: #ffffff;
+}
+
+.nav-item--highlight-emerald {
+    background: rgba(16, 185, 129, 0.12);
+    color: #6ee7b7;
+}
+.nav-item--highlight-emerald:hover {
+    background: rgba(16, 185, 129, 0.22);
+    color: #ffffff;
+}
+
+.nav-item--highlight-teal {
+    background: rgba(20, 184, 166, 0.12);
+    color: #5eead4;
+}
+.nav-item--highlight-teal:hover {
+    background: rgba(20, 184, 166, 0.22);
+    color: #ffffff;
+}
+
+.nav-item--highlight-amber {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fcd34d;
+}
+.nav-item--highlight-amber:hover {
+    background: rgba(245, 158, 11, 0.22);
+    color: #ffffff;
+}
+
+.nav-item--highlight-purple {
+    background: rgba(124, 58, 237, 0.12);
+    color: #c4b5fd;
+}
+.nav-item--highlight-purple:hover {
+    background: rgba(124, 58, 237, 0.22);
+    color: #ffffff;
+}
+
+.nav-item--highlight-violet {
+    background: rgba(139, 92, 246, 0.12);
+    color: #ddd6fe;
+}
+.nav-item--highlight-violet:hover {
+    background: rgba(139, 92, 246, 0.22);
+    color: #ffffff;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(167, 139, 250, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.user-profile-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #482683);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid rgba(167, 139, 250, 0.4);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+    flex-shrink: 0;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-role {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #a78bfa;
+}
+
+.user-email {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.signout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.signout-btn:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ffffff;
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Dashboard Main Content Area */
+.dashboard-main {
+    flex: 1;
+    margin-left: 260px;
+    padding: 2rem;
+    min-height: 100vh;
+    background: var(--bg-light, #0b0619);
+}
+
+/* Shared Dashboard Page Header */
+.dashboard-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(167, 139, 250, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.dashboard-header h1 {
+    font-family: var(--display-font);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 0%, #ddd6fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboard-header p {
+    font-size: 0.95rem;
+    color: rgba(167, 139, 250, 0.8);
+    margin: 0;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1024px) {
+    .dashboard-sidebar {
+        width: 230px;
+    }
+    .dashboard-main {
+        margin-left: 230px;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-layout {
+        flex-direction: column;
+    }
+    .dashboard-sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        padding: 1.25rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(167, 139, 250, 0.18);
+    }
+    .dashboard-main {
+        margin-left: 0;
+        padding: 1.25rem 1rem;
+    }
+}

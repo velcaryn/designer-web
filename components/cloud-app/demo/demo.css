@@ -1,0 +1,771 @@
+/*
+ * /connect/request-demo
+ *
+ * Follows the sign-in page's language (src/app/connect/login/page.js): the
+ * #090514 ground, static radial washes, a glass card and a Cormorant heading.
+ * A prospect who arrives here from the marketing site should not feel handed
+ * off to a different product.
+ *
+ * Self-contained tokens because this route sits outside .vc-app and does not
+ * import landing.css. Prefix vcx-.
+ */
+
+.vcx-root {
+    --vcx-ink: #f4f2f8;
+    --vcx-ink-2: #a79fbe;
+    --vcx-line: rgba(255, 255, 255, 0.1);
+    --vcx-accent: #7c3aed;
+    --vcx-accent-soft: #a78bfa;
+    --vcx-good: #34d399;
+    --vcx-warn: #fbbf24;
+    --vcx-bad: #f87171;
+    --vcx-info: #60a5fa;
+
+    position: relative;
+    min-height: 100dvh; /* dvh: vh includes the iOS address bar and clips the footer */
+    background: #090514;
+    color: var(--vcx-ink);
+    font-family: var(--v2-font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Static gradients, not animated orbs. This page hosts an interactive
+   sandbox; an animated background under it costs frames on the phones that
+   can least spare them. */
+.vcx-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(60rem 40rem at 18% 20%, rgba(124, 58, 237, 0.20), transparent 60%),
+        radial-gradient(48rem 34rem at 85% 78%, rgba(20, 184, 166, 0.12), transparent 60%),
+        radial-gradient(70rem 46rem at 50% 110%, rgba(72, 38, 131, 0.28), transparent 65%);
+}
+
+.vcx-main {
+    position: relative;
+    z-index: 1;
+    max-width: 44rem;
+    margin: 0 auto;
+    padding: 40px 20px 56px;
+}
+
+.vcx-main--wide { max-width: 68rem; }
+
+.vcx-card {
+    background: rgba(22, 14, 46, 0.72);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 1px solid var(--vcx-line);
+    border-radius: 24px;
+    padding: 32px 28px;
+    box-shadow: 0 24px 64px -32px rgba(0, 0, 0, 0.8), 0 0 60px -30px rgba(124, 58, 237, 0.5);
+}
+
+/* ── Brand header ──────────────────────────────────────────────────────── */
+
+.vcx-brand {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    padding: 28px 20px 0;
+}
+
+.vcx-brand a { display: inline-flex; align-items: center; min-height: 44px; }
+.vcx-brand img { height: 30px; width: auto; }
+
+/* ── Progress ──────────────────────────────────────────────────────────── */
+
+/*
+ * A filling rule with a step label, replacing the two numbered circles.
+ *
+ * The circles said which step you were on but not how much was left, and
+ * "1 (2)" on a two-step form reads as bureaucracy rather than progress. A bar
+ * that visibly travels as you move from page one to page two answers "how much
+ * more of this is there" without a word.
+ */
+.vcx-progress { margin-bottom: 26px; }
+
+.vcx-progress-track {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.09);
+    overflow: hidden;
+}
+
+.vcx-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--vcx-accent), var(--vcx-accent-soft));
+    transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vcx-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 9px;
+    font-size: 12.5px;
+    color: var(--vcx-ink-2);
+}
+
+.vcx-progress-meta strong { color: var(--vcx-ink); font-weight: 600; }
+
+/* ── Type ──────────────────────────────────────────────────────────────── */
+
+.vcx-title {
+    font-family: var(--v2-font-cormorant), 'Cormorant Garamond', Georgia, serif;
+    /* 700, not 400. Cormorant is a high-contrast display serif: at 400 its
+       thin strokes make a 40px headline read lighter than the body copy
+       beneath it, which is what made this hero feel timid rather than like
+       the first thing on the page. */
+    font-weight: 700;
+    font-size: clamp(34px, 6.2vw, 56px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    text-wrap: balance;
+}
+
+.vcx-sub {
+    margin: 0 0 28px;
+    color: var(--vcx-ink-2);
+    font-size: clamp(16px, 2.2vw, 18px);
+    line-height: 1.55;
+    max-width: 46ch;
+}
+
+/* ── Fields ────────────────────────────────────────────────────────────── */
+
+.vcx-field { margin-bottom: 18px; }
+
+.vcx-label {
+    display: flex; align-items: baseline; gap: 8px;
+    font-size: 14px; font-weight: 600; margin-bottom: 6px;
+}
+
+.vcx-opt { font-weight: 400; font-size: 12.5px; color: var(--vcx-ink-2); }
+
+.vcx-input {
+    width: 100%;
+    /* 15px minimum. Below 16px iOS zooms on focus; 15px with the app viewport
+       lock is what the sign-in page already uses. */
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--vcx-ink);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--vcx-line);
+    border-radius: 10px;
+    padding: 13px 14px;
+    min-height: 48px;
+}
+
+.vcx-input::placeholder { color: rgba(167, 159, 190, 0.6); }
+
+.vcx-input:focus-visible,
+.vcx-submit:focus-visible,
+.vcx-chip:focus-visible,
+.vcx-ctl:focus-visible,
+.vcx-dot:focus-visible,
+.vcx-cta-btn:focus-visible,
+.vcx-back:focus-visible {
+    outline: 2px solid var(--vcx-accent-soft);
+    outline-offset: 2px;
+}
+
+.vcx-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.vcx-error {
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 14px; margin-bottom: 18px;
+    border-radius: 10px;
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    color: #fca5a5; font-size: 14px;
+}
+
+.vcx-root .vcx-submit {
+    width: 100%; min-height: 52px; margin-top: 8px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border: none; border-radius: 12px;
+    background: var(--vcx-accent); color: #fff;
+    font-family: inherit; font-size: 16px; font-weight: 600;
+    cursor: pointer;
+}
+
+.vcx-root .vcx-submit[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.vcx-root .vcx-back {
+    width: 100%; min-height: 44px; margin-top: 10px;
+    background: none; border: none; color: var(--vcx-ink-2);
+    font-family: inherit; font-size: 14px; cursor: pointer;
+}
+
+.vcx-foot { margin: 18px 0 0; text-align: center; font-size: 13.5px; color: var(--vcx-ink-2); }
+/* The link is inline in a sentence, so it cannot simply be made 44px tall
+   without breaking the line box. inline-block plus vertical padding gives it a
+   real 44px hit area while the text stays on the baseline. */
+.vcx-foot a {
+    color: var(--vcx-accent-soft);
+    text-decoration: none;
+    display: inline-block;
+    min-height: 44px;
+    line-height: 44px;
+    padding: 0 6px;
+}
+.vcx-foot a:hover { text-decoration: underline; }
+
+
+/*
+ * WHY EVERY BUTTON RULE BELOW IS PREFIXED WITH .vcx-root
+ *
+ * This page lives under src/app/connect/layout.js, which wraps everything in
+ * `.vc-app` and loads app-reset.css. That file contains, deliberately:
+ *
+ *     .vc-app button { background-color: transparent; }
+ *
+ * a floor so a button with no declared background does not render as OS-grey
+ * chrome inside the app. Its specificity is (0,1,1). A single-class rule like
+ * `.vcx-submit` is (0,1,0) and LOSES, regardless of source order - so the
+ * submit button, every feature chip, every bed and every tooth rendered with
+ * no fill at all. It looked like unstyled text, which is exactly what it was.
+ *
+ * Adding `.vcx-root` takes these to (0,2,0). Not !important: this is a real
+ * specificity contest with a correct answer, and !important would just move
+ * the problem to whoever needs to override it next.
+ */
+
+/* ── Feature chips ─────────────────────────────────────────────────────── */
+
+/*
+ * "Full HMS suite" is its own row above the individual features, not one chip
+ * among fifteen. It means something different from every other chip - it is
+ * the whole set, not a member of it - and sitting inline it read as just
+ * another option while silently ticking everything else.
+ */
+.vcx-suite {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 60px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    border-radius: 14px;
+    border: 1px solid var(--vcx-line);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--vcx-ink);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 140ms ease, background 140ms ease;
+}
+
+.vcx-root .vcx-suite:hover:not(.vcx-suite--on) { border-color: rgba(255, 255, 255, 0.24); }
+
+.vcx-root .vcx-suite--on {
+    background: rgba(124, 58, 237, 0.2);
+    border-color: var(--vcx-accent);
+}
+
+.vcx-suite-tick {
+    flex: 0 0 auto;
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--vcx-line);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: transparent;
+}
+
+.vcx-suite--on .vcx-suite-tick { background: var(--vcx-accent); border-color: var(--vcx-accent); color: #fff; }
+
+.vcx-suite-text { min-width: 0; }
+.vcx-suite-title { display: block; font-size: 15.5px; font-weight: 600; }
+.vcx-suite-sub { display: block; font-size: 13px; color: var(--vcx-ink-2); margin-top: 1px; }
+
+/* The subset heading, so the chips below read as members of the suite above
+   rather than as a competing list. */
+.vcx-features-head {
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 11px;
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--vcx-ink-2); font-weight: 600;
+}
+
+.vcx-features-head::after {
+    content: ''; flex: 1; height: 1px; background: var(--vcx-line);
+}
+
+.vcx-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin: 0 0 22px;
+    /* The subset is indented under its heading so the grouping is structural,
+       not just typographic. */
+    padding-left: 2px;
+}
+
+/*
+ * The tick is a FIXED-WIDTH SLOT that is always present, just invisible when
+ * unselected.
+ *
+ * Rendering the icon only when selected changed each chip's width by ~20px on
+ * click, which reflowed the whole wrap - selecting everything pushed "Dental
+ * charting" off the second line onto a third, and chips visibly jumped under
+ * the cursor. A grid whose items resize when you pick them is unusable at
+ * speed, which is exactly how someone ticks fifteen boxes.
+ */
+.vcx-chip-tick {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* Occupies its space from the start; only the ink appears on selection. */
+    opacity: 0;
+    transition: opacity 120ms ease;
+}
+
+.vcx-chip--on .vcx-chip-tick { opacity: 1; }
+
+.vcx-root .vcx-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    /* 44px tall as a real box, not a ::before overlay - a pseudo-element
+       measures as a tap target and then never receives the tap. */
+    min-height: 44px;
+    padding: 10px 15px;
+    border-radius: 999px;
+    /* Border reserved in the base state so selecting changes only its colour;
+       adding a border on select would shift every chip after it. */
+    border: 1px solid var(--vcx-line);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--vcx-ink-2);
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+
+/* :not(--on) so hover never repaints a selected chip. A bare .vcx-chip:hover
+   is (0,2,0) against .vcx-chip--on at (0,1,0) and would win, wiping the
+   selected background while its text colour survived. */
+.vcx-root .vcx-chip:hover:not(.vcx-chip--on) { border-color: rgba(255, 255, 255, 0.22); color: var(--vcx-ink); }
+
+.vcx-root .vcx-chip--on {
+    background: rgba(124, 58, 237, 0.22);
+    border-color: var(--vcx-accent);
+    color: #fff;
+}
+
+.vcx-chip--all { font-weight: 600; }
+
+.vcx-more {
+    border: 1px solid var(--vcx-line);
+    border-radius: 12px;
+    padding: 4px 16px 8px;
+    margin-bottom: 6px;
+}
+
+.vcx-more summary {
+    cursor: pointer; min-height: 44px;
+    display: flex; align-items: center;
+    font-size: 14px; color: var(--vcx-ink-2);
+}
+
+/* ── Loading ───────────────────────────────────────────────────────────── */
+
+.vcx-loading { text-align: center; padding: 80px 20px; }
+
+.vcx-loading-title {
+    font-family: var(--v2-font-cormorant), 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700; font-size: clamp(30px, 6.5vw, 50px); margin: 0 0 10px;
+    letter-spacing: -0.02em; line-height: 1.1;
+}
+
+.vcx-loading-sub { color: var(--vcx-ink-2); margin: 0 0 28px; }
+
+.vcx-loading-bar {
+    max-width: 300px; height: 3px; margin: 0 auto;
+    background: var(--vcx-line); border-radius: 2px; overflow: hidden;
+}
+
+/* Determinate, not an indefinite spinner: it says how much longer. */
+.vcx-loading-bar span {
+    display: block; height: 100%; width: 100%;
+    background: var(--vcx-accent);
+    transform-origin: left;
+    animation: vcx-fill 1.8s ease-out forwards;
+}
+
+@keyframes vcx-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* ── Showcase ──────────────────────────────────────────────────────────── */
+
+.vcx-showcase { display: flex; flex-direction: column; gap: 18px; }
+
+.vcx-showcase-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 20px; flex-wrap: wrap;
+}
+
+.vcx-eyebrow {
+    margin: 0 0 6px; font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--vcx-accent-soft); font-weight: 700;
+}
+
+.vcx-showcase-title {
+    font-family: var(--v2-font-cormorant), 'Cormorant Garamond', Georgia, serif;
+    /* This is the line that changes as the carousel advances, so it is the
+       one carrying the whole panel. Same weight correction as .vcx-title. */
+    font-weight: 700;
+    font-size: clamp(28px, 5vw, 44px);
+    margin: 0 0 6px;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+}
+
+.vcx-showcase-blurb {
+    margin: 0;
+    color: var(--vcx-ink-2);
+    font-size: clamp(15px, 2vw, 17px);
+    line-height: 1.5;
+    max-width: 52ch;
+}
+
+.vcx-showcase-controls { display: flex; gap: 8px; flex: 0 0 auto; }
+
+.vcx-root .vcx-ctl {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--vcx-line);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--vcx-ink); cursor: pointer;
+}
+
+.vcx-root .vcx-ctl:hover { border-color: rgba(255, 255, 255, 0.24); }
+
+.vcx-frame {
+    border: 1px solid var(--vcx-line);
+    border-radius: 16px;
+    background: rgba(22, 14, 46, 0.7);
+    overflow: hidden;
+}
+
+.vcx-frame-bar {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--vcx-line);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.vcx-frame-bar > span:not(.vcx-frame-label) {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* Says it is sample data, on every panel, at all times. A demo screenshot
+   that could be mistaken for a real hospital's numbers is a claim we cannot
+   evidence. */
+.vcx-frame-label { margin-left: auto; font-size: 11.5px; color: var(--vcx-ink-2); }
+
+.vcx-frame-body { padding: 18px; min-height: 320px; }
+
+.vcx-panel-skeleton {
+    height: 300px; border-radius: 10px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+}
+
+.vcx-panel-note { margin: 14px 0 0; font-size: 13.5px; color: var(--vcx-ink-2); line-height: 1.55; }
+
+.vcx-dots { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+.vcx-root .vcx-dot {
+    /* 12px visible dot inside a 44px hit area, achieved with padding on a real
+       box rather than a pseudo-element. */
+    width: 44px; height: 32px; padding: 10px 16px;
+    background: none; border: none; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+}
+
+.vcx-dot::after {
+    content: ''; width: 100%; height: 3px; border-radius: 2px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.vcx-dot--on::after { background: var(--vcx-accent); }
+
+.vcx-cta {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; flex-wrap: wrap; padding-top: 6px;
+}
+
+.vcx-cta p { margin: 0 4px 0 0; color: var(--vcx-ink-2); font-size: 15px; width: 100%; text-align: center; }
+
+.vcx-root .vcx-cta-btn--primary {
+    background: var(--vcx-accent);
+    border-color: var(--vcx-accent);
+    color: #fff;
+}
+
+.vcx-root .vcx-cta-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 44px; padding: 0 20px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--vcx-line);
+    color: var(--vcx-ink); text-decoration: none; font-size: 15px; font-weight: 600;
+}
+
+.vcx-root .vcx-cta-btn:hover { border-color: var(--vcx-accent); }
+
+/* ── Panel internals ───────────────────────────────────────────────────── */
+
+.vcx-table-wrap { overflow-x: auto; }
+.vcx-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.vcx-table th {
+    text-align: left; padding: 8px 10px; font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--vcx-ink-2); border-bottom: 1px solid var(--vcx-line); font-weight: 600;
+}
+.vcx-table td { padding: 11px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.vcx-table td:last-child, .vcx-table th:last-child { text-align: right; }
+
+.vcx-pill {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 700; white-space: nowrap;
+}
+.vcx-pill--good { background: rgba(52, 211, 153, 0.16); color: var(--vcx-good); }
+.vcx-pill--warn { background: rgba(251, 191, 36, 0.16); color: var(--vcx-warn); }
+.vcx-pill--bad { background: rgba(248, 113, 113, 0.16); color: var(--vcx-bad); }
+.vcx-pill--info { background: rgba(96, 165, 250, 0.16); color: var(--vcx-info); }
+.vcx-pill--active { background: rgba(167, 139, 250, 0.18); color: var(--vcx-accent-soft); }
+.vcx-pill--muted { background: rgba(255, 255, 255, 0.08); color: var(--vcx-ink-2); }
+
+.vcx-stats { display: flex; gap: 26px; flex-wrap: wrap; margin-bottom: 18px; }
+.vcx-stat { display: flex; flex-direction: column; }
+.vcx-stat-num { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.vcx-stat-label { font-size: 12.5px; color: var(--vcx-ink-2); }
+
+.vcx-total {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--vcx-line);
+    font-size: 15px; color: var(--vcx-ink-2);
+}
+.vcx-total strong { font-size: 22px; color: var(--vcx-ink); font-variant-numeric: tabular-nums; }
+
+.vcx-emr { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.vcx-emr-block--wide { grid-column: 1 / -1; }
+.vcx-emr-block h5 {
+    margin: 0 0 6px; font-size: 11.5px; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--vcx-ink-2); font-weight: 600;
+}
+.vcx-emr-block p { margin: 0; font-size: 15px; }
+.vcx-icd {
+    font-size: 12px; padding: 2px 7px; border-radius: 5px;
+    background: rgba(255, 255, 255, 0.08); color: var(--vcx-ink-2); margin-left: 6px;
+}
+
+/* ── Bed map sandbox ───────────────────────────────────────────────────── */
+
+.vcx-beds { display: flex; flex-direction: column; gap: 14px; }
+.vcx-beds-bar { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; font-size: 13.5px; }
+.vcx-beds-stat { color: var(--vcx-ink); }
+.vcx-beds-stat strong { font-size: 17px; font-variant-numeric: tabular-nums; }
+.vcx-beds-hint { color: var(--vcx-accent-soft); }
+.vcx-ward-name { margin: 0 0 7px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--vcx-ink-2); font-weight: 600; }
+.vcx-bed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+
+.vcx-root .vcx-bed {
+    display: flex; flex-direction: column; gap: 2px; align-items: flex-start;
+    min-height: 72px; padding: 9px 11px;
+    border-radius: 10px; border: 1px solid var(--vcx-line);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--vcx-ink); font-family: inherit; text-align: left; cursor: pointer;
+}
+
+.vcx-bed-id { font-size: 10.5px; color: var(--vcx-ink-2); font-weight: 700; letter-spacing: 0.05em; }
+.vcx-bed-name { font-size: 13.5px; font-weight: 600; }
+.vcx-bed-days, .vcx-bed-free { font-size: 11.5px; color: var(--vcx-ink-2); }
+
+/* Occupancy carried by a left rule, and the patient name is always present -
+   never colour alone. */
+.vcx-root .vcx-bed--stable { border-left: 3px solid var(--vcx-good); }
+.vcx-root .vcx-bed--watch { border-left: 3px solid var(--vcx-warn); }
+.vcx-root .vcx-bed--critical { border-left: 3px solid var(--vcx-bad); }
+.vcx-root .vcx-bed--free { border-style: dashed; }
+.vcx-root .vcx-bed--held { outline: 2px solid var(--vcx-accent-soft); outline-offset: 1px; }
+.vcx-root .vcx-bed--target { background: rgba(124, 58, 237, 0.16); border-color: var(--vcx-accent); }
+
+/* ── Dental sandbox ────────────────────────────────────────────────────── */
+
+.vcx-dental { display: flex; flex-direction: column; gap: 16px; }
+.vcx-arch { display: flex; flex-direction: column; gap: 10px; }
+.vcx-arch-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.vcx-quad { display: flex; gap: 3px; }
+
+.vcx-root .vcx-tooth {
+    width: 30px; height: 40px;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 3px;
+    border-radius: 6px 6px 4px 4px;
+    border: 1px solid var(--vcx-line);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--vcx-ink-2);
+    font-family: inherit; font-size: 10px; cursor: pointer;
+}
+
+.vcx-root .vcx-tooth--caries { background: rgba(248, 113, 113, 0.3); border-color: var(--vcx-bad); color: #fff; }
+.vcx-root .vcx-tooth--filled { background: rgba(96, 165, 250, 0.3); border-color: var(--vcx-info); color: #fff; }
+.vcx-root .vcx-tooth--crown { background: rgba(251, 191, 36, 0.3); border-color: var(--vcx-warn); color: #fff; }
+.vcx-root .vcx-tooth--rct { background: rgba(167, 139, 250, 0.34); border-color: var(--vcx-accent-soft); color: #fff; }
+.vcx-root .vcx-tooth--missing { background: repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 3px, transparent 3px, transparent 6px); opacity: 0.55; }
+.vcx-root .vcx-tooth--watch { background: rgba(255, 255, 255, 0.14); }
+.vcx-root .vcx-tooth--sel { outline: 2px solid var(--vcx-accent-soft); outline-offset: 1px; }
+
+.vcx-tooth-detail { border: 1px solid var(--vcx-line); border-radius: 10px; padding: 12px 14px; background: rgba(255,255,255,0.03); }
+.vcx-tooth-detail-head { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+.vcx-tooth-detail-num { font-weight: 700; font-size: 15px; }
+.vcx-tooth-detail p { margin: 0; font-size: 14px; color: var(--vcx-ink-2); }
+.vcx-tooth-chip { font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: rgba(255,255,255,0.1); }
+.vcx-tooth-chip--caries { background: rgba(248, 113, 113, 0.2); color: var(--vcx-bad); }
+.vcx-tooth-chip--filled { background: rgba(96, 165, 250, 0.2); color: var(--vcx-info); }
+.vcx-tooth-chip--crown { background: rgba(251, 191, 36, 0.2); color: var(--vcx-warn); }
+.vcx-tooth-chip--rct { background: rgba(167, 139, 250, 0.2); color: var(--vcx-accent-soft); }
+
+.vcx-legend { display: flex; gap: 14px; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; font-size: 12px; color: var(--vcx-ink-2); }
+.vcx-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.vcx-legend-dot { width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--vcx-line); }
+/* The legend re-uses the .vcx-tooth--* state classes on a <span>, which the
+   .vcx-root-prefixed rules above still match, so the key stays in step with
+   the chart automatically. */
+
+/* ── Scribe sandbox ────────────────────────────────────────────────────── */
+
+.vcx-scribe { display: flex; flex-direction: column; gap: 14px; }
+.vcx-scribe-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+.vcx-root .vcx-scribe-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 44px; padding: 0 18px; border-radius: 999px;
+    border: 1px solid var(--vcx-accent); background: rgba(124, 58, 237, 0.2);
+    color: #fff; font-family: inherit; font-size: 14.5px; font-weight: 600; cursor: pointer;
+}
+
+.vcx-root .vcx-scribe-btn[disabled] { opacity: 0.6; cursor: default; }
+.vcx-scribe-note { font-size: 12.5px; color: var(--vcx-ink-2); }
+
+.vcx-wave { display: flex; align-items: center; gap: 2px; height: 56px; }
+.vcx-wave-bar { flex: 1; border-radius: 2px; background: rgba(255, 255, 255, 0.1); transition: background 200ms ease; }
+.vcx-wave-bar--on { background: var(--vcx-accent-soft); }
+
+.vcx-scribe-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.vcx-transcript h4, .vcx-note h4 {
+    margin: 0 0 8px; font-size: 11.5px; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--vcx-ink-2); font-weight: 600;
+}
+.vcx-line { margin: 0 0 8px; font-size: 14px; line-height: 1.5; }
+.vcx-line span { display: block; font-size: 11px; color: var(--vcx-ink-2); text-transform: uppercase; letter-spacing: 0.05em; }
+.vcx-line--doctor { color: var(--vcx-ink); }
+.vcx-line--patient { color: var(--vcx-ink-2); }
+.vcx-scribe-idle { margin: 0; font-size: 13.5px; color: var(--vcx-ink-2); }
+
+.vcx-note-body { margin: 0; display: flex; flex-direction: column; gap: 9px; }
+.vcx-note-body dt { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--vcx-ink-2); }
+.vcx-note-body dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; }
+
+.vcx-sr {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ── Demo QR ───────────────────────────────────────────────────────────── */
+
+.vcx-qr {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 16px;
+    border: 1px solid var(--vcx-line);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+/* A white plate under the code REGARDLESS of theme. A QR drawn on this page's
+   dark ground has inverted contrast, and most phone scanners simply will not
+   read it - which would make the one panel that is about scanning a QR the one
+   panel that fails to demonstrate it. */
+.vcx-qr-plate {
+    background: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    flex: 0 0 auto;
+    line-height: 0;
+}
+.vcx-qr-plate svg { width: 104px; height: 104px; display: block; }
+
+.vcx-qr-side { min-width: 0; flex: 1 1 200px; }
+.vcx-qr-title { margin: 0 0 4px; font-weight: 700; font-size: 15px; color: var(--vcx-ink); }
+.vcx-qr-note { margin: 0 0 6px; font-size: 13.5px; line-height: 1.45; color: var(--vcx-ink-2); }
+.vcx-qr-url {
+    margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+    color: var(--vcx-accent-soft);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+    /* The showcase header stacks: title above controls, rather than the title
+       being squeezed into whatever the buttons leave behind. */
+    .vcx-showcase-head { flex-direction: column; align-items: stretch; gap: 14px; }
+    .vcx-showcase-controls { justify-content: flex-end; }
+}
+
+@media (max-width: 720px) {
+    .vcx-row, .vcx-emr, .vcx-scribe-cols { grid-template-columns: 1fr; }
+    .vcx-card { padding: 24px 18px; border-radius: 18px; }
+    .vcx-frame-body { padding: 14px; min-height: 260px; }
+    .vcx-tooth { width: 26px; height: 34px; }
+
+    /* Full-width CTAs beat three buttons wrapping into ragged rows, and a
+       44px floor keeps every one of them a real tap target. */
+    .vcx-cta { flex-direction: column; align-items: stretch; }
+    .vcx-cta-btn { justify-content: center; min-height: 44px; }
+    .vcx-submit, .vcx-back { width: 100%; min-height: 48px; justify-content: center; }
+
+    .vcx-qr { gap: 14px; }
+    .vcx-qr-plate svg { width: 88px; height: 88px; }
+
+    /* Tables are the densest thing here. They already scroll horizontally;
+       this just stops the scroll starting immediately on a phone. */
+    .vcx-table { font-size: 13px; }
+    .vcx-table th, .vcx-table td { padding: 7px 8px; }
+
+    .vcx-loading { padding: 48px 16px; }
+    .vcx-dots { flex-wrap: wrap; }
+}
+
+@media (max-width: 480px) {
+    .vcx-card { padding: 20px 14px; }
+    /* Stacked, because side by side at this width leaves the caption about
+       four words per line. */
+    .vcx-qr { flex-direction: column; align-items: flex-start; }
+    .vcx-qr-plate { align-self: center; }
+    .vcx-frame-label { display: none; }
+    .vcx-showcase-controls .vcx-ctl { min-width: 44px; min-height: 44px; }
+}
+
+@media (max-width: 400px) {
+    .vcx-tooth { width: 21px; height: 30px; font-size: 8.5px; }
+    .vcx-stats { gap: 16px; }
+    .vcx-stat-num { font-size: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vcx-loading-bar span { animation-duration: 0.001ms; }
+    .vcx-chip, .vcx-wave-bar { transition-duration: 0.001ms; }
+}

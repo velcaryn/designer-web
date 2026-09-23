@@ -120,6 +120,42 @@ const CSP = [
     'upgrade-insecure-requests',
 ].join('; ');
 
+/*
+ * VelBiz Cloud (the ERP and its admin) gets its own policy, built as the
+ * site's policy with four additions and nothing else. Each is something the
+ * ERP genuinely does that the brochure site does not:
+ *
+ *   - img-src api.qrserver.com: document previews draw their verification
+ *     QR code from it (lib/pdfUtils.js qrCodeImg).
+ *   - style-src fonts.googleapis.com and font-src fonts.gstatic.com: the
+ *     document templates and the dashboard's print styles load their
+ *     typefaces from Google Fonts.
+ *   - form-action accounts.google.com: the admin sign-in form posts to
+ *     NextAuth, which redirects to Google, and Chrome applies form-action
+ *     to that redirect.
+ *
+ * Google Analytics is not loaded on these pages, so its hosts are dropped
+ * here rather than carried over. The routes it covers are listed in
+ * ERP_PATHS below; the marketing /cloud page and /cloud/onboarding keep the
+ * site policy.
+ */
+const ERP_CSP = CSP
+    .replace("img-src 'self' data: blob:", "img-src 'self' data: blob: https://api.qrserver.com")
+    .replace("font-src 'self' data:", "font-src 'self' data: https://fonts.gstatic.com")
+    .replace("style-src 'self' 'unsafe-inline'", "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com")
+    .replace("form-action 'self'", "form-action 'self' https://accounts.google.com")
+    .replace(" https://www.googletagmanager.com`", "`")
+    .replace(/script-src ([^;]*) https:\/\/www\.googletagmanager\.com/, 'script-src $1')
+    .replace(/connect-src 'self'[^;]*/, "connect-src 'self'");
+
+const ERP_PATHS = [
+    '/cloud/login',
+    '/cloud/dashboard/:path*',
+    '/cloud/doc/:path*',
+    '/admin/:path*',
+    '/api/auth/:path*',
+];
+
 const SECURITY_HEADERS = [
     /* Clickjacking. `frame-ancestors 'none'` in the CSP above supersedes
        this for modern browsers; this is what covers the older ones. */
@@ -155,6 +191,18 @@ const nextConfig = {
         formats: ['image/avif', 'image/webp'],
     },
     poweredByHeader: false,
+    /*
+     * The app has two root layouts: app/(site) is the marketing site and
+     * app/(erp) is VelBiz Cloud, the ERP and its admin. They share no CSS on
+     * purpose (Tailwind's preflight and the ERP's own reset would fight), and
+     * separate root layouts are what guarantee that: crossing between them
+     * is a full page load. With no single root layout there is nothing to
+     * compose a 404 from for an unmatched URL, so that page is
+     * app/global-not-found.js, which this flag enables.
+     */
+    experimental: {
+        globalNotFound: true,
+    },
     async redirects() {
         return [
             { source: '/newlanding', destination: '/', permanent: true },
@@ -169,6 +217,13 @@ const nextConfig = {
                 source: '/:path*',
                 headers: SECURITY_HEADERS,
             },
+            /* Declared after the site-wide entry on purpose: when two
+               entries set the same key for a path, the later one wins, so
+               these replace only the CSP on the ERP routes. */
+            ...ERP_PATHS.map((source) => ({
+                source,
+                headers: [{ key: 'Content-Security-Policy', value: ERP_CSP }],
+            })),
             /* The demo sites are sixteen fictional businesses. They must
                never be indexed: a fake bakery ranking for a real query is
                thin content at best, and at worst someone finds it without

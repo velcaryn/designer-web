@@ -39,6 +39,11 @@ export const contact = {
        hand-typed into a component, for the same reason `phone` is: one
        place to update if either changes. */
     emailContact: 'contact@velbiz.com',
+    /* A made-up number in the Indian mobile format, for input placeholders
+       and sample import rows in VelBiz Cloud. Lives here so no screen types
+       a phone-shaped string by hand, and so it can never be mistaken for,
+       or drift into, a real number. */
+    phonePlaceholder: '+91 98765 43210',
     emailInfo: 'info@velbiz.com',
     instagram: 'https://instagram.com/velbiz.digital',
     instagramHandle: '@velbiz.digital',

@@ -1,0 +1,182 @@
+/*
+ * SEED PAGES ARE EXCLUDED.
+ *
+ * Every selector below ends in `:where(:not(.sd-root, .sd-root *))`. The one
+ * public marketing page that lives under /connect (request-demo) is built on
+ * the Seed system inside this layout's .vc-app wrapper, and without the
+ * exclusion these resets -- `.vc-app input`, `.vc-app a`, `.vc-app button`,
+ * the header and footer rules, all at (0,1,1) -- outranked its (0,1,0)
+ * classes: near-black inputs, a blank Sign In button, a nav that stopped
+ * being sticky and a footer with no padding.
+ *
+ * :where() contributes ZERO specificity, so for every element in the HMS
+ * app itself these rules match exactly as before with exactly the same
+ * weight. The app never renders .sd-root.
+ */
+
+/*
+ * Scope boundary for the PRODUCT surfaces: Connect (connect/layout.js) and
+ * Cloud (cloud/dashboard/layout.js), both of which wrap their content in
+ * `<div class="vc-app">`. Nothing outside those trees is affected.
+ *
+ * It lived under src/app/connect/ and applied only to Connect, which is why
+ * Cloud carried the same bugs untouched: globals.css styles the marketing
+ * header on the bare element -
+ *
+ *     header { position: fixed; background-color: rgba(255,255,255,0.97); }
+ *
+ * so Cloud's own <header class="cloud-header"> rendered as a fixed, opaque
+ * WHITE bar across the top of every one of its 19 dashboard pages on a dark
+ * theme. One shared reset instead of two divergent copies.
+ *
+ * See docs/CONNECT_UI_REFACTOR_BASELINE.md for the original rationale:
+ * globals.css carries marketing-scale rules (h1 clamped to 3.75rem,
+ * header{position:fixed}) that were never meant for dense app screens.
+ *
+ * Deliberately NOT wrapped in @layer: CSS cascade layers always lose to
+ * unlayered rules regardless of specificity, and globals.css's h1/header
+ * rules are unlayered - an earlier version of this file used @layer and it
+ * was silently defeated every time (a PageHeader title rendered at the
+ * marketing clamp's ~60px instead of the intended 32px, invisibly, because
+ * the more-specific class selector still lost to the *unlayered* element
+ * selector). Plain CSS here relies on ordinary specificity instead: a class
+ * selector reliably beats a bare element selector without any layer needed.
+ *
+ * `.vc-reset-type` is opt-in (applied by <PageHeader>, not globally) -
+ * flipping every h1/h2/h3 in the app to inherit-size in one shot would
+ * visually break any page that hasn't migrated yet, with no screenshot rig
+ * to catch regressions. Phase 8 (subtractive sweep) promotes this to
+ * unconditional once every Connect page has migrated.
+ */
+
+.vc-app header:not(.v2-nav-header):where(:not(.sd-root, .sd-root *)) {
+    position: static;
+    z-index: auto;
+    background: none;
+    backdrop-filter: none;
+    box-shadow: none;
+    top: auto;
+    width: auto;
+}
+
+/*
+ * Same treatment for <footer>, and for the same reason. globals.css styles the
+ * marketing footer on the bare element:
+ *
+ *     footer { background-color: var(--secondary-color); padding: 4rem 0 0; }
+ *
+ * An unlayered element selector, so any Connect page that uses a semantic
+ * <footer> inherits a solid brand-purple slab with 4rem of top padding no
+ * matter what its own class says. That is exactly what appeared on the sign-in
+ * screen: a purple rectangle floating under the card, from markup that set no
+ * background at all. Found by reading computed styles, not by looking, because
+ * it reads as a design choice rather than a bug.
+ */
+.vc-app footer:where(:not(.sd-root, .sd-root *)) {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+}
+
+/* Neutralizes the marketing anchor color/underline-transition default
+   inside the app shell; components still set their own link color where
+   they need one. */
+.vc-app a:where(:not(.sd-root, .sd-root *)) {
+    color: inherit;
+    transition: none;
+}
+
+/*
+ * Baseline for native form controls.
+ *
+ * A bare <input>, <select> or <textarea> with no background declared is painted
+ * by the BROWSER, not by any stylesheet, and Chrome paints it white on every
+ * platform. On a dark theme that is a white slab with white-ish text, and no
+ * amount of theming elsewhere touches it because there is no rule to override -
+ * the same failure as a <button> that declares no background rendering as grey
+ * OS chrome. Cloud had these on its task, note, timeline and filter screens.
+ *
+ * Element selectors, so any component class (.vc-input, .cfb-input, an inline
+ * style) still wins on ordinary specificity. This is a floor, not a style.
+ */
+.vc-app input:where(:not(.sd-root, .sd-root *)),
+.vc-app select:where(:not(.sd-root, .sd-root *)),
+.vc-app textarea:where(:not(.sd-root, .sd-root *)) {
+    background-color: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    font-family: inherit;
+}
+
+/* Checkboxes and radios are drawn by the platform from accent-color; giving
+   them the surface background instead would erase the tick. */
+.vc-app input[type="checkbox"]:where(:not(.sd-root, .sd-root *)),
+.vc-app input[type="radio"]:where(:not(.sd-root, .sd-root *)) {
+    background-color: initial;
+    border: initial;
+    accent-color: var(--accent);
+}
+
+/* A button with no background of its own inherits the page rather than
+   rendering as an OS-grey (light mode) or white (dark mode) box. Anything that
+   wants to look like a button already declares its own fill. */
+.vc-app button:where(:not(.sd-root, .sd-root *)) {
+    background-color: transparent;
+    color: inherit;
+    font-family: inherit;
+}
+
+/* The native dropdown list is painted by the OS in its own colours, so its
+   options need a colour pair that works there rather than the app's. */
+.vc-app select option:where(:not(.sd-root, .sd-root *)) {
+    background-color: var(--surface);
+    color: var(--text-primary);
+}
+
+.vc-reset-type :is(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit;
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.vc-reset-type p {
+    margin: 0;
+    color: inherit;
+}
+
+/* Visible keyboard-focus ring everywhere in the app, not just on the
+   primitives that already declare their own (Button, Modal's close button).
+   Plain elements - links, native <button>/<select> not wrapped in a
+   primitive, clickable rows - get this as a baseline so keyboard navigation
+   is never silently invisible. Only fires for keyboard focus, not mouse
+   clicks, per :focus-visible semantics - which every browser this app
+   targets supports natively, so no JS input-source tracking is needed.
+
+   No border-radius override here (an earlier version hardcoded --radius-xs) -
+   that only matched elements that happen to use --radius-xs themselves; on
+   any button/pill with a larger radius (a rounded tab, a badge-style
+   button), the ring's smaller, squarer corners visibly poked out past the
+   element's own rounder corners, reading as a broken double border rather
+   than a focus ring. Leaving border-radius untouched here means the ring
+   just traces whatever radius the element's own rule already declared. */
+.vc-app a:focus-visible:where(:not(.sd-root, .sd-root *)),
+.vc-app button:focus-visible:where(:not(.sd-root, .sd-root *)),
+.vc-app input:focus-visible:where(:not(.sd-root, .sd-root *)),
+.vc-app select:focus-visible:where(:not(.sd-root, .sd-root *)),
+.vc-app textarea:focus-visible:where(:not(.sd-root, .sd-root *)),
+.vc-app [tabindex]:focus-visible:where(:not(.sd-root, .sd-root *)) {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vc-app *:where(:not(.sd-root, .sd-root *)),
+    .vc-app *:where(:not(.sd-root, .sd-root *))::before,
+    .vc-app *:where(:not(.sd-root, .sd-root *))::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}

@@ -1,0 +1,402 @@
+/*
+ * VelBiz Cloud Sign-in.
+ *
+ * A 70/30 split: brand and enterprise product showcase on the left, the sign-in form on the right.
+ * Deliberately outside the tenant theme system to present a unified brand front door.
+ */
+
+.vcl {
+    --ink: #F4F2FA;
+    --ink-2: rgba(244, 242, 250, 0.66);
+    --ink-3: rgba(244, 242, 250, 0.52);
+    --ground: #0A0616;
+    --panel: #120B26;
+    --line: rgba(255, 255, 255, 0.09);
+    --line-strong: rgba(255, 255, 255, 0.16);
+    --violet: #7C3AED;
+    --violet-soft: #A78BFA;
+    --teal-soft: #2DD4BF;
+
+    --r-surface: 14px;
+    --r-control: 10px;
+
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--v2-font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ── Left: brand and product stage ─────────────────────────────────────── */
+
+.vcl-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 48px 56px;
+    overflow: hidden;
+    border-right: 1px solid var(--line);
+}
+
+.vcl-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(58% 46% at 12% 8%, rgba(124, 58, 237, 0.30) 0%, transparent 72%),
+        radial-gradient(46% 42% at 88% 92%, rgba(13, 148, 136, 0.14) 0%, transparent 70%),
+        radial-gradient(80% 55% at 50% 108%, rgba(72, 38, 131, 0.42) 0%, transparent 72%);
+}
+
+.vcl-stage > * { position: relative; z-index: 1; }
+
+.vcl-brand { display: flex; flex-direction: column; gap: 14px; }
+.vcl-logo { align-self: flex-start; }
+
+.vcl-brand-line {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--violet-soft);
+}
+.vcl-brand-rule { flex: 1; height: 1px; background: var(--line); max-width: 180px; }
+
+/* ── The feature marquee ───────────────────────────────────────────────── */
+
+.vcl-feature { max-width: 760px; width: 100%; }
+
+.vcl-feature-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.vcl-feature-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(124, 58, 237, 0.2);
+    color: var(--violet-soft);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+.vcl-feature-label {
+    font-family: var(--v2-font-cormorant), 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(26px, 2.6vw, 38px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    text-wrap: balance;
+}
+
+.vcl-feature-blurb {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: clamp(15px, 1.3vw, 17px);
+    line-height: 1.55;
+    max-width: 48ch;
+}
+
+.vcl-feature-body { animation: vcl-fade 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes vcl-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Stagecard Mockup Chrome ───────────────────────────────────────────── */
+
+.vcl-stagecard {
+    margin-top: 24px;
+    background: rgba(18, 11, 38, 0.85);
+    border: 1px solid var(--line);
+    border-radius: var(--r-surface);
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(124, 58, 237, 0.08);
+}
+
+.vcl-stagecard-bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 16px;
+    background: rgba(10, 6, 22, 0.6);
+    border-bottom: 1px solid var(--line);
+}
+
+.vcl-stagecard-bar span:nth-child(1),
+.vcl-stagecard-bar span:nth-child(2),
+.vcl-stagecard-bar span:nth-child(3) {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.vcl-stagecard-label {
+    margin-left: 8px;
+    font-size: 11px;
+    color: var(--ink-3);
+    font-weight: 500;
+}
+
+.vcl-stagecard-body {
+    padding: 20px 24px;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.vcl-ticks {
+    display: flex;
+    gap: 6px;
+    margin-top: 26px;
+    padding: 0;
+    list-style: none;
+}
+.vcl .vcl-tick {
+    width: 26px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--line-strong);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.vcl .vcl-tick--on { background: var(--violet-soft); }
+
+/* ── Left footer ───────────────────────────────────────────────────────── */
+
+.vcl .vcl-foot,
+.vcl footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    background-color: transparent !important;
+    padding: 0 !important;
+}
+.vcl .vcl-foot a { color: var(--ink-2); text-decoration: none; }
+.vcl .vcl-foot a:hover { color: var(--ink); text-decoration: underline; }
+.vcl .vcl-foot-links { display: flex; gap: 18px; flex-wrap: wrap; }
+.vcl .vcl-foot-co { display: flex; flex-direction: column; gap: 4px; }
+.vcl .vcl-foot-name { color: var(--ink-2); font-weight: 600; }
+
+/* ── Right: form panel ─────────────────────────────────────────────────── */
+
+.vcl-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+    background: var(--panel);
+    position: relative;
+}
+
+.vcl-form-wrap {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+}
+
+.vcl-checking {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 340px;
+    color: var(--ink-2);
+    font-size: 14px;
+}
+
+.vcl-title {
+    font-family: var(--v2-font-cormorant), 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+}
+
+.vcl-sub {
+    margin: 0 0 28px;
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.vcl-form { display: flex; flex-direction: column; gap: 18px; }
+.vcl-field { display: flex; flex-direction: column; gap: 7px; }
+.vcl-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--violet-soft);
+}
+
+.vcl-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.vcl-input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--ink-3);
+    pointer-events: none;
+}
+
+.vcl .vcl-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 48px 12px 42px;
+    background: rgba(10, 6, 22, 0.7);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-control);
+    color: var(--ink);
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+}
+
+.vcl .vcl-input::placeholder { color: var(--ink-3); }
+.vcl .vcl-input:focus {
+    outline: none;
+    border-color: var(--violet);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.28);
+}
+.vcl .vcl-input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Autofill protection */
+.vcl .vcl-input:-webkit-autofill,
+.vcl .vcl-input:-webkit-autofill:hover,
+.vcl .vcl-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--ink);
+    -webkit-box-shadow: 0 0 0px 1000px #0e081e inset;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.vcl-pw-toggle {
+    position: absolute;
+    right: 4px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--ink-3);
+    cursor: pointer;
+    border-radius: 8px;
+}
+.vcl-pw-toggle:hover { color: var(--ink); }
+.vcl-pw-toggle:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--violet-soft); }
+
+.vcl-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(153, 27, 27, 0.25);
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    color: #fca5a5;
+    padding: 11px 13px;
+    border-radius: var(--r-control);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.vcl .vcl-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 4px;
+    background: linear-gradient(135deg, #7c3aed 0%, #6a3bb5 100%);
+    border: none;
+    border-radius: var(--r-control);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+    transition: filter 0.15s ease, transform 0.15s ease;
+}
+.vcl .vcl-submit:hover:not(:disabled) { filter: brightness(1.12); }
+.vcl .vcl-submit:active:not(:disabled) { transform: translateY(1px); }
+.vcl .vcl-submit:disabled { opacity: 0.7; cursor: progress; }
+.vcl .vcl-submit:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.55); }
+
+.vcl-trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 20px 0 0;
+    font-size: 12px;
+    color: var(--ink-3);
+    text-align: center;
+}
+
+.vcl-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: vcl-spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+@keyframes vcl-spin { to { transform: rotate(360deg); } }
+
+.vcl-help {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-2);
+}
+.vcl-help p { margin: 0 0 6px; }
+.vcl-help a {
+    color: var(--violet-soft);
+    text-decoration: none;
+    font-weight: 600;
+}
+.vcl-help a:hover { color: #ffffff; text-decoration: underline; }
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+    .vcl { grid-template-columns: 1fr; }
+    .vcl-stage { padding: 40px 32px; border-right: none; border-bottom: 1px solid var(--line); }
+    .vcl-panel { padding: 48px 24px; }
+}
+
+@media (max-width: 640px) {
+    .vcl-stage { padding: 32px 20px; gap: 28px; }
+    .vcl-stagecard { display: none; }
+    .vcl-panel { padding: 36px 18px; }
+    .vcl-title { font-size: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vcl-feature-body { animation: none; }
+    .vcl-spinner { animation-duration: 1.5s; }
+}

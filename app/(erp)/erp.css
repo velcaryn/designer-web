@@ -1,0 +1,1068 @@
+/*
+  VelBiz Cloud: global styles for the ERP and its admin area.
+
+  Imported only by app/(erp)/layout.js, the ERP's own root layout, so none of
+  this reaches the marketing site and none of the site's Tailwind reaches
+  here. It is the core of the stylesheet the ERP was built against (tokens,
+  the tenant theme set, typography, utilities, buttons); the old public-site
+  sections of that file were left behind.
+*/
+
+/*
+  Theme system - three ready-made professional options a tenant/client can pick
+  (see src/lib/themes.js for the canonical list + picker UI). "ledger" is the
+  original brand and stays the default (zero visual change for anyone who never
+  picks a theme). Every theme only overrides these 7 tokens - components must
+  read colors via var(--...) rather than hardcoding hex so a theme switch
+  actually changes the whole app. --shadow-md/lg and --section-border derive
+  from var(--primary-color) via color-mix() so they auto-adapt with no
+  per-theme override needed.
+*/
+:root {
+    --primary-color: #482683;
+    --primary-light: #6a3bb5;
+    --secondary-color: #2d1752;
+    --primary-faint: rgba(72, 38, 131, 0.06);
+    --text-main: #333333;
+    --text-muted: #6c757d;
+    --bg-white: #ffffff;
+    --bg-light: #f5f3f9;
+    --bg-dark: #121212;
+    --border-radius: 10px;
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* Two layers rather than one wide diffuse blur: the tight 1px layer draws
+       the actual edge, the 3px layer gives depth. A single `0 2px 8px` at 6%
+       spreads so thin it is imperceptible on an uncalibrated display, which
+       (together with the old --border value) is what made every card read as
+       floating with no edge on Windows. */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.09);
+    --shadow-md: 0 10px 25px color-mix(in srgb, var(--primary-color) 12%, transparent);
+    --shadow-lg: 0 20px 40px color-mix(in srgb, var(--secondary-color) 15%, transparent);
+    --section-border: 1px solid color-mix(in srgb, var(--primary-color) 10%, transparent);
+
+    /* ── Tier 1: primitive scales - pure numbers, never theme-overridden ── */
+    --space-0: 0;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    --text-xs: 12px;
+    --text-sm: 13px;
+    --text-base: 14px;
+    --text-lg: 16px;
+    --text-xl: 20px;
+    --text-2xl: 24px;
+    --text-3xl: 32px;
+    --text-4xl: 40px;
+    --leading-tight: 1.25;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.7;
+    --weight-normal: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --radius-full: 999px;
+
+    --z-base: 0;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-overlay: 900;
+    --z-modal: 1000;
+    --z-popover: 1100;
+    --z-toast: 1200;
+
+    --dur-fast: 0.15s;
+    --dur-base: 0.25s;
+    --dur-slow: 0.4s;
+    --ease-out: cubic-bezier(0.25, 0.8, 0.25, 1);
+    --border-width: 1px;
+
+    /* ── Tier 2: semantic tokens - the only colors app code (Connect) may
+       reference. Each theme below overrides ~11 of these; everything else
+       derives via color-mix() so the derivation is defined once, here. ── */
+    --surface-page: var(--bg-light);
+    --surface: var(--bg-white);
+    --surface-raised: var(--bg-white);
+    --surface-sunken: color-mix(in srgb, var(--bg-light) 60%, var(--bg-white) 40%);
+    --surface-inverse: var(--secondary-color);
+    --surface-hover: color-mix(in srgb, var(--primary-color) 6%, var(--bg-white) 94%);
+    --surface-selected: color-mix(in srgb, var(--primary-color) 10%, var(--bg-white) 90%);
+
+    /* 22%, not the original 12%. At 12% this resolved to #E7E7E7 on a white
+       card - a 1.24:1 contrast ratio, which macOS's colour-managed Retina
+       rendering draws as a crisp hairline but a typical uncalibrated Windows
+       or Linux panel loses entirely, so every card, table, and input looked
+       borderless and "floating". 22% resolves to about #D2D2D2 (~1.5:1),
+       which holds up on an uncalibrated display while still reading as a
+       hairline rather than a heavy rule. Verified against all three themes:
+       on the dark `command` theme the same 22% mix lands on rgb(62,68,86),
+       visible against its #141B2E surface. Do not lower these without
+       checking on a non-Mac display - the target users are ~99% Windows. */
+    --border: color-mix(in srgb, var(--text-main) 22%, var(--bg-white) 78%);
+    --border-strong: color-mix(in srgb, var(--text-main) 38%, var(--bg-white) 62%);
+    --border-focus: var(--primary-color);
+
+    --text-primary: var(--text-main);
+    --text-secondary: var(--text-muted);
+    --text-tertiary: color-mix(in srgb, var(--text-muted) 70%, var(--bg-white) 30%);
+    --text-on-accent: #ffffff;
+    --text-inverse: #ffffff;
+
+    --accent: var(--primary-color);
+    --accent-hover: var(--primary-light);
+    /* Mixed against the surface rather than the fixed
+       --primary-faint: rgba(72,38,131,.06). That literal was authored for a
+       white page and is defined exactly once, never per theme, so on all four
+       dark themes it painted a 6%-opacity dark purple onto an already dark
+       surface: effectively invisible. Every selected state that depends on it
+       (active config tab, chips, focus ring) therefore had almost no visible
+       fill on the default theme. Mixing against --bg-white makes it track
+       whichever theme is active, light or dark. */
+    --accent-subtle: color-mix(in srgb, var(--primary-color) 20%, var(--bg-white) 80%);
+    --accent-contrast: #ffffff;
+
+    --shadow-color: var(--primary-color);
+
+    --focus-ring: 0 0 0 3px var(--accent-subtle);
+
+    /* ── App chrome (Connect/Cloud left rail, brand mark) ──────────────────
+       The rail used to hardcode a bright purple gradient plus `color: white`
+       and rgba(255,255,255,...) nav text. That is only correct on a dark
+       theme: under the light Bedside theme it rendered white text on a light
+       rail, and the white brand SVG disappeared entirely. Driving the rail
+       from tokens is what lets one stylesheet serve both a dark and a light
+       theme, which is the whole point of having a theme system.
+
+       Deliberately NOT color-mix(): a browser that cannot parse it drops the
+       entire background declaration, which is the documented "purple missing
+       from the left rail" failure. Plain stops degrade to a flat colour. */
+    --rail-from: var(--surface-raised);
+    --rail-mid: var(--surface);
+    --rail-to: var(--bg-light);
+    --rail-border: var(--border);
+    --rail-text: var(--text-primary);
+    --rail-text-muted: var(--text-secondary);
+
+    /* Interaction states are rail-specific rather than the page's
+       --surface-hover / --accent-subtle. A light theme wants a COLOURED rail
+       (see the shared light-rail block further down), and on that rail the
+       page's pale hover wash would be invisible. Dark themes point these back
+       at the page tokens, so nothing changes for them. */
+    --rail-hover: var(--surface-hover);
+    --rail-active-bg: var(--accent-subtle);
+    --rail-active-bar: var(--accent);
+
+    /* The brand SVG ships white, so dark themes need no filter. Light themes
+       flip it to near-black; brightness(0) renders any source colour black. */
+    --logo-filter: none;
+
+    /* ── Status tones ──────────────────────────────────────────────────────
+     *
+     * Only the -fg of each pair is a literal. The -bg and -border are MIXED
+     * from that -fg against the current surface, so a theme that overrides the
+     * foreground gets a matching background for free.
+     *
+     * They used to be three independent literals per tone, and every dark theme
+     * overrode the -fg only. The backgrounds therefore stayed at their
+     * light-mode values on dark screens, which produced the two worst
+     * legibility failures in the product: a "Completed" pill drew light-green
+     * #4ade80 text on light-green #dcfce7, and the bulk-import DPDP warning drew
+     * yellow #facc15 on pale-yellow #fef9c3. Both were effectively invisible.
+     *
+     * 15% keeps the fill a tint rather than a block; 45% on the border keeps the
+     * outline legible without ringing the pill in saturated colour. Because the
+     * mix target is --bg-white, the same declaration produces a pale tint on the
+     * light theme and a deep tint on the dark ones.
+     */
+    --status-success-fg: #166534;
+    --status-success-bg: color-mix(in srgb, var(--status-success-fg) 15%, var(--bg-white) 85%);
+    --status-success-border: color-mix(in srgb, var(--status-success-fg) 45%, var(--bg-white) 55%);
+    --status-warning-fg: #854d0e;
+    --status-warning-bg: color-mix(in srgb, var(--status-warning-fg) 15%, var(--bg-white) 85%);
+    --status-warning-border: color-mix(in srgb, var(--status-warning-fg) 45%, var(--bg-white) 55%);
+    --status-danger-fg: #991b1b;
+    --status-danger-bg: color-mix(in srgb, var(--status-danger-fg) 15%, var(--bg-white) 85%);
+    --status-danger-border: color-mix(in srgb, var(--status-danger-fg) 45%, var(--bg-white) 55%);
+    --status-info-fg: #1e3a8a;
+    --status-info-bg: color-mix(in srgb, var(--status-info-fg) 15%, var(--bg-white) 85%);
+    --status-info-border: color-mix(in srgb, var(--status-info-fg) 45%, var(--bg-white) 55%);
+    --status-active-fg: #9a3412;
+    --status-active-bg: color-mix(in srgb, var(--status-active-fg) 15%, var(--bg-white) 85%);
+    --status-active-border: color-mix(in srgb, var(--status-active-fg) 45%, var(--bg-white) 55%);
+    --status-neutral-fg: #475569;
+    --status-neutral-bg: color-mix(in srgb, var(--status-neutral-fg) 15%, var(--bg-white) 85%);
+    --status-neutral-border: color-mix(in srgb, var(--status-neutral-fg) 45%, var(--bg-white) 55%);
+}
+
+/*
+ * Fallback for browsers/environments where color-mix() fails to parse -
+ * Chrome <111, Firefox <113, Safari <16.4, and (the real risk for this app)
+ * any frozen/locked-down enterprise browser build, which hospital IT
+ * departments are known to run for years past a normal update cadence. This
+ * matters more here than on a typical consumer site: when a browser can't
+ * parse color-mix(), the ENTIRE declaration that calls it is dropped, not
+ * just that one color - a `background: linear-gradient(..., color-mix(...))`
+ * loses its whole background (not just a wrong tint), and a
+ * `border: 1px solid var(--border)` where --border resolves to an unparsed
+ * color-mix() computes to the guaranteed-invalid value, which drops the
+ * border entirely. That is the exact "boxes missing their border completely"
+ * / "purple missing from the left rail" failure mode.
+ *
+ * These fallbacks are deliberately plain, neutral-toned values, not a
+ * brand-accurate re-derivation (that would need color-mix() itself) - the
+ * goal is that every border/shadow/surface stays visible, not that it stays
+ * pixel-perfect, in an environment old enough to hit this branch at all.
+ * Keep this block in sync whenever a new color-mix()-based token is added
+ * to the :root block above.
+ */
+@supports not (color: color-mix(in srgb, red, blue)) {
+    :root {
+        --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.14);
+        --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.18);
+        --section-border: 1px solid rgba(0, 0, 0, 0.10);
+
+        --surface-sunken: #f2f1f5;
+        --surface-hover: #f5f3f9;
+        --surface-selected: #ece8f5;
+        --accent-subtle: #e4dcf3;
+
+        /* Status fills, which are color-mix() in the block above. These are the
+           original light-theme literals, correct here because this branch only
+           runs on engines too old to parse color-mix() and the themes below
+           restate them for dark. */
+        --status-success-bg: #dcfce7; --status-success-border: #16653440;
+        --status-warning-bg: #fef9c3; --status-warning-border: #854d0e40;
+        --status-danger-bg: #fee2e2;  --status-danger-border: #991b1b40;
+        --status-info-bg: #dbeafe;    --status-info-border: #1e3a8a40;
+        --status-active-bg: #fed7aa;  --status-active-border: #9a341240;
+        --status-neutral-bg: #f1f5f9; --status-neutral-border: #47556940;
+
+        /* Kept in step with the 22%/38% mixes in :root above - see the
+           contrast note there for why these are not lighter. */
+        --border: #d2d2d8;
+        --border-strong: #b1b1b8;
+        --text-tertiary: #8a8a92;
+    }
+
+    :root[data-theme="command"] {
+        --surface-raised: #1a2338;
+        --surface-sunken: #0e1526;
+        --surface-hover: #17203a;
+        --surface-selected: #202b4a;
+        --accent-subtle: #1c2f56;
+        --border: #2c3757;
+        --border-strong: #46527a;
+        --text-tertiary: #a2a9c4;
+    
+        --status-success-bg: #0d2a1c; --status-warning-bg: #2a2411; --status-danger-bg: #2b1516;
+        --status-info-bg: #16233f; --status-active-bg: #2c1c12; --status-neutral-bg: #1a2233;
+    }
+
+    /* The default (Velvet) theme is dark, so the light-toned :root fallbacks
+       above are wrong for it. Without this block a browser lacking color-mix()
+       renders the shipped default with a near-white border and an almost
+       invisible accent wash. */
+    :root, :root[data-theme="velvet"], :root[data-theme="ledger"] {
+        --surface-sunken: #0d0722;
+        --surface-hover: #1d1340;
+        --surface-selected: #26194f;
+        --accent-subtle: #2a1a4d;
+        --border: #3a3050;
+        --border-strong: #574a72;
+        --text-tertiary: #7d8598;
+    
+        --status-success-bg: #0f2a19; --status-warning-bg: #2a2410; --status-danger-bg: #2b1414;
+        --status-info-bg: #131f3a; --status-active-bg: #2c1a10; --status-neutral-bg: #1a2130;
+    }
+
+    :root[data-theme="emerald"] {
+        --surface-sunken: #041915;
+        --surface-hover: #0a3128;
+        --surface-selected: #0d3f33;
+        --accent-subtle: #0b3a2c;
+        --border: #23483f;
+        --border-strong: #3d6a5d;
+        --text-tertiary: #86a79c;
+    
+        --status-success-bg: #0c2b1d; --status-warning-bg: #2a2712; --status-danger-bg: #2c1616;
+        --status-info-bg: #152338; --status-active-bg: #2d1c12; --status-neutral-bg: #1b2a26;
+    }
+
+    :root[data-theme="gold"] {
+        --surface-sunken: #100e0a;
+        --surface-hover: #241d12;
+        --surface-selected: #2e2415;
+        --accent-subtle: #3a2c12;
+        --border: #453a26;
+        --border-strong: #6b5a3a;
+        --text-tertiary: #b5a68a;
+    
+        --status-success-bg: #122614; --status-warning-bg: #2e2711; --status-danger-bg: #2d1614;
+        --status-info-bg: #152238; --status-active-bg: #2f1d10; --status-neutral-bg: #22201a;
+    }
+
+    /* --border-strong, not the old literal #cbd5e1: that light grey was the
+       shimmer's bright band, so on any of the four dark themes the "loading"
+       state flashed a near-white bar across a dark screen. --border-strong is
+       defined per theme in the blocks above, so it stays a step lighter than
+       the surface without ever being white. */
+    .skeleton-shimmer {
+        background: linear-gradient(90deg, var(--bg-light) 25%, var(--border-strong) 50%, var(--bg-light) 75%);
+    }
+}
+
+/* Ledger - the original brand, executed properly. Explicit block (identical to
+   :root above) so switching back to it after another theme is a real, provable
+   reset rather than relying on inheritance. */
+/* ── Blockbuster 5-Theme System ── */
+
+/* Velvet Midnight (Default Blockbuster Velvet Dark Theme)
+ *
+ * Values are taken from the landing page's palette in
+ * src/components/landing/landing.css rather than picked to look similar, so the
+ * marketing site and the product read as one surface. The mapping:
+ *
+ *   --bg-light      #090514  = landing --v2-bg-dark        (page ground)
+ *   --bg-white      #160e2e  = landing --v2-bg-card-dark   (card, opaque)
+ *   --surface-raised #23164a = landing --v2-bg-card-hover  (elevated card)
+ *
+ * --surface-raised previously resolved to rgba(18,11,38,.85), which is
+ * --bg-white with transparency: over a --bg-light page it composited to almost
+ * exactly the card colour, so "raised" surfaces were invisible and every card,
+ * modal and popover sat flat on the background with only a hairline to separate
+ * it. Elevation has to be a different colour, not the same colour at lower
+ * alpha.
+ *
+ * --text-muted is slate (#94a3b8), matching landing's --v2-text-muted-light,
+ * not the violet #a78bfa it used to be. Violet is the accent; when secondary
+ * text also rendered violet, every label competed with the actual accents and
+ * the whole app read purple-washed. Violet stays available as --accent.
+ */
+:root, :root[data-theme="velvet"], :root[data-theme="ledger"] {
+    --primary-color: #7c3aed;
+    --primary-light: #a78bfa;
+    --secondary-color: #482683;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --bg-white: #160e2e;
+    --bg-light: #090514;
+    --display-font: var(--v2-font-cormorant), 'Cormorant Garamond', Georgia, serif;
+    --surface-raised: #23164a;
+    --surface-inverse: #090514;
+    --text-on-accent: #ffffff;
+    --status-success-fg: #4ade80;
+    --status-warning-fg: #facc15;
+    --status-danger-fg: #f87171;
+    --status-info-fg: #60a5fa;
+    --status-active-fg: #fb923c;
+    --status-neutral-fg: #94a3b8;
+}
+
+/* Command Navy (Cyber Indigo & Cobalt Glass) */
+:root[data-theme="command"] {
+    --primary-color: #3b82f6;
+    --primary-light: #60a5fa;
+    --secondary-color: #1d4ed8;
+    --text-main: #f8fafc;
+    --text-muted: #93c5fd;
+    --bg-white: #0f172a;
+    --bg-light: #090d16;
+    --display-font: 'Inter', sans-serif;
+    --surface-raised: #1e293b;
+    --surface-inverse: #090d16;
+    --text-on-accent: #ffffff;
+    --status-success-fg: #4ade80;
+    --status-warning-fg: #facc15;
+    --status-danger-fg: #f87171;
+    --status-info-fg: #93c5fd;
+    --status-active-fg: #fb923c;
+    --status-neutral-fg: #94a3b8;
+}
+
+/* Obsidian Emerald (Clinical Mint & Deep Jade) */
+:root[data-theme="emerald"] {
+    --primary-color: #10b981;
+    --primary-light: #34d399;
+    --secondary-color: #047857;
+    --text-main: #ecfdf5;
+    --text-muted: #6ee7b7;
+    --bg-white: #06231e;
+    --bg-light: #041613;
+    --display-font: 'Inter', sans-serif;
+    --surface-raised: #064e3b;
+    --surface-inverse: #041613;
+    --text-on-accent: #ffffff;
+    --status-success-fg: #34d399;
+    --status-warning-fg: #facc15;
+    --status-danger-fg: #f87171;
+    --status-info-fg: #60a5fa;
+    --status-active-fg: #fb923c;
+    --status-neutral-fg: #94a3b8;
+}
+
+/* Imperial Gold (Luxury Jet Black & Amber Gold) */
+:root[data-theme="gold"] {
+    --primary-color: #f59e0b;
+    --primary-light: #fbbf24;
+    --secondary-color: #b45309;
+    --text-main: #fffbeb;
+    --text-muted: #fcd34d;
+    --bg-white: #17140f;
+    --bg-light: #0d0b08;
+    --display-font: var(--v2-font-cormorant), serif;
+    --surface-raised: #261e14;
+    --surface-inverse: #0d0b08;
+    --text-on-accent: #000000;
+    --status-success-fg: #4ade80;
+    --status-warning-fg: #fbbf24;
+    --status-danger-fg: #f87171;
+    --status-info-fg: #60a5fa;
+    --status-active-fg: #fb923c;
+    --status-neutral-fg: #94a3b8;
+}
+
+/* Bedside Pearl (Clinical Day Light Mode) */
+/* ── Light themes ──────────────────────────────────────────────────────────
+ *
+ * Three of them, against four dark, so a hospital that wants a bright screen
+ * has a real choice rather than one grudging option. Daylight wards and older
+ * monitors are common, and staff who find dark screens harder to read should
+ * not be picking from a single theme.
+ *
+ * All three keep a COLOURED left rail with white text rather than going white
+ * on white. A fully white rail was technically correct and looked like an
+ * unbranded admin panel: the rail is the one piece of persistent chrome on
+ * every screen, so it is where the brand actually lives. The page stays light;
+ * only the rail is saturated.
+ */
+:root[data-theme="bedside"] {
+    --primary-color: #482683;
+    --primary-light: #6a3bb5;
+    --secondary-color: #2d1752;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --bg-white: #ffffff;
+    --bg-light: #f6f4fb;
+    --display-font: var(--v2-font-cormorant), 'Cormorant Garamond', Georgia, serif;
+    --surface-raised: #ffffff;
+    --surface-inverse: #2d1752;
+    --text-on-accent: #ffffff;
+    --rail-from: #3b1d6e;
+    --rail-mid: #2d1752;
+    --rail-to: #1e0f38;
+}
+
+/* Meridian Teal - clinical and calm, the register most hospital software
+   reaches for, done properly rather than as washed-out mint. */
+:root[data-theme="meridian"] {
+    --primary-color: #0f766e;
+    --primary-light: #14b8a6;
+    --secondary-color: #115e59;
+    --text-main: #12312e;
+    --text-muted: #5c7a76;
+    --bg-white: #ffffff;
+    --bg-light: #f2f8f7;
+    --display-font: 'Inter', sans-serif;
+    --surface-raised: #ffffff;
+    --surface-inverse: #115e59;
+    --text-on-accent: #ffffff;
+    --rail-from: #12706a;
+    --rail-mid: #0f5f5a;
+    --rail-to: #0b4744;
+}
+
+/* Daylight Slate - the most neutral option. No brand hue in the page at all,
+   for anyone who wants the interface to disappear behind the data. */
+:root[data-theme="daylight"] {
+    --primary-color: #1d4ed8;
+    --primary-light: #3b82f6;
+    --secondary-color: #1e3a8a;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --bg-white: #ffffff;
+    --bg-light: #f1f5f9;
+    --display-font: 'Inter', sans-serif;
+    --surface-raised: #ffffff;
+    --surface-inverse: #1e293b;
+    --text-on-accent: #ffffff;
+    --rail-from: #24356b;
+    --rail-mid: #1b2a55;
+    --rail-to: #131f40;
+}
+
+/*
+ * Shared light-theme rail. Grouped because the rail is dark on all three, so
+ * its text, borders and interaction states are the same regardless of the hue
+ * chosen above. This is also why --logo-filter is NOT set here: the brand SVG
+ * ships white, and on a saturated rail white is exactly what it should be.
+ */
+:root[data-theme="bedside"],
+:root[data-theme="meridian"],
+:root[data-theme="daylight"] {
+    /*
+     * Status foregrounds, declared once for all three light themes rather than
+     * repeated in each. They are a step darker than the obvious Tailwind-600
+     * picks (#15803d, #a16207, #c2410c) because the -bg is mixed FROM the -fg:
+     * a mid-tone green on a tint of itself measured 4.09:1, just under the 4.5
+     * AA floor for the small bold text a status pill uses. Darkening the
+     * foreground raises the pair to a comfortable pass without changing the hue
+     * anyone recognises.
+     */
+    --status-success-fg: #14532d;
+    --status-warning-fg: #713f12;
+    --status-danger-fg: #991b1b;
+    --status-info-fg: #1e3a8a;
+    --status-active-fg: #7c2d12;
+    --status-neutral-fg: #334155;
+
+    --rail-border: rgba(255, 255, 255, 0.16);
+    --rail-text: #ffffff;
+    --rail-text-muted: rgba(255, 255, 255, 0.72);
+    --rail-hover: rgba(255, 255, 255, 0.12);
+    --rail-active-bg: rgba(255, 255, 255, 0.18);
+    --rail-active-bar: #ffffff;
+    --logo-filter: none;
+}
+
+
+
+
+/* ── Skeleton Loader ─────────────────────────────────────────── */
+@keyframes skeletonShimmer {
+    0% {
+        background-position: 200% center;
+    }
+
+    100% {
+        background-position: -200% center;
+    }
+}
+
+.skeleton-pulse {
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.6s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+/* Theme-aware variant used across Cloud/Connect - tracks whichever of the
+   three themes (Ledger/Bedside/Command) is active via CSS vars, so the same
+   markup shimmers correctly in both light and dark palettes. */
+.skeleton-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bg-light) 25%,
+        color-mix(in srgb, var(--text-muted) 22%, var(--bg-white) 78%) 50%,
+        var(--bg-light) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.6s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+/* ── PDP Skeleton Layout ─────────────────────────────────────── */
+.pdp-skeleton-wrapper {
+    padding: 2rem 0 4rem;
+}
+
+.pdp-skeleton-breadcrumb {
+    height: 18px;
+    width: 280px;
+    margin-bottom: 2rem;
+}
+
+.pdp-skeleton-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.pdp-skeleton-image {
+    height: 420px;
+    width: 100%;
+    border-radius: 12px;
+}
+
+.pdp-skeleton-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.pdp-skeleton-title {
+    height: 36px;
+    width: 80%;
+}
+
+.pdp-skeleton-badge {
+    height: 24px;
+    width: 140px;
+    border-radius: 20px;
+}
+
+.pdp-skeleton-id {
+    height: 16px;
+    width: 120px;
+}
+
+.pdp-skeleton-btn {
+    height: 48px;
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.pdp-skeleton-desc-title {
+    height: 28px;
+    width: 160px;
+    margin-bottom: .75rem;
+}
+
+.pdp-skeleton-desc-line {
+    height: 14px;
+    margin-bottom: .5rem;
+}
+
+@media (max-width: 768px) {
+    .pdp-skeleton-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pdp-skeleton-image {
+        height: 260px;
+    }
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: var(--text-main);
+    line-height: 1.6;
+    background-color: var(--bg-white);
+    overflow-x: hidden;
+}
+
+/*
+ * SCROLLBARS
+ *
+ * Nothing styled these before, so every scroll surface rendered the raw OS
+ * scrollbar - 17px of chrome on Windows, and a permanently visible bar on any
+ * Mac driven by a mouse rather than a trackpad. On a sidebar that is already
+ * narrow, that is a real bite out of the usable width.
+ *
+ * WHY THE STANDARD PROPERTIES AND NOT ::-webkit-scrollbar. The obvious fix is
+ * the webkit pseudo-elements, and it has a trap: defining ::-webkit-scrollbar
+ * at all opts the element OUT of macOS overlay scrollbars, so a Mac that
+ * currently shows a bar only while scrolling starts showing one permanently.
+ * Styling the scrollbar to be less intrusive would make it MORE intrusive for
+ * exactly the users least bothered by it.
+ *
+ * `scrollbar-width` / `scrollbar-color` have no such side effect - they set the
+ * width and colour of a scrollbar the platform was going to draw anyway, and
+ * leave the show/hide behaviour alone. They are supported in Firefox 64+,
+ * Chrome 121+ and Safari 18.2+.
+ *
+ * The pseudo-element block below is therefore fenced behind @supports NOT, so
+ * only older engines - which never had overlay scrollbars to lose - reach it.
+ *
+ * Colour comes from --text-muted, which every theme already redefines, so the
+ * thumb re-themes with everything else and never needs a per-theme override.
+ */
+* {
+    scrollbar-width: thin;
+    /* Dim at rest, so a long page is not framed by a hard line. The track is
+       transparent rather than tinted: a visible groove on every scrollable card
+       in a dense UI reads as clutter. */
+    scrollbar-color: color-mix(in srgb, var(--text-muted) 38%, transparent) transparent;
+}
+
+/*
+ * Stronger once the pointer is in a scrolling region: quiet while you read,
+ * obvious the moment you might reach for it. On hover of the CONTAINER rather
+ * than the bar, because an 8px target is not something anyone finds by accident.
+ *
+ * Deliberately NOT written as `*:hover`. That was the first attempt and it is
+ * wrong twice over: it made every element on the page a hover-sensitive style
+ * target, forcing a recalc across the subtree on every mouse move, and it did
+ * not even work - measured in Chromium, a universal hover rule left the
+ * computed scrollbar-color unchanged, while the class-scoped rules below apply
+ * correctly. Listing the real scroll containers costs one line each and is both
+ * faster and verifiable.
+ */
+.vcs-main:hover,
+.vc-table-wrap:hover,
+.vcs-notif-panel-list:hover,
+.ro-scroll:hover,
+.vc-modal:hover {
+    scrollbar-color: color-mix(in srgb, var(--text-muted) 62%, transparent) transparent;
+}
+
+/*
+ * The sidebar rail carries its own dark ground in most themes, where a thumb
+ * mixed from the page's --text-muted is close to invisible. --rail-text-muted
+ * is the token that tracks the rail rather than the page.
+ */
+.vcs-sidebar {
+    scrollbar-color: color-mix(in srgb, var(--rail-text-muted) 42%, transparent) transparent;
+}
+
+.vcs-sidebar:hover {
+    scrollbar-color: color-mix(in srgb, var(--rail-text-muted) 70%, transparent) transparent;
+}
+
+@supports not (scrollbar-width: thin) {
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, var(--text-muted) 38%, transparent);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: color-mix(in srgb, var(--text-muted) 62%, transparent);
+    }
+
+    /* Without this the two bars meet in a small filled square in the corner. */
+    ::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+
+    .vcs-sidebar::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, var(--rail-text-muted) 42%, transparent);
+    }
+
+    .vcs-sidebar::-webkit-scrollbar-thumb:hover {
+        background: color-mix(in srgb, var(--rail-text-muted) 70%, transparent);
+    }
+}
+
+/*
+ * Typography pairings. A hospital picks one in Hospital Config > Branding
+ * (connect_clients.branding.fontPairing); ConnectShell stamps the choice onto
+ * <html data-font="...">.
+ *
+ * "modern" = Instrument Serif for h1/h2 only, Inter everywhere else. Kept as
+ * an OPT-IN setting rather than a new default so an existing hospital's
+ * screens do not change typeface under them without anyone choosing it. The
+ * face is loaded by next/font in layout.js (self-hosted, preloaded), so this
+ * is a variable swap with no network request and no layout shift.
+ *
+ * Deliberately scoped to h1/h2: a serif at body or button size costs
+ * legibility on the dense clinical tables this app is mostly made of, which
+ * is exactly where a "nice" typeface stops being nice.
+ */
+:root[data-font="modern"] {
+    --display-font: var(--font-instrument-serif), Georgia, serif;
+}
+:root[data-font="modern"] h1,
+:root[data-font="modern"] h2 {
+    font-family: var(--font-instrument-serif), Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+}
+
+/*
+ * ── Density ────────────────────────────────────────────────────────────────
+ *
+ * A per-user preference (localStorage, stamped onto <html data-density>), not
+ * a tenant setting: whether a ward clerk wants more rows on screen has nothing
+ * to do with which hospital they work for, and two people at one desk can
+ * legitimately disagree.
+ *
+ * It re-scales the spacing ramp rather than restyling components, so every
+ * screen that already spends --space-* tokens responds without touching a
+ * single component file. Type size is deliberately NOT reduced: shrinking text
+ * to fit more rows is how dense clinical UI becomes unreadable, and the
+ * failure mode there is a misread dose, not an ugly screen. Only the air
+ * between things changes.
+ */
+:root[data-density="compact"] {
+    --space-2: 6px;
+    --space-3: 8px;
+    --space-4: 12px;
+    --space-5: 14px;
+    --space-6: 16px;
+    --space-8: 22px;
+    --space-10: 28px;
+    --space-12: 34px;
+    --space-16: 44px;
+}
+
+:root[data-density="spacious"] {
+    --space-3: 14px;
+    --space-4: 20px;
+    --space-5: 26px;
+    --space-6: 32px;
+    --space-8: 42px;
+    --space-10: 52px;
+    --space-12: 64px;
+    --space-16: 84px;
+}
+
+/*
+ * ── Motion ─────────────────────────────────────────────────────────────────
+ *
+ * The OS preference is authoritative and needs no setting: prefers-reduced-
+ * motion already means "I have asked for less motion", so it is honoured
+ * unconditionally below. The explicit control exists for the case the media
+ * query cannot express, a shared ward workstation whose OS profile nobody can
+ * change, where one user still needs the animation gone.
+ *
+ * Durations collapse to 1ms rather than 0s on purpose: a zero-length
+ * transition never fires transitionend, and any code waiting on that event to
+ * unmount a modal or clear a flag would hang.
+ */
+:root[data-motion="reduced"] {
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-slow: 1ms;
+}
+
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --dur-fast: 1ms;
+        --dur-base: 1ms;
+        --dur-slow: 1ms;
+    }
+    *, *::before, *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ======================= */
+/* Typography              */
+/* ======================= */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    color: var(--secondary-color);
+}
+
+h1 {
+    font-size: clamp(2rem, 5vw, 3.75rem);
+}
+
+h2 {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+h3 {
+    font-size: 1.4rem;
+}
+
+p {
+    margin-bottom: 1.25rem;
+    color: var(--text-muted);
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--primary-light);
+}
+
+/* ======================= */
+/* Utilities               */
+/* ======================= */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+}
+
+.section {
+    padding: 5rem 0;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-2 {
+    margin-top: 1rem;
+}
+
+.mt-4 {
+    margin-top: 2rem;
+}
+
+.responsive-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.responsive-padding {
+    padding: 40px 32px;
+}
+
+.divider {
+    height: 4px;
+    width: 60px;
+    background-color: var(--primary-color);
+    margin: 1rem auto 1.5rem;
+    border-radius: 2px;
+}
+
+.divider-light {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.section-header p {
+    max-width: 580px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ----- Distinct Section Backgrounds ----- */
+.section-white {
+    background-color: var(--bg-white);
+    border-bottom: var(--section-border);
+}
+
+.section-light {
+    background-color: var(--bg-light);
+    border-bottom: var(--section-border);
+}
+
+.section-purple {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.section-purple .section-header h2 {
+    color: #ffffff;
+}
+
+.section-purple .section-header p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* ======================= */
+/* Buttons                 */
+/* ======================= */
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.05rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #ffffff !important;
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    color: #ffffff !important;
+    border-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-light);
+    color: #ffffff;
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.btn-cta {
+    background-color: #ffffff;
+    color: var(--primary-color) !important;
+    border-color: #ffffff;
+    font-weight: 700;
+}
+
+.btn-cta:hover {
+    background-color: rgba(255, 255, 255, 0.88);
+    color: var(--secondary-color) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+
+/* The VelBiz lockup (components/cloud-app/VelbizLockup.js). */
+.vbz-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--vbz-h) * 0.32);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: calc(var(--vbz-h) * 0.78);
+    letter-spacing: -0.01em;
+    line-height: 1;
+    white-space: nowrap;
+}
+.vbz-lockup img { height: var(--vbz-h); width: auto; flex-shrink: 0; }
