@@ -16,7 +16,7 @@
  * `registry/vengenceui/**` is one of the two `@source` paths declared in
  * app/globals.css; they would not resolve anywhere under components/.
  *
- * TWO CHANGES FROM UPSTREAM, BOTH DELIBERATE
+ * THREE CHANGES FROM UPSTREAM, ALL DELIBERATE
  *
  * 1. `onFocus` alongside `onMouseEnter`, so the highlight follows
  *    keyboard focus and not only the mouse. Upstream is pointer-only,
@@ -25,6 +25,12 @@
  *    highlight still moves, so nothing is lost, it just stops sliding.
  *    The blanket reduced-motion rule in globals.css cannot reach this
  *    because the duration is written as an inline style.
+ * 3. An optional CONTROLLED mode: pass `activeIndex` and `onActiveChange`
+ *    and the highlight sits wherever the parent says. Upstream follows the
+ *    mouse alone, so on a phone (no hover) the highlight stayed on the
+ *    first cell while a tapped cell switched to its on-accent label
+ *    colour: white text on the white ground, and the chosen option looked
+ *    blank. Without the two props it behaves as before.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -39,28 +45,37 @@ export function HighlightGrid({
     transitionDuration = 250,
     highlightFirst = true,
     reduceMotion = false,
+    activeIndex,
+    onActiveChange,
     renderCell,
     className = '',
 }) {
     const gridRef = useRef(null);
     const highlightRef = useRef(null);
     const cellRefs = useRef(new Map());
-    const [active, setActive] = useState(highlightFirst ? 0 : null);
+    const [ownActive, setOwnActive] = useState(highlightFirst ? 0 : null);
+    const controlled = activeIndex !== undefined;
+    const active = controlled ? activeIndex : ownActive;
+    const choose = useCallback((gi) => {
+        if (controlled) onActiveChange?.(gi);
+        else setOwnActive(gi);
+    }, [controlled, onActiveChange]);
 
     /* Flatten rows into cells carrying a running global index and a
-       resolved colour, so a cell can be addressed by one number. */
-    const gridRows = useMemo(() => {
-        let gi = 0;
-        return rows.map((row) => row.map((item) => {
-            const idx = gi;
-            gi += 1;
+       resolved colour, so a cell can be addressed by one number. The index
+       is the count of cells in earlier rows plus the position in this one,
+       computed rather than accumulated in a mutable counter. */
+    const gridRows = useMemo(() => rows.map((row, r) => {
+        const offset = rows.slice(0, r).reduce((n, earlier) => n + earlier.length, 0);
+        return row.map((item, c) => {
+            const idx = offset + c;
             return {
                 ...item,
                 color: item.color ?? colors[idx % colors.length],
                 gi: idx,
             };
-        }));
-    }, [rows, colors]);
+        });
+    }), [rows, colors]);
 
     const moveTo = useCallback((gi, color) => {
         const grid = gridRef.current;
@@ -77,15 +92,18 @@ export function HighlightGrid({
         highlight.style.backgroundColor = color;
     }, []);
 
-    /* Park the highlight on the first cell, and keep it aligned when the
-       grid is resized or reflowed: the position is measured in pixels,
-       so a layout change would otherwise strand it. */
+    /* Keep the highlight on the active cell (the first, to begin with),
+       and re-align it when the grid is resized or reflowed: the position
+       is measured in pixels, so a layout change would otherwise strand it.
+       It used to re-park on the FIRST cell on every resize, which on a
+       phone (the address bar sliding in and out resizes the page) threw
+       the highlight off whatever the visitor had chosen. */
     useEffect(() => {
-        if (!highlightFirst) return undefined;
-        const first = gridRows[0]?.[0];
-        if (!first) return undefined;
+        if (active == null) return undefined;
+        const target = gridRows.flat().find((c) => c.gi === active);
+        if (!target) return undefined;
 
-        const place = () => moveTo(first.gi, first.color);
+        const place = () => moveTo(target.gi, target.color);
         place();
 
         const ro = typeof ResizeObserver !== 'undefined'
@@ -98,7 +116,7 @@ export function HighlightGrid({
             ro?.disconnect();
             window.removeEventListener('resize', place);
         };
-    }, [gridRows, highlightFirst, moveTo]);
+    }, [gridRows, active, moveTo]);
 
     return (
         <div className={`relative w-full ${className}`}>
@@ -133,14 +151,8 @@ export function HighlightGrid({
                                     if (el) cellRefs.current.set(cell.gi, el);
                                     else cellRefs.current.delete(cell.gi);
                                 }}
-                                onMouseEnter={() => {
-                                    setActive(cell.gi);
-                                    moveTo(cell.gi, cell.color);
-                                }}
-                                onFocus={() => {
-                                    setActive(cell.gi);
-                                    moveTo(cell.gi, cell.color);
-                                }}
+                                onMouseEnter={() => choose(cell.gi)}
+                                onFocus={() => choose(cell.gi)}
                                 className={`relative z-10 flex flex-1 min-w-0 ${c < row.length - 1 ? 'border-r-2 border-[#0a0a0c]' : ''}`}
                             >
                                 {renderCell

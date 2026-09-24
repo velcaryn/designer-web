@@ -47,7 +47,7 @@ import {
     Export,
     Check,
 } from '@phosphor-icons/react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Reveal from '@/components/Reveal';
 import { HighlightGrid } from '@/registry/vengenceui/highlight-grid';
 import useReducedMotionPref from '@/components/claudelanding/useReducedMotionPref';
@@ -153,9 +153,70 @@ function useNarrow() {
     return narrow;
 }
 
+/* How long each part stays selected before the next one takes over. */
+const ADVANCE_MS = 5000;
+
+/* The highlight's colours: the component's own eight hues, deepened until
+   the white label on each clears 4.5:1 (4.9 to 7.3). The stock set ran from
+   2.2 to 4.0, so the selected label was hard to read on half of them. */
+const HIGHLIGHT_COLORS = [
+    '#C2410C', '#2F5F99', '#B45309', '#047857',
+    '#3F6B3E', '#1D4ED8', '#4B5563', '#0F766E',
+];
+
 export default function CloudModules() {
     const [active, setActive] = useState(0);
+    /* Bumped on every deliberate choice, so choosing the part that is
+       already selected still restarts its five seconds. */
+    const [cycle, setCycle] = useState(0);
+    /* True when the visitor chose the part, so a screen reader announces
+       it; the automatic advance every five seconds stays silent. */
+    const [userChose, setUserChose] = useState(false);
+    const [inView, setInView] = useState(false);
+    const [hovered, setHovered] = useState(false);
+    const [keyboardFocus, setKeyboardFocus] = useState(false);
+    const [tabHidden, setTabHidden] = useState(false);
     const reduceMotion = useReducedMotionPref();
+    const rootRef = useRef(null);
+
+    /*
+     * AUTOMATIC ADVANCE, every five seconds: Sales, Billing, Stock and on
+     * round. It runs only while the block is on screen and the tab is
+     * visible, pauses while a mouse is over it or keyboard focus is inside
+     * it (content that moves by itself must be stoppable), and never runs
+     * under reduced motion. A tap on a phone is NOT a pause: it selects
+     * that part and the five seconds start again from there.
+     */
+    const running = inView && !hovered && !keyboardFocus && !tabHidden && !reduceMotion;
+
+    useEffect(() => {
+        if (!running) return undefined;
+        const t = setTimeout(() => {
+            setUserChose(false);
+            setActive((i) => (i + 1) % MODULES.length);
+        }, ADVANCE_MS);
+        return () => clearTimeout(t);
+    }, [running, active, cycle]);
+
+    useEffect(() => {
+        const el = rootRef.current;
+        if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+        const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.35 });
+        io.observe(el);
+        return () => io.disconnect();
+    }, []);
+
+    useEffect(() => {
+        const sync = () => setTabHidden(document.hidden);
+        document.addEventListener('visibilitychange', sync);
+        return () => document.removeEventListener('visibilitychange', sync);
+    }, []);
+
+    const choose = useCallback((i) => {
+        setUserChose(true);
+        setActive(i);
+        setCycle((n) => n + 1);
+    }, []);
 
     /* The grid takes rows, not a flat list, so the shape is stated here
        rather than left to a wrapping algorithm. Two rows of four on a
@@ -167,7 +228,6 @@ export default function CloudModules() {
     for (let i = 0; i < MODULES.length; i += perRow) {
         rows.push(MODULES.slice(i, i + perRow));
     }
-    const current = MODULES[active];
 
     return (
         <section id="modules" className="nv-section nv-ground--warm">
@@ -181,6 +241,13 @@ export default function CloudModules() {
                 </div>
 
                 <Reveal className="cld-grid">
+                    <div
+                        ref={rootRef}
+                        onPointerEnter={(e) => { if (e.pointerType === 'mouse') setHovered(true); }}
+                        onPointerLeave={(e) => { if (e.pointerType === 'mouse') setHovered(false); }}
+                        onFocus={(e) => setKeyboardFocus(e.target.matches(':focus-visible'))}
+                        onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setKeyboardFocus(false); }}
+                    >
                     <HighlightGrid
                         rows={rows.map((row) => row.map((m) => ({
                             label: m.name,
@@ -189,14 +256,15 @@ export default function CloudModules() {
                         })))}
                         highlightFirst
                         reduceMotion={reduceMotion}
+                        colors={HIGHLIGHT_COLORS}
+                        activeIndex={active}
+                        onActiveChange={choose}
                         renderCell={(cell, isActive) => (
                             <button
                                 type="button"
                                 className={`cld-grid__cell${isActive ? ' is-active' : ''}`}
                                 aria-pressed={isActive}
-                                onClick={() => setActive(cell.index)}
-                                onMouseEnter={() => setActive(cell.index)}
-                                onFocus={() => setActive(cell.index)}
+                                onClick={() => choose(cell.index)}
                             >
                                 <cell.Icon size={20} weight="bold" />
                                 <span className="cld-grid__label">{cell.label}</span>
@@ -204,22 +272,40 @@ export default function CloudModules() {
                         )}
                     />
 
-                    {/* The detail for whichever part is selected. `aria-live`
-                        so a screen reader hears the panel change rather than
-                        being left on a cell whose meaning is elsewhere. */}
-                    <div className="cld-grid__panel" aria-live="polite">
-                        <h3 className="cld-grid__panelName">
-                            <current.Icon size={18} weight="bold" />
-                            {current.name}
-                        </h3>
-                        <ul className="cld-grid__items">
-                            {current.items.map((item) => (
-                                <li key={item} className="cld-grid__item">
-                                    <Check size={15} weight="bold" />
-                                    <span>{item}</span>
-                                </li>
-                            ))}
-                        </ul>
+                    {/* A thin bar across the top of the panel that fills over the
+                        five seconds, so it is plain the block moves on by itself.
+                        Keyed on the selection, so it restarts with every change,
+                        and absent whenever the advance is paused. */}
+                    <div className="cld-grid__timer" aria-hidden="true">
+                        {running && <span key={`${active}-${cycle}`} className="cld-grid__timerFill" />}
+                    </div>
+
+                    {/* Every part's detail is rendered, stacked in one grid cell,
+                        and only the selected one is visible. The block is always
+                        as tall as the longest list, so the page below does not
+                        jump every five seconds while someone is reading it. */}
+                    <div className="cld-grid__panels" aria-live={userChose ? 'polite' : 'off'}>
+                        {MODULES.map((m, i) => (
+                            <div
+                                key={m.name}
+                                className={`cld-grid__panel${i === active ? ' is-on' : ''}`}
+                                aria-hidden={i !== active}
+                            >
+                                <h3 className="cld-grid__panelName">
+                                    <m.Icon size={18} weight="bold" />
+                                    {m.name}
+                                </h3>
+                                <ul className="cld-grid__items">
+                                    {m.items.map((item) => (
+                                        <li key={item} className="cld-grid__item">
+                                            <Check size={15} weight="bold" />
+                                            <span>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
                     </div>
                 </Reveal>
             </div>

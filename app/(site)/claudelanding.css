@@ -3096,11 +3096,45 @@ a.cl-bento__cell:active {
     }
 }
 
-.cld-grid__panel {
-    padding: clamp(18px, 3vw, 26px);
+/* The five-second timer: a thin bar under the grid that fills while the
+   block advances by itself, and is empty whenever it is paused. It carries
+   the divider line the panel used to draw. */
+.cld-grid__timer {
+    position: relative;
+    height: 4px;
     border-top: var(--nv-stroke) solid var(--nv-ink);
     background: var(--nv-lav-soft);
+    overflow: hidden;
 }
+
+.cld-grid__timerFill {
+    position: absolute;
+    inset: 0;
+    background: var(--nv-lav-deep);
+    transform-origin: left center;
+    transform: scaleX(0);
+    animation: cld-grid-fill 5s linear forwards;
+}
+
+@keyframes cld-grid-fill {
+    to { transform: scaleX(1); }
+}
+
+/* Every part's detail is stacked in one grid cell and only the selected one
+   is visible, so the block keeps the height of the longest list and the
+   page does not jump each time it advances. */
+.cld-grid__panels {
+    display: grid;
+    background: var(--nv-lav-soft);
+}
+
+.cld-grid__panel {
+    grid-area: 1 / 1;
+    padding: clamp(18px, 3vw, 26px);
+    visibility: hidden;
+}
+
+.cld-grid__panel.is-on { visibility: visible; }
 
 .cld-grid__panelName {
     display: flex;
