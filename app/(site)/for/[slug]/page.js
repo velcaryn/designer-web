@@ -59,7 +59,7 @@ export async function generateMetadata({ params }) {
     if (!content) return {};
 
     return {
-        title: `${content.metaTitle} | ${brand.name}`,
+        title: content.metaTitle,
         description: content.metaDescription,
         alternates: { canonical: `/for/${slug}` },
         openGraph: {

@@ -6829,7 +6829,10 @@ body:has(.cl-contact__form) .cl-dock {
 
 .nv-svcIndex__head { padding-top: calc(14px + 78px + clamp(36px, 5vw, 64px)) !important; }
 
-.nv-svcIndex__title {
+/* Scoped under .nv-root so it out-ranks `.nv-root h1` (0,1,1) in
+   globals.css: the title is the page's <h1>, and without this it took the
+   generic h1 weight and tracking instead of these. */
+.nv-root .nv-svcIndex__title {
     font-family: var(--nv-font-display);
     font-size: var(--nv-d1);
     font-weight: 600;
@@ -6837,6 +6840,7 @@ body:has(.cl-contact__form) .cl-dock {
     letter-spacing: -0.02em;
     color: var(--nv-ink);
     margin-bottom: 18px;
+    padding-bottom: 0;
 }
 
 .nv-svcIndex__grid {

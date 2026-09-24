@@ -27,7 +27,7 @@ import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
 import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 
 export const metadata = {
-    title: `Privacy | ${brand.name}`,
+    title: 'Privacy',
     description: `What ${brand.shortName} collects on this site, and what it does not.`,
     alternates: { canonical: '/privacy' },
     openGraph: {

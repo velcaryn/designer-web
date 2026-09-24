@@ -42,7 +42,7 @@ import { LabProvider } from '@/components/claudelanding/LabContext';
 import { DEMOS } from '@/content/demos';
 
 export const metadata = {
-    title: `See a Finished Site | ${brand.name}`,
+    title: 'See a Finished Site',
     description:
         `Twenty-four complete example websites, one per trade, and a colour and typeface lab that repaints the page live. Pick yours and see what ${brand.shortName} builds.`,
     alternates: { canonical: '/demo-site' },

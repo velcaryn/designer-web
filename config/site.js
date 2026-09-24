@@ -696,6 +696,53 @@ export const services = [
     },
 ];
 
+/**
+ * The /cloud questions. One array, two consumers, as with the home page:
+ * the visible FAQ on /cloud (Nl4Faq with `items`) and the FAQPage
+ * structured data (StructuredData with `pageFaqs`). Every answer restates
+ * something the /cloud page already says, or how signup actually works
+ * (the form records a request, VelBiz sets the workspace up and sends the
+ * login). No prices and no trial length: neither is published anywhere.
+ */
+export const cloudFaqs = [
+    {
+        q: 'What is VelBiz Cloud?',
+        a: 'One system for the day-to-day of a small business: enquiries and quotes, GST invoices, stock across the shop and the godown, purchases and vendors, double-entry accounts, expenses with approval, and a monthly payroll run.',
+    },
+    {
+        q: 'Does it produce GST invoices?',
+        a: 'Yes. Invoices and quotes are numbered in sequence and printed on your own letterhead, tax rates are set per item code, and a GST filing summary is ready at the end of each quarter. Repeat invoices can raise themselves on a schedule.',
+    },
+    {
+        q: 'Can my customer see the bill without installing anything?',
+        a: 'Yes. Every invoice has a link you can send. Your customer opens the bill in their browser, with no app and no login.',
+    },
+    {
+        q: 'Can it track stock in the shop and the godown separately?',
+        a: 'Yes. Balances are kept per location, every movement is recorded so a shortfall has a trail, and you can set a reorder level per item and get an alert when stock drops below it.',
+    },
+    {
+        q: 'Do I have to keep the accounts myself?',
+        a: 'No. The accounts are kept in proper double entry as you invoice, buy and spend, with a chart of accounts, vouchers, a daybook and ledger statements, so the books are there when you or your accountant need them.',
+    },
+    {
+        q: 'Does it work on a phone?',
+        a: 'Yes. It runs in the browser on a phone, a tablet or a computer, and the screens you use most have a phone layout.',
+    },
+    {
+        q: 'Can I take my data out if I leave?',
+        a: 'Yes. You can export everything in open formats whenever you ask. There is no lock-in clause and no export fee.',
+    },
+    {
+        q: 'How do I get started?',
+        a: 'Fill in the short signup form on this page. We review it, set up your workspace and send you your login. Or send us one month of your bills and we will set it up with your own numbers first.',
+    },
+    {
+        q: 'Who is behind VelBiz Cloud?',
+        a: `${brand.name}, ${brand.parent.charAt(0).toLowerCase() + brand.parent.slice(1)}, based in Tirunelveli, Tamil Nadu. We also build websites for small businesses, and a VelBiz website can be wired to VelBiz Cloud.`,
+    },
+];
+
 export function findService(slug) {
     return services.find((s) => s.slug === slug) ?? null;
 }

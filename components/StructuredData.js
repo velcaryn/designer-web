@@ -39,7 +39,7 @@
  * that page's own trade, alongside (not instead of) the three real
  * services below. Left undefined everywhere else.
  */
-import { brand, contact, phoneHref, faqs as siteFaqs, services } from '@/config/site';
+import { brand, contact, phoneHref, services } from '@/config/site';
 
 /* Confirmed with the user: the organisation and every Service node in
    this graph name the same eight places, so the signal is consistent
@@ -57,7 +57,16 @@ const AREA_SERVED = [
     { '@type': 'State', name: 'Tamil Nadu' },
 ];
 
-export default function StructuredData({ pageFaqs = siteFaqs, verticalService = null }) {
+/*
+ * `pageFaqs`: the questions VISIBLE on this page, or nothing. There is no
+ * default any more: defaulting to the home page's FAQ put those questions
+ * in the structured data of /cloud, /services, /privacy and others, where
+ * they appear nowhere on the page, which is exactly the mismatch the
+ * FAQPage comment below warns about.
+ * `pagePath`: the page's path, so its FAQ node gets its own @id.
+ * `extra`: page-specific nodes (WebPage, SoftwareApplication, ...).
+ */
+export default function StructuredData({ pageFaqs = null, pagePath = '', verticalService = null, extra = [] }) {
     const site = `https://${brand.domain}`;
 
     /* @graph rather than three separate script tags: it lets the nodes
@@ -174,7 +183,8 @@ export default function StructuredData({ pageFaqs = siteFaqs, verticalService = 
                 provider: { '@id': `${site}/#organization` },
                 areaServed: AREA_SERVED,
             }] : []),
-            {
+            ...extra,
+            ...(pageFaqs?.length ? [{
                 /* FAQPage, built from the SAME array ClFaq renders.
                    Never type these answers twice. On an earlier build the
                    rendered FAQ and the JSON-LD were written separately,
@@ -183,7 +193,7 @@ export default function StructuredData({ pageFaqs = siteFaqs, verticalService = 
                    does not match the visible page is a manual-action
                    risk, not just an untidiness. */
                 '@type': 'FAQPage',
-                '@id': `${site}/#faq`,
+                '@id': `${site}${pagePath}#faq`,
                 isPartOf: { '@id': `${site}/#website` },
                 mainEntity: pageFaqs.map((item) => ({
                     '@type': 'Question',
@@ -193,7 +203,7 @@ export default function StructuredData({ pageFaqs = siteFaqs, verticalService = 
                         text: item.a,
                     },
                 })),
-            },
+            }] : []),
         ],
     };
 

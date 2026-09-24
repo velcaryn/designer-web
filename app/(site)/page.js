@@ -27,6 +27,7 @@
  * person reads cannot drift.
  */
 import './claudelanding.css';
+import './nv4-faq.css';
 import './newlanding-v4.css';
 
 import { brand, plans, pricing, v4Faqs } from '@/config/site';
@@ -47,7 +48,10 @@ import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
 import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 
 export const metadata = {
-    title: 'Websites for small businesses',
+    /* The home page shares the layout's segment, so the "%s | VelBiz Digital"
+       template does not apply here: the brand has to be in the title itself.
+       Tamil Nadu is named because the business is local and so is the search. */
+    title: { absolute: 'Websites for Small Businesses in Tamil Nadu | VelBiz Digital' },
     description: `We build websites for small businesses. From ${pricing.currency} ${plans[0].price}, one fixed price agreed before anything starts. ${brand.shortName}, ${brand.base}.`,
     alternates: { canonical: '/' },
     openGraph: {

@@ -23,7 +23,7 @@ import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
 import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 
 export const metadata = {
-    title: `Credits | ${brand.name}`,
+    title: 'Credits',
     description: `Third-party assets and open-source work used to build ${brand.shortName}'s website.`,
     alternates: { canonical: '/credits' },
     openGraph: {

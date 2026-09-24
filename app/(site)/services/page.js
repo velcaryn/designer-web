@@ -23,7 +23,7 @@ import { SparklesText } from '@/registry/magicui/sparkles-text';
 import { ShineBorder } from '@/registry/magicui/shine-border';
 
 export const metadata = {
-    title: `Services | ${brand.name}`,
+    title: 'Websites, Online Shops and SEO',
     description: `What ${brand.shortName} does: websites, getting found on search and maps, and the words and posts that bring people back.`,
     alternates: { canonical: '/services' },
     openGraph: {
@@ -71,6 +71,7 @@ export default function ServicesIndexPage() {
                 <section className="nv-section nv-ground--paper nv-svcIndex__head">
                     <div className="nv-shell">
                         <SparklesText
+                            as="h1"
                             text="What We Do."
                             className="nv-svcIndex__title"
                             colors={{ first: '#0066cc', second: '#a855f7' }}

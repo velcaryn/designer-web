@@ -13,7 +13,7 @@ import Nl4Footer from '@/components/newlanding-v4/Nl4Footer';
 import Nl4Dock from '@/components/newlanding-v4/Nl4Dock';
 
 export const metadata = {
-    title: `Terms | ${brand.name}`,
+    title: 'Terms',
     description: `The terms of using ${brand.shortName}'s website.`,
     alternates: { canonical: '/terms' },
     openGraph: {

@@ -7,6 +7,18 @@
  * spelled out, and each exposes a CSS variable that the pairing entries in
  * that file refer to by name.
  *
+ * THE FILES ARE BUNDLED, NOT FETCHED FROM GOOGLE AT BUILD TIME.
+ * These families used to go through next/font/google, which downloads each
+ * one during the build. Google Fonts intermittently answers with a font URL
+ * that has no file extension (/l/font?kit=...&...), and both bundlers fail
+ * on it: Turbopack with "next/font/google queries have exactly one entry",
+ * webpack with a null read in the loader. Roughly one clean build in five
+ * failed, on whichever family was unlucky, including before the site moved
+ * into app/(site). The files in assets/fonts/lab are Google's own Latin
+ * subsets (the same subset every call here asked for), one variable file
+ * per family where Google serves one, per-weight files where it does not.
+ * All are SIL Open Font License, which permits bundling them.
+ *
  * THIS FILE WAS SCAFFOLDING. IT IS NOW LOAD-BEARING, AND HERE IS WHY.
  * The header used to say this file must be deleted once a pairing was
  * chosen. That was right while the lab was the only consumer. It is no
@@ -29,23 +41,6 @@
  * weight of twelve families would make the lab itself too slow to judge
  * anything by.
  */
-import {
-    Outfit,
-    Plus_Jakarta_Sans,
-    Space_Grotesk,
-    Archivo,
-    Work_Sans,
-    Lexend,
-    Source_Sans_3,
-    Bodoni_Moda,
-    Jost,
-    Geist,
-    Geist_Mono,
-    Bricolage_Grotesque,
-    DM_Serif_Display,
-    Poppins,
-    Instrument_Serif,
-} from 'next/font/google';
 import localFont from 'next/font/local';
 
 /*
@@ -75,14 +70,17 @@ import localFont from 'next/font/local';
  *
  * app/fonts.js keeps its default preload, because those two ARE the page.
  */
-export const outfit = Outfit({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700', '800'], variable: '--f-outfit',
+export const outfit = localFont({
+    src: '../../assets/fonts/lab/outfit-latin-variable.woff2', weight: '600 800',
+    display: 'swap', preload: false, variable: '--f-outfit',
 });
-export const jakarta = Plus_Jakarta_Sans({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700', '800'], variable: '--f-jakarta',
+export const jakarta = localFont({
+    src: '../../assets/fonts/lab/plus-jakarta-sans-latin-variable.woff2', weight: '400 800',
+    display: 'swap', preload: false, variable: '--f-jakarta',
 });
-export const grotesk = Space_Grotesk({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700'], variable: '--f-grotesk',
+export const grotesk = localFont({
+    src: '../../assets/fonts/lab/space-grotesk-latin-variable.woff2', weight: '600 700',
+    display: 'swap', preload: false, variable: '--f-grotesk',
 });
 /* INTER AND FRAUNCES ARE NOT DECLARED HERE. THEY ARE ALIASED.
 
@@ -98,23 +96,29 @@ export const grotesk = Space_Grotesk({
    copy that is already preloaded. One download, and --f-inter and
    --f-fraunces keep working everywhere they are used, including
    config/themes.js. */
-export const archivo = Archivo({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700', '800'], variable: '--f-archivo',
+export const archivo = localFont({
+    src: '../../assets/fonts/lab/archivo-latin-variable.woff2', weight: '600 800',
+    display: 'swap', preload: false, variable: '--f-archivo',
 });
-export const workSans = Work_Sans({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-work',
+export const workSans = localFont({
+    src: '../../assets/fonts/lab/work-sans-latin-variable.woff2', weight: '400 700',
+    display: 'swap', preload: false, variable: '--f-work',
 });
-export const lexend = Lexend({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700', '800'], variable: '--f-lexend',
+export const lexend = localFont({
+    src: '../../assets/fonts/lab/lexend-latin-variable.woff2', weight: '600 800',
+    display: 'swap', preload: false, variable: '--f-lexend',
 });
-export const sourceSans = Source_Sans_3({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-source',
+export const sourceSans = localFont({
+    src: '../../assets/fonts/lab/source-sans-3-latin-variable.woff2', weight: '400 700',
+    display: 'swap', preload: false, variable: '--f-source',
 });
-export const bodoni = Bodoni_Moda({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['600', '700', '800'], variable: '--f-bodoni',
+export const bodoni = localFont({
+    src: '../../assets/fonts/lab/bodoni-moda-latin-variable.woff2', weight: '600 800',
+    display: 'swap', preload: false, variable: '--f-bodoni',
 });
-export const jost = Jost({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-jost',
+export const jost = localFont({
+    src: '../../assets/fonts/lab/jost-latin-variable.woff2', weight: '400 700',
+    display: 'swap', preload: false, variable: '--f-jost',
 });
 
 /*
@@ -132,34 +136,38 @@ export const jost = Jost({
  * labelled honestly in config/themes.js rather than passed off as the
  * originals. If a paid family is bought later, swapping it in is one entry.
  */
-export const geist = Geist({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['500', '600', '700', '800'], variable: '--f-geist',
+export const geist = localFont({
+    src: '../../assets/fonts/lab/geist-latin-variable.woff2', weight: '500 800',
+    display: 'swap', preload: false, variable: '--f-geist',
 });
-export const geistMono = Geist_Mono({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600'], variable: '--f-geistmono',
+export const geistMono = localFont({
+    src: '../../assets/fonts/lab/geist-mono-latin-variable.woff2', weight: '400 600',
+    display: 'swap', preload: false, variable: '--f-geistmono',
 });
-export const bricolage = Bricolage_Grotesque({
-    subsets: ['latin'], display: 'swap', preload: false, variable: '--f-bricolage',
+export const bricolage = localFont({
+    src: '../../assets/fonts/lab/bricolage-grotesque-latin-variable.woff2', weight: '200 800',
+    display: 'swap', preload: false, variable: '--f-bricolage',
 });
-/* Figtree is bundled rather than fetched from Google Fonts at build time.
-   On Netlify's builders Turbopack failed to resolve the Google-hosted Figtree
-   files ("next/font/google queries have exactly one entry") while every other
-   family built fine. The file is Google's own Latin subset of the variable
-   font, so it covers the same weights (400-700) and characters the Google
-   call asked for. Figtree is SIL Open Font License 1.1, which permits
-   bundling it with the site. */
 export const figtree = localFont({
-    src: '../../assets/fonts/figtree-latin-variable.woff2',
+    src: '../../assets/fonts/lab/figtree-latin-variable.woff2',
     weight: '400 700', display: 'swap', preload: false, variable: '--f-figtree',
 });
-export const dmSerif = DM_Serif_Display({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['400'], variable: '--f-dmserif',
+export const dmSerif = localFont({
+    src: '../../assets/fonts/lab/dm-serif-display-latin-variable.woff2', weight: '400',
+    display: 'swap', preload: false, variable: '--f-dmserif',
 });
-export const poppins = Poppins({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-poppins',
+export const poppins = localFont({
+    src: [
+        { path: '../../assets/fonts/lab/poppins-latin-400.woff2', weight: '400', style: 'normal' },
+        { path: '../../assets/fonts/lab/poppins-latin-500.woff2', weight: '500', style: 'normal' },
+        { path: '../../assets/fonts/lab/poppins-latin-600.woff2', weight: '600', style: 'normal' },
+        { path: '../../assets/fonts/lab/poppins-latin-700.woff2', weight: '700', style: 'normal' },
+    ],
+    display: 'swap', preload: false, variable: '--f-poppins',
 });
-export const instrument = Instrument_Serif({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['400'], variable: '--f-instrument',
+export const instrument = localFont({
+    src: '../../assets/fonts/lab/instrument-serif-latin-variable.woff2', weight: '400',
+    display: 'swap', preload: false, variable: '--f-instrument',
 });
 
 export const labFontVariables = [

@@ -22,6 +22,15 @@
  * v4Faqs in config/site.js (the SAME array StructuredData receives).
  * Rows are plain elements (Trap A). The question is a real <button>
  * with aria-expanded; the reply is a region labelled by it.
+ *
+ * EVERY ANSWER IS IN THE HTML. A closed answer is rendered with the
+ * `hidden` attribute rather than left out, so the text a crawler or an
+ * answer engine reads on the page matches the FAQPage structured data built
+ * from the same array. Opening a question swaps it for the typed reply.
+ *
+ * Reusable: the home page passes nothing and gets v4Faqs with its category
+ * chips; /cloud passes its own `items` and no `groups`, and the chips row
+ * is left out when there are no groups.
  */
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
@@ -68,13 +77,22 @@ function Reply({ text, id, labelledBy, reduce }) {
     );
 }
 
-export default function Nl4Faq() {
+const DEFAULT_LEDE = 'The cost, who owns what, and whether you need a shop or just a way to be found. Tap a question and the answer arrives like a reply.';
+
+export default function Nl4Faq({
+    items = v4Faqs,
+    groups = v4FaqGroups,
+    sectionId = 'faq',
+    idPrefix = 'v4faq',
+    title = 'Questions People Actually Ask.',
+    lede = DEFAULT_LEDE,
+} = {}) {
     const [open, setOpen] = useState(null);
     const [group, setGroup] = useState(ALL);
     const reduce = useReducedMotion();
 
-    const active = v4FaqGroups.find((g) => g.id === group);
-    const shown = v4Faqs
+    const active = groups.find((g) => g.id === group);
+    const shown = items
         .map((item, i) => ({ item, i }))
         .filter(({ i }) => !active || active.questions.includes(i));
     const half = Math.ceil(shown.length / 2);
@@ -91,8 +109,8 @@ export default function Nl4Faq() {
                         type="button"
                         className="nv4-faq__q"
                         aria-expanded={isOpen}
-                        aria-controls={`v4faq-a-${i}`}
-                        id={`v4faq-q-${i}`}
+                        aria-controls={`${idPrefix}-a-${i}`}
+                        id={`${idPrefix}-q-${i}`}
                         onClick={() => setOpen(isOpen ? null : i)}
                     >
                         <span className="nv4-faq__qText">{item.q}</span>
@@ -106,13 +124,16 @@ export default function Nl4Faq() {
                     </span>
                 </div>
 
+                {!isOpen && (
+                    <p id={`${idPrefix}-a-${i}`} hidden>{item.a}</p>
+                )}
                 {isOpen && (
                     <div className="nv4-faq__turn nv4-faq__turn--us">
                         <span className="nv4-faq__avatar nv4-faq__avatar--us" aria-hidden="true">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src="/vb-mark-light.svg" alt="" width={22} height={17} />
                         </span>
-                        <Reply text={item.a} id={`v4faq-a-${i}`} labelledBy={`v4faq-q-${i}`} reduce={!!reduce} />
+                        <Reply text={item.a} id={`${idPrefix}-a-${i}`} labelledBy={`${idPrefix}-q-${i}`} reduce={!!reduce} />
                     </div>
                 )}
             </div>
@@ -120,18 +141,14 @@ export default function Nl4Faq() {
     };
 
     return (
-        <section id="faq" className="nv-section nv-ground--warm">
+        <section id={sectionId} className="nv-section nv-ground--warm">
             <div className="nv-shell">
                 <div className="nv4-faq__head">
                     <div className="nv4-faq__headText">
                         <SparklesText as="h2" className="nv4-h2 nv4-faq__title" sparklesCount={8}>
-                            Questions People Actually Ask.
+                            {title}
                         </SparklesText>
-                        <p className="nv-lede">
-                            The cost, who owns what, and whether you need a shop
-                            or just a way to be found. Tap a question and the
-                            answer arrives like a reply.
-                        </p>
+                        <p className="nv-lede">{lede}</p>
                     </div>
                     <div className="nv4-faq__figure" aria-hidden="true">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -146,8 +163,9 @@ export default function Nl4Faq() {
                     </div>
                 </div>
 
+                {groups.length > 0 && (
                 <div className="nv4-faq__chips" role="group" aria-label="Filter questions">
-                    {[{ id: ALL, label: 'All' }, ...v4FaqGroups].map((g) => {
+                    {[{ id: ALL, label: 'All' }, ...groups].map((g) => {
                         const on = g.id === group;
                         return (
                             <button
@@ -162,6 +180,7 @@ export default function Nl4Faq() {
                         );
                     })}
                 </div>
+                )}
 
                 <div className="nv4-faq">
                     <div className="nv4-faq__col">{shown.slice(0, half).map(row)}</div>
