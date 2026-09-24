@@ -11,7 +11,7 @@ was built in the Velcaryn repo as "Velcaryn Cloud" and moved here in September
 | `app/(erp)/layout.js` | The ERP's own root layout. Separate from the site's so Tailwind and the ERP's reset never load together; moving between them is a full page load. |
 | `app/(erp)/cloud/login`, `app/(erp)/cloud/dashboard/**` | The tenant app. |
 | `app/(erp)/cloud/doc/[docNumber]/[secretKey]` | The public link a tenant sends a customer. |
-| `app/(erp)/admin/**` | The admin area: approve signups, manage tenants. Google sign-in, allow-list in `lib/auth.js`. |
+| `app/(erp)/admin/**` | The admin area: approve signups, manage tenants. Google sign-in with the velbiz.com Google account's OAuth client; allow-list in `lib/auth.js`. |
 | `app/api/cloud/**`, `app/api/admin/cloud/**` | The APIs. |
 | `app/api/cron/generate-recurring-invoices` + `netlify/functions/scheduled-recurring-invoices.js` | Hourly recurring invoices. |
 | `components/cloud-app/`, `components/dashboard/`, `components/admin/` | ERP components. (`components/cloud/` is the marketing page's.) |
