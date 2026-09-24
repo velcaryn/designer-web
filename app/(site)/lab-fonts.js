@@ -42,11 +42,11 @@ import {
     Geist,
     Geist_Mono,
     Bricolage_Grotesque,
-    Figtree,
     DM_Serif_Display,
     Poppins,
     Instrument_Serif,
 } from 'next/font/google';
+import localFont from 'next/font/local';
 
 /*
  * Every call is written out in full. next/font requires literal, statically
@@ -141,8 +141,16 @@ export const geistMono = Geist_Mono({
 export const bricolage = Bricolage_Grotesque({
     subsets: ['latin'], display: 'swap', preload: false, variable: '--f-bricolage',
 });
-export const figtree = Figtree({
-    subsets: ['latin'], display: 'swap', preload: false, weight: ['400', '500', '600', '700'], variable: '--f-figtree',
+/* Figtree is bundled rather than fetched from Google Fonts at build time.
+   On Netlify's builders Turbopack failed to resolve the Google-hosted Figtree
+   files ("next/font/google queries have exactly one entry") while every other
+   family built fine. The file is Google's own Latin subset of the variable
+   font, so it covers the same weights (400-700) and characters the Google
+   call asked for. Figtree is SIL Open Font License 1.1, which permits
+   bundling it with the site. */
+export const figtree = localFont({
+    src: '../../assets/fonts/figtree-latin-variable.woff2',
+    weight: '400 700', display: 'swap', preload: false, variable: '--f-figtree',
 });
 export const dmSerif = DM_Serif_Display({
     subsets: ['latin'], display: 'swap', preload: false, weight: ['400'], variable: '--f-dmserif',
