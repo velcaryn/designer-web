@@ -1,6 +1,6 @@
 @import "tailwindcss" source(none);
-@source "../registry/magicui/**/*.jsx";
-@source "../registry/vengenceui/**/*.jsx";
+@source "../../registry/magicui/**/*.jsx";
+@source "../../registry/vengenceui/**/*.jsx";
 
 /* Maps shadcn's conventional theme variable names (used by every vendored
    registry/ component: text-foreground, bg-muted, border-border, bg-primary)
